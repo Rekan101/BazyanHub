@@ -271,7 +271,7 @@ export default function Navbar() {
     <span 
       className=" 
         truncate 
-        text-[15px] 
+        text-[13px] 
         font-extrabold 
         leading-tight 
         tracking-[-0.02em] 
@@ -288,7 +288,7 @@ export default function Navbar() {
         mt-1 
         max-w-[190px] 
         truncate 
-        text-[8px] 
+        text-[7px] 
         font-medium 
         leading-tight 
         text-slate-500 
