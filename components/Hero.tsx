@@ -27,7 +27,7 @@ export default function Hero() {
   const translatedActions: QuickAction[] = [
     {
       label: t("map"),
-      href: "/map",
+       href: "https://www.google.com/maps/search/?api=1&query=35.5947,45.13686",
       icon: "map",
     },
     {
