@@ -194,112 +194,112 @@ export default function Navbar() {
                 LOGO
             ================================================= */}
 
-            <Link
-              href="#hero"
-              aria-label={t("brand")}
-              className="
-                group flex shrink-0
-                items-center gap-3
-                rounded-2xl
-                outline-none
-                focus-visible:ring-2
-                focus-visible:ring-emerald-500
-                focus-visible:ring-offset-2
-                dark:focus-visible:ring-offset-slate-950
-              "
-            >
-              <div
-                className="
-                  relative flex
-                  h-14 w-14
-                  shrink-0
-                  items-center justify-center
-                  overflow-hidden
-                  rounded-2xl
-                  transition-all duration-300
+            <Link 
+  href="#hero" 
+  aria-label={t("brand")} 
+  className=" 
+    group flex shrink-0 
+    items-center gap-3 
+    rounded-2xl 
+    outline-none 
+    focus-visible:ring-2 
+    focus-visible:ring-emerald-500 
+    focus-visible:ring-offset-2 
+    dark:focus-visible:ring-offset-slate-950 
+  " 
+>
+  <div 
+    className=" 
+      relative flex 
+      h-14 w-14 
+      shrink-0 
+      items-center justify-center 
+      overflow-hidden 
+      rounded-2xl 
+      transition-all duration-300 
 
-                  group-hover:scale-[1.035]
-                  group-hover:shadow-[0_10px_30px_rgba(22,163,74,0.12)]
+      group-hover:scale-[1.035] 
+      group-hover:shadow-[0_10px_30px_rgba(22,163,74,0.12)] 
 
-                  sm:h-[62px]
-                  sm:w-[62px]
+      sm:h-[62px] 
+      sm:w-[62px] 
 
-                  lg:h-[66px]
-                  lg:w-[66px]
-                "
-              >
-                <div
-                  aria-hidden="true"
-                  className="
-                    absolute inset-0
-                    rounded-2xl
-                    bg-emerald-50/70
-                    dark:bg-emerald-400/[0.06]
-                  "
-                />
+      lg:h-[66px] 
+      lg:w-[66px] 
+    " 
+  >
+    <div 
+      aria-hidden="true" 
+      className=" 
+        absolute inset-0 
+        rounded-2xl 
+        bg-emerald-50/70 
+        dark:bg-emerald-400/[0.06] 
+      " 
+    />
 
-                <Image
-                  src="/images/logo.png"
-                  alt={t("brand")}
-                  width={88}
-                  height={88}
-                  priority
-                  className="
-                    relative z-10
-                    h-14 w-14
-                    scale-125
-                    object-contain
-                    transition-transform duration-300
-                    sm:h-[60px]
-                    sm:w-[60px]
-                    sm:scale-125
-                    lg:h-[64px]
-                    lg:w-[64px]
-                    lg:scale-125
-                  "
-                />
-              </div>
+    <Image 
+      src="/images/logo.png" 
+      alt={t("brand")} 
+      width={88} 
+      height={88} 
+      priority 
+      className=" 
+        relative z-10 
+        h-14 w-14 
+        scale-125 
+        object-contain 
+        transition-transform duration-300 
+        sm:h-[60px] 
+        sm:w-[60px] 
+        sm:scale-125 
+        lg:h-[64px] 
+        lg:w-[64px] 
+        lg:scale-125 
+      " 
+    />
+  </div>
 
-              <div
-                className="
-                  hidden
-                  min-w-0
-                  sm:flex
-                  sm:flex-col
-                "
-              >
-                <span
-                  className="
-                    truncate
-                    text-[18px]
-                    font-extrabold
-                    leading-tight
-                    tracking-[-0.02em]
-                    text-slate-900
-                    dark:text-white
-                    lg:text-[20px]
-                  "
-                >
-                  {t("brand")}
-                </span>
+  {/* تەنها ئەم className ـە گۆڕاوە */}
+  <div 
+    className=" 
+      flex 
+      min-w-0 
+      flex-col 
+    " 
+  >
+    <span 
+      className=" 
+        truncate 
+        text-[18px] 
+        font-extrabold 
+        leading-tight 
+        tracking-[-0.02em] 
+        text-slate-900 
+        dark:text-white 
+        lg:text-[20px] 
+      " 
+    >
+      {t("brand")} 
+    </span>
 
-                <span
-                  className="
-                    mt-1
-                    max-w-[190px]
-                    truncate
-                    text-[10px]
-                    font-medium
-                    leading-tight
-                    text-slate-500
-                    dark:text-slate-400
-                    lg:text-[11px]
-                  "
-                >
-                  {t("brandTagline")}
-                </span>
-              </div>
-            </Link>
+    <span 
+      className=" 
+        mt-1 
+        max-w-[190px] 
+        truncate 
+        text-[10px] 
+        font-medium 
+        leading-tight 
+        text-slate-500 
+        dark:text-slate-400 
+        lg:text-[11px] 
+      " 
+    >
+      {t("brandTagline")} 
+    </span>
+  </div>
+</Link>
 
             {/* =================================================
                 DESKTOP NAVIGATION

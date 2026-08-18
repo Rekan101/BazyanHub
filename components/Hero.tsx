@@ -80,7 +80,8 @@ export default function Hero() {
         className="absolute inset-0 bg-gradient-to-l from-[#16A34A]/25 via-transparent to-transparent"
       />
 
-      <div className="relative mx-auto w-full max-w-[1440px] px-4 pb-14 pt-24 sm:px-6 lg:px-10">
+      {/* ONLY MOBILE TOP SPACING CHANGED: pt-24 → pt-32 */}
+      <div className="relative mx-auto w-full max-w-[1440px] px-4 pb-14 pt-32 sm:px-6 sm:pt-24 lg:px-10">
         <div className="mx-auto max-w-3xl text-center">
 
           {/* =====================================================
@@ -113,27 +114,31 @@ export default function Hero() {
             </motion.div>
 
             {/* Main Animated Headline */}
-                                                <motion.h1
-  animate={{
-    y: [0, -5, 0, 5, 0],
-    backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-  }}
-  transition={{
-    y: {
-      duration: 5,
-      repeat: Infinity,
-      ease: "easeInOut",
-    },
-    backgroundPosition: {
-      duration: 6,
-      repeat: Infinity,
-      ease: "linear",
-    },
-  }}
-  className="text-balance bg-[linear-gradient(90deg,rgb(4,120,87),rgb(255,255,255),rgb(180,110,8))] bg-[length:200%_auto] bg-clip-text text-3xl font-extrabold leading-tight text-transparent drop-shadow-[0_5px_15px_rgba(0,0,0,0.95)] sm:text-4xl lg:text-5xl"
->
-  {t("heroTitle")}
-</motion.h1>
+            <motion.h1
+              animate={{
+                y: [0, -5, 0, 5, 0],
+                backgroundPosition: [
+                  "0% 50%",
+                  "100% 50%",
+                  "0% 50%",
+                ],
+              }}
+              transition={{
+                y: {
+                  duration: 5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                },
+                backgroundPosition: {
+                  duration: 6,
+                  repeat: Infinity,
+                  ease: "linear",
+                },
+              }}
+              className="text-balance bg-[linear-gradient(90deg,rgb(4,120,87),rgb(255,255,255),rgb(180,110,8))] bg-[length:200%_auto] bg-clip-text text-3xl font-extrabold leading-tight text-transparent drop-shadow-[0_5px_15px_rgba(0,0,0,0.95)] sm:text-4xl lg:text-5xl"
+            >
+              {t("heroTitle")}
+            </motion.h1>
 
             {/* Animated Subheading */}
             <motion.p
@@ -164,57 +169,57 @@ export default function Hero() {
           ====================================================== */}
 
           <motion.form
-  onSubmit={handleSearch}
-  initial={{ opacity: 0, y: 16 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{
-    duration: 0.6,
-    delay: 0.2,
-    ease: "easeOut",
-  }}
-  className="mx-auto mt-8 flex max-w-2xl flex-col gap-2 rounded-2xl bg-white/95 p-2 shadow-xl shadow-black/20 backdrop-blur-md dark:bg-slate-900/95 sm:flex-row"
->
-  <label
-    htmlFor="hero-search"
-    className="sr-only"
-  >
-    {t("searchAriaLabel")}
-  </label>
+            onSubmit={handleSearch}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.6,
+              delay: 0.2,
+              ease: "easeOut",
+            }}
+            className="mx-auto mt-8 flex max-w-2xl flex-col gap-2 rounded-2xl bg-white/95 p-2 shadow-xl shadow-black/20 backdrop-blur-md dark:bg-slate-900/95 sm:flex-row"
+          >
+            <label
+              htmlFor="hero-search"
+              className="sr-only"
+            >
+              {t("searchAriaLabel")}
+            </label>
 
-  <div className="relative flex-1">
-    <Search
-      aria-hidden="true"
-      className={`pointer-events-none absolute top-1/2 h-5 w-5 -translate-y-1/2 text-[#9CA3AF] dark:text-slate-400 ${
-        language === "en"
-          ? "left-4"
-          : "right-4"
-      }`}
-    />
+            <div className="relative flex-1">
+              <Search
+                aria-hidden="true"
+                className={`pointer-events-none absolute top-1/2 h-5 w-5 -translate-y-1/2 text-[#9CA3AF] dark:text-slate-400 ${
+                  language === "en"
+                    ? "left-4"
+                    : "right-4"
+                }`}
+              />
 
-    <input
-      id="hero-search"
-      type="search"
-      value={query}
-      onChange={(event) =>
-        setQuery(event.target.value)
-      }
-      placeholder={t("searchPlaceholder")}
-      aria-label={t("searchAriaLabel")}
-      className={`w-full rounded-xl bg-transparent py-3.5 text-sm text-[#1F2937] outline-none placeholder:text-[#9CA3AF] dark:text-white dark:placeholder:text-slate-400 ${
-        language === "en"
-          ? "pl-11 pr-4"
-          : "pe-11 ps-4"
-      }`}
-    />
-  </div>
+              <input
+                id="hero-search"
+                type="search"
+                value={query}
+                onChange={(event) =>
+                  setQuery(event.target.value)
+                }
+                placeholder={t("searchPlaceholder")}
+                aria-label={t("searchAriaLabel")}
+                className={`w-full rounded-xl bg-transparent py-3.5 text-sm text-[#1F2937] outline-none placeholder:text-[#9CA3AF] dark:text-white dark:placeholder:text-slate-400 ${
+                  language === "en"
+                    ? "pl-11 pr-4"
+                    : "pe-14 ps-10"
+                }`}
+              />
+            </div>
 
-  <button
-    type="submit"
-    className="shrink-0 rounded-xl bg-[#16A34A] px-6 py-3.5 text-sm font-bold text-white shadow-md shadow-[#16A34A]/30 transition-all hover:bg-[#15803D] active:scale-[0.98]"
-  >
-    {t("searchButton")}
-  </button>
-</motion.form>
+            <button
+              type="submit"
+              className="shrink-0 rounded-xl bg-[#16A34A] px-6 py-3.5 text-sm font-bold text-white shadow-md shadow-[#16A34A]/30 transition-all hover:bg-[#15803D] active:scale-[0.98]"
+            >
+              {t("searchButton")}
+            </button>
+          </motion.form>
 
           <motion.div
             initial={{ opacity: 0, y: 16 }}

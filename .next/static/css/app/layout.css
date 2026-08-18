@@ -1214,8 +1214,8 @@ video {
 .pb-8 {
   padding-bottom: 2rem;
 }
-.pe-11 {
-  padding-inline-end: 2.75rem;
+.pe-14 {
+  padding-inline-end: 3.5rem;
 }
 .pl-11 {
   padding-left: 2.75rem;
@@ -1240,6 +1240,18 @@ video {
 }
 .pt-6 {
   padding-top: 1.5rem;
+}
+.pe-16 {
+  padding-inline-end: 4rem;
+}
+.ps-6 {
+  padding-inline-start: 1.5rem;
+}
+.ps-10 {
+  padding-inline-start: 2.5rem;
+}
+.pt-32 {
+  padding-top: 8rem;
 }
 .text-center {
   text-align: center;
@@ -1899,6 +1911,10 @@ select {
   background-color: rgb(15 23 42 / 0.85);
 }
 
+.dark\:bg-slate-900\/95:is(.dark *) {
+  background-color: rgb(15 23 42 / 0.95);
+}
+
 .dark\:bg-slate-950:is(.dark *) {
   --tw-bg-opacity: 1;
   background-color: rgb(2 6 23 / var(--tw-bg-opacity));
@@ -1934,10 +1950,6 @@ select {
 
 .dark\:bg-white\/\[0\.08\]:is(.dark *) {
   background-color: rgb(255 255 255 / 0.08);
-}
-
-.dark\:bg-slate-900\/95:is(.dark *) {
-  background-color: rgb(15 23 42 / 0.95);
 }
 
 .dark\:text-emerald-400:is(.dark *) {
@@ -2156,6 +2168,10 @@ select {
   .sm\:py-20 {
     padding-top: 5rem;
     padding-bottom: 5rem;
+  }
+
+  .sm\:pt-24 {
+    padding-top: 6rem;
   }
 
   .sm\:text-2xl {
