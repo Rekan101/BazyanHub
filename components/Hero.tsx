@@ -67,7 +67,7 @@ export default function Hero() {
         fill
         priority
         sizes="100vw"
-        className="object-cover object-top"
+        className="object-cover object-[center_35%] sm:object-top"
       />
 
       <div
@@ -108,7 +108,7 @@ export default function Hero() {
               className="mx-auto mb-5 inline-flex items-center rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-black/20 backdrop-blur-xl sm:text-sm"
             >
               <span>
-                ✨ پلاتفۆرمی گشتگیری شارۆچکەی بازیان
+                ✨ پلاتفۆرمی گشتگیری قەزای بازیان
               </span>
             </motion.div>
 
