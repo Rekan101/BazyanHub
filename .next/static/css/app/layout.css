@@ -1111,9 +1111,9 @@ video {
   -o-object-fit: cover;
      object-fit: cover;
 }
-.object-top {
-  -o-object-position: top;
-     object-position: top;
+.object-\[center_35\%\] {
+  -o-object-position: center 35%;
+     object-position: center 35%;
 }
 .p-1\.5 {
   padding: 0.375rem;
@@ -1936,6 +1936,10 @@ select {
   background-color: rgb(255 255 255 / 0.08);
 }
 
+.dark\:bg-slate-900\/95:is(.dark *) {
+  background-color: rgb(15 23 42 / 0.95);
+}
+
 .dark\:text-emerald-400:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(52 211 153 / var(--tw-text-opacity));
@@ -1997,6 +2001,16 @@ select {
   --tw-shadow: 0 20px 60px rgba(0,0,0,0.35);
   --tw-shadow-colored: 0 20px 60px var(--tw-shadow-color);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.dark\:placeholder\:text-slate-400:is(.dark *)::-moz-placeholder {
+  --tw-text-opacity: 1;
+  color: rgb(148 163 184 / var(--tw-text-opacity));
+}
+
+.dark\:placeholder\:text-slate-400:is(.dark *)::placeholder {
+  --tw-text-opacity: 1;
+  color: rgb(148 163 184 / var(--tw-text-opacity));
 }
 
 .dark\:hover\:border-emerald-400\/30:hover:is(.dark *) {
@@ -2117,6 +2131,11 @@ select {
 
   .sm\:overflow-visible {
     overflow: visible;
+  }
+
+  .sm\:object-top {
+    -o-object-position: top;
+       object-position: top;
   }
 
   .sm\:px-0 {
