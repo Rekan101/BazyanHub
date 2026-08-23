@@ -9,6 +9,7 @@ import {
   Map,
   Heart,
   ListChecks,
+  ChevronDown,
 } from "lucide-react";
 import type { QuickAction } from "@/lib/types";
 import { useLanguage } from "@/lib/i18n";
@@ -27,7 +28,7 @@ export default function Hero() {
   const translatedActions: QuickAction[] = [
     {
       label: t("map"),
-       href: "https://www.google.com/maps/search/?api=1&query=35.5947,45.13686",
+      href: "https://www.google.com/maps/search/?api=1&query=35.5947,45.13686",
       icon: "map",
     },
     {
@@ -80,12 +81,12 @@ export default function Hero() {
         className="absolute inset-0 bg-gradient-to-l from-[#16A34A]/25 via-transparent to-transparent"
       />
 
-      {/* ONLY MOBILE TOP SPACING CHANGED: pt-24 → pt-32 */}
-      <div className="relative mx-auto w-full max-w-[1440px] px-4 pb-14 pt-32 sm:px-6 sm:pt-24 lg:px-10">
+      <div className="relative mx-auto w-full max-w-[1440px] px-4 pb-14 pt-28 sm:px-6 sm:pt-24 lg:px-10">
         <div className="mx-auto max-w-3xl text-center">
 
           {/* =====================================================
-              UPDATED HERO HEADLINE + SUBHEADING ONLY
+              HERO HEADLINE + SUBHEADING
+              Mobile spacing/size optimized only
           ====================================================== */}
 
           <motion.div
@@ -106,7 +107,7 @@ export default function Hero() {
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
-              className="mx-auto mb-5 inline-flex items-center rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-black/20 backdrop-blur-xl sm:text-sm"
+              className="mx-auto mb-3 inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[11px] font-semibold text-white shadow-lg shadow-black/20 backdrop-blur-xl sm:mb-5 sm:px-4 sm:py-2 sm:text-sm"
             >
               <span>
                 ✨ پلاتفۆرمی گشتگیری قەزای بازیان
@@ -135,7 +136,7 @@ export default function Hero() {
                   ease: "linear",
                 },
               }}
-              className="text-balance bg-[linear-gradient(90deg,rgb(4,120,87),rgb(255,255,255),rgb(180,110,8))] bg-[length:200%_auto] bg-clip-text text-3xl font-extrabold leading-tight text-transparent drop-shadow-[0_5px_15px_rgba(0,0,0,0.95)] sm:text-4xl lg:text-5xl"
+              className="text-balance bg-[linear-gradient(90deg,rgb(4,120,87),rgb(255,255,255),rgb(180,110,8))] bg-[length:200%_auto] bg-clip-text text-2xl font-extrabold leading-tight text-transparent drop-shadow-[0_5px_15px_rgba(0,0,0,0.95)] sm:text-4xl lg:text-5xl"
             >
               {t("heroTitle")}
             </motion.h1>
@@ -158,14 +159,15 @@ export default function Hero() {
                   ease: "easeInOut",
                 },
               }}
-              className="mx-auto mt-4 max-w-2xl text-balance text-sm leading-relaxed text-white drop-shadow-[0_3px_10px_rgba(0,0,0,0.95)] sm:text-base"
+              className="mx-auto mt-3 line-clamp-3 max-w-xl text-balance text-xs leading-relaxed text-white drop-shadow-[0_3px_10px_rgba(0,0,0,0.95)] sm:mt-4 sm:line-clamp-none sm:max-w-2xl sm:text-base"
             >
               {t("heroDescription")}
             </motion.p>
           </motion.div>
 
           {/* =====================================================
-              EVERYTHING BELOW REMAINS UNCHANGED
+              SEARCH
+              UNCHANGED
           ====================================================== */}
 
           <motion.form
@@ -177,7 +179,7 @@ export default function Hero() {
               delay: 0.2,
               ease: "easeOut",
             }}
-            className="mx-auto mt-8 flex max-w-2xl flex-col gap-2 rounded-2xl bg-white/95 p-2 shadow-xl shadow-black/20 backdrop-blur-md dark:bg-slate-900/95 sm:flex-row"
+            className="mx-auto mt-6 flex max-w-2xl flex-col gap-2 rounded-2xl bg-white/95 p-2 shadow-xl shadow-black/20 backdrop-blur-md dark:bg-slate-900/95 sm:mt-8 sm:flex-row"
           >
             <label
               htmlFor="hero-search"
@@ -221,6 +223,11 @@ export default function Hero() {
             </button>
           </motion.form>
 
+          {/* =====================================================
+              QUICK ACTIONS
+              UNCHANGED
+          ====================================================== */}
+
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -229,7 +236,7 @@ export default function Hero() {
               delay: 0.3,
               ease: "easeOut",
             }}
-            className="mx-auto mt-6 flex max-w-2xl flex-wrap items-center justify-center gap-2.5"
+            className="mx-auto mt-5 flex max-w-2xl flex-wrap items-center justify-center gap-2.5 sm:mt-6"
           >
             {translatedActions.map((action) => {
               const Icon =
@@ -251,6 +258,50 @@ export default function Hero() {
                 </Link>
               );
             })}
+          </motion.div>
+
+          {/* =====================================================
+              MOBILE SERVICES SCROLL INDICATOR
+              Mobile only
+          ====================================================== */}
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.6,
+              delay: 0.5,
+              ease: "easeOut",
+            }}
+            className="mt-6 flex flex-col items-center sm:hidden"
+          >
+            <Link
+              href="#services"
+              aria-label="بۆ بینینی خزمەتگوزاریەکان"
+              className="flex flex-col items-center text-white/90 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/20"
+            >
+              <span className="text-sm font-semibold drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+                بۆ بینینی خزمەتگوزاریەکان
+              </span>
+
+              <motion.span
+                animate={{
+                  y: [0, 6, 0],
+                }}
+                transition={{
+                  duration: 1.4,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                className="mt-1.5"
+                aria-hidden="true"
+              >
+                <ChevronDown
+                  className="h-6 w-6"
+                  strokeWidth={2.5}
+                />
+              </motion.span>
+            </Link>
           </motion.div>
         </div>
       </div>
