@@ -176,8 +176,7 @@ export function ServicesSection() {
         </div>
 
         {/* Cards Grid */}
-        <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
-          <AnimatePresence mode="popLayout">
+         <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-3">          <AnimatePresence mode="popLayout">
             {visibleCategories.map(
               (category: ServiceCategory, index: number) => {
                 const Icon = CATEGORY_ICONS[category.icon];
