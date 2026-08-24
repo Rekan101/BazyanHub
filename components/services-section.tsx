@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type MouseEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
@@ -77,8 +77,6 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   house: House,
   "graduation-cap": GraduationCap,
   wrench: Wrench,
-
-  // Job Opportunities icon
   briefcase: Briefcase,
 };
 
@@ -250,7 +248,7 @@ function getCategoryTitle(
     return localized[language];
   }
 
-  return category.title;
+  return category.translations[language];
 }
 
 function readFavorites(): Record<string, boolean> {
@@ -267,14 +265,14 @@ function readFavorites(): Record<string, boolean> {
       return {};
     }
 
-    const parsed = JSON.parse(stored);
+    const parsed: unknown = JSON.parse(stored);
 
     if (
       parsed &&
       typeof parsed === "object" &&
       !Array.isArray(parsed)
     ) {
-      return parsed;
+      return parsed as Record<string, boolean>;
     }
 
     return {};
@@ -390,7 +388,7 @@ export function ServicesSection() {
         : "ckb";
 
   const toggleFavorite = (
-    e: React.MouseEvent,
+    e: MouseEvent,
     id: string
   ) => {
     e.preventDefault();
