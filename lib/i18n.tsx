@@ -35,7 +35,8 @@ export const TRANSLATIONS = {
 
     heroTitle: "ژیانی ڕۆژانەت ئاسانتر بکە",
     heroDescription:
-               "هەرچیت پێویستە لە بازیان لێرە هەیە؛ ڕێنمایی گشتی، ژمارەی بەپەلە و خزمەتگوزارییە ڕۆژانەیییەکان؛ (مارکێت، چێشتخانە، تاکسی، گەیاندن و وەستای تایبەت و زیاتر هتد...) لە یەک پلاتفۆرمدا.",    searchPlaceholder: " گەڕان لە خزمەتگوزاری و بازرگانی...",
+      "هەرچیت پێویستە لە بازیان لێرە هەیە؛ ڕێنمایی گشتی، ژمارەی بەپەلە و خزمەتگوزارییە ڕۆژانەیییەکان؛ (مارکێت، چێشتخانە، تاکسی، گەیاندن و وەستای تایبەت و زیاتر هتد...) لە یەک پلاتفۆرمدا.",
+    searchPlaceholder: " گەڕان لە خزمەتگوزاری و بازرگانی...",
     searchAriaLabel: "گەڕان لە خزمەتگوزاری و بازرگانییەکان",
     searchButton: "گەڕان",
     map: "نەخشە",
@@ -52,7 +53,7 @@ export const TRANSLATIONS = {
 
     aboutTitle: "دەربارەی بازیان",
     aboutDescription:
-      "ناوچەی بازیان لە هەرێمی کوردستان دانیشتووە و بە سروشتی سەرسوڕهێنەر، چیاکان، ڕووبار و شوێنە مێژووییەکانییەوە ناسراوە. لە ڕێگەی BazianHub ـەوە بە ئاسانی دەتوانیت خزمەتگوزاری، بازرگانی و شوێنە گەشتیارییەکانی ناوچەکە بدۆزیتەوە و ڕاستەوخۆ پەیوەندییان پێوە بکەیت.",
+      "ناوچەی بازیان لە هەرێمی کوردستان دانیشتووە و بە سروشتێکی جوان، شاخەکان، کارگە بازرگانیەکان و شوێنی گەشتیاری و بازاڕێکی گەورەوە ناسراوە. لە ڕێگەی BazianHub ـەوە بە ئاسانی دەتوانیت خزمەتگوزاری، بازرگانی و شوێنە گەشتیارییەکانی ناوچەکە بدۆزیتەوە و ڕاستەوخۆ پەیوەندییان پێوە بکەیت.",
     aboutCoverageTitle: "ناوچەی گەیشتنی خزمەتگوزاری و بازرگانییەکان",
     aboutCoverageDescription:
       "کۆکردنەوەی هەموو خزمەتگوزار و بازرگانییەکانی بازیان لە یەک پلاتفۆرمدا.",
@@ -134,7 +135,7 @@ export const TRANSLATIONS = {
 
     aboutTitle: "عن بازيان",
     aboutDescription:
-      "تقع منطقة بازيان في إقليم كردستان وتشتهر بطبيعتها الخلابة وجبالها وأنهارها ومواقعها التاريخية. من خلال BazianHub يمكنك بسهولة اكتشاف الخدمات والأعمال والأماكن السياحية في المنطقة والتواصل معها مباشرة.",
+      "تقع منطقة بازيان في إقليم كردستان وتشتهر بطبيعتها الجميلة وجبالها وورشها التجارية وأماكنها السياحية وسوقها الكبير. من خلال BazianHub يمكنك بسهولة اكتشاف الخدمات والأعمال والأماكن السياحية في المنطقة والتواصل معها مباشرة.",
     aboutCoverageTitle: "تغطية واسعة للخدمات والأعمال",
     aboutCoverageDescription:
       "جمع جميع مقدمي الخدمات والأعمال التجارية في بازيان ضمن منصة واحدة.",
@@ -216,7 +217,7 @@ export const TRANSLATIONS = {
 
     aboutTitle: "About Bazian",
     aboutDescription:
-      "Bazian is located in the Kurdistan Region and is known for its beautiful nature, mountains, rivers, and historical sites. Through BazianHub, you can easily discover local services, businesses, and tourist attractions and contact them directly.",
+      "Bazian is located in the Kurdistan Region and is known for its beautiful nature, mountains, commercial workshops, tourist attractions, and large market. Through BazianHub, you can easily discover local services, businesses, and tourist attractions and contact them directly.",
     aboutCoverageTitle: "Wide service & business coverage",
     aboutCoverageDescription:
       "Bringing Bazian's service providers and businesses together on one platform.",
