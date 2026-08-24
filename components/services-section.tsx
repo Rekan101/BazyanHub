@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo, useState } from "react";
@@ -16,7 +17,7 @@ import {
   House,
   GraduationCap,
   Wrench,
-  BriefcaseBusiness,
+  Briefcase,
   Heart,
   Sparkles,
   Flame,
@@ -77,7 +78,7 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   wrench: Wrench,
 
   // Job Opportunities icon
-  "briefcase-business": BriefcaseBusiness,
+  briefcase: Briefcase,
 };
 
 const SERVICE_FILTERS = [
