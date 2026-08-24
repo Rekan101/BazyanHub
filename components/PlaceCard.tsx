@@ -3,10 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Star, MapPin, Heart, ArrowLeft } from "lucide-react";
-import type { Place } from "@/lib/types";
+import type { PlaceWithTranslations } from "@/lib/data/places";
+import { useLanguage } from "@/lib/i18n";
 
 interface PlaceCardProps {
-  place: Place;
+  place: PlaceWithTranslations;
   priority?: boolean;
 }
 
@@ -15,34 +16,39 @@ export default function PlaceCard({
   priority = false,
 }: PlaceCardProps) {
   const [isFavorite, setIsFavorite] = useState(false);
+  const { language } = useLanguage();
+
+  const currentLanguage =
+    language === "ar"
+      ? "ar"
+      : language === "en"
+        ? "en"
+        : "ckb";
+
+  const placeTitle =
+    place.translations[currentLanguage];
 
   // Normalize image path
   const imageName = place.image.split("/").pop() || "";
   const imageSrc = `/images/${imageName}`;
-
-  console.log("Place:", place.title);
-  console.log("Original image:", place.image);
-  console.log("Final image:", imageSrc);
 
   return (
     <article
       dir="rtl"
       className="group flex h-full flex-col overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-sm shadow-black/[0.03] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/[0.08] dark:border-white/10 dark:bg-[#1F2937]"
     >
-      {/* ================= IMAGE ================= */}
+      {/* IMAGE */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
         <img
           src={imageSrc}
-          alt={place.title}
+          alt={placeTitle}
           loading={priority ? "eager" : "lazy"}
           decoding="async"
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
           onError={(event) => {
             console.error("IMAGE FAILED:", imageSrc);
 
-            const image = event.currentTarget;
-
-            image.style.display = "none";
+            event.currentTarget.style.display = "none";
           }}
         />
 
@@ -54,7 +60,9 @@ export default function PlaceCard({
         {/* Favorite */}
         <button
           type="button"
-          onClick={() => setIsFavorite((value) => !value)}
+          onClick={() =>
+            setIsFavorite((value) => !value)
+          }
           aria-pressed={isFavorite}
           aria-label={
             isFavorite
@@ -65,18 +73,26 @@ export default function PlaceCard({
         >
           <Heart
             className="h-[18px] w-[18px]"
-            fill={isFavorite ? "#EF4444" : "none"}
-            stroke={isFavorite ? "#EF4444" : "currentColor"}
+            fill={
+              isFavorite
+                ? "#EF4444"
+                : "none"
+            }
+            stroke={
+              isFavorite
+                ? "#EF4444"
+                : "currentColor"
+            }
           />
         </button>
       </div>
 
-      {/* ================= CONTENT ================= */}
+      {/* CONTENT */}
       <div className="flex flex-1 flex-col gap-3 p-4">
         {/* Title + Rating */}
         <div className="flex items-start justify-between gap-2">
           <h3 className="min-w-0 flex-1 text-base font-bold leading-snug text-[#1F2937] dark:text-white">
-            {place.title}
+            {placeTitle}
           </h3>
 
           <div className="flex shrink-0 items-center gap-1 rounded-lg bg-[#FACC15]/15 px-2 py-1 text-xs font-bold text-[#B45309]">
@@ -99,9 +115,9 @@ export default function PlaceCard({
           {place.description}
         </p>
 
-        {/* Details */}
+        {/* Dynamic Details */}
         <Link
-          href={place.href}
+          href={`/places/${place.id}`}
           className="mt-2 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-[#16A34A] px-4 py-2.5 text-sm font-semibold text-[#16A34A] transition-all duration-200 hover:bg-[#16A34A] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#16A34A]/30"
         >
           بینینی وردەکاری

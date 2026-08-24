@@ -1,6 +1,17 @@
 import type { Place } from "@/lib/types";
 
-export const places: Place[] = [
+export type PlaceTranslations = {
+  ku: string;
+  ckb: string;
+  ar: string;
+  en: string;
+};
+
+export type PlaceWithTranslations = Place & {
+  translations: PlaceTranslations;
+};
+
+export const places: PlaceWithTranslations[] = [
   {
     id: "darwish-restaurant",
     slug: "chishtxanay-derwish",
@@ -13,6 +24,13 @@ export const places: Place[] = [
       "چێشتخانەیەکی نوێ و بەرین لە دڵی بازیان، ناسراو بە کەبابی تایبەتی و خزمەتگوزارییەکی گەرم.",
     image: "/images/darwish-restaurant.jpg",
     href: "/businesses/chishtxanay-derwish",
+
+    translations: {
+      ku: "چێشتخانەی دەرویش",
+      ckb: "چێشتخانەی دەرویش",
+      ar: "مطعم درويش",
+      en: "Darwish Restaurant",
+    },
   },
 
   {
@@ -27,12 +45,19 @@ export const places: Place[] = [
       "شوێنێکی سروشتی سەوز و ئارام بۆ گەشت و وێنەگرتن.",
     image: "/images/dilezha-village.jpg",
     href: "/attractions/gundi-dilezha",
+
+    translations: {
+      ku: "گوندی دێلێژە",
+      ckb: "گوندی دێلێژە",
+      ar: "قرية ديلێژە",
+      en: "Dilezha Village",
+    },
   },
 
   {
     id: "chapa-chanara",
     slug: "chapa-chanara",
-    title: "شاخی بەستراوی بازیان",
+    title: "شوێنی گەشتیاری چەپە چنارە",
     category: "گەشتیاری",
     location: "دۆڵی سروشتی، بازیان",
     rating: 4.7,
@@ -41,6 +66,13 @@ export const places: Place[] = [
       "شوێنێکی سروشتی جوان و گونجاو بۆ پشوودان و گەشتی خێزانی.",
     image: "/images/chapa-chanara.jpg",
     href: "/attractions/chapa-chanara",
+
+    translations: {
+      ku: "شوێنی گەشتیاری چەپە چنارە",
+      ckb: "شوێنی گەشتیاری چەپە چنارە",
+      ar: "موقع چەپە چنارە السياحي",
+      en: "Chepa Chinara Tourist Spot",
+    },
   },
 
   {
@@ -55,5 +87,12 @@ export const places: Place[] = [
       "یەکێک لە ناسراوترین شوێنە مێژووییەکانی ناوچەی بازیان.",
     image: "/images/bazian-pass.jpg",
     href: "/attractions/darbandi-bazyan",
+
+    translations: {
+      ku: "دەربەندی بازیان",
+      ckb: "دەربەندی بازیان",
+      ar: "ممر بازیان",
+      en: "Bazian Pass",
+    },
   },
 ];
