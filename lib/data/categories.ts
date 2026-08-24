@@ -15,18 +15,15 @@ export type ServiceFilter = {
 export type ServiceCategory = {
   id: string;
 
-  // Keep the existing Kurdish fallback for compatibility
+  // Kurdish fallback for compatibility
   title: string;
 
   // Localized category title
   translations: LocalizedText;
 
   icon: string;
-
   filters: ServiceFilter[];
-
   imageSrc: string;
-
   popular?: boolean;
   featured?: boolean;
 };
@@ -265,4 +262,21 @@ export const categories: ServiceCategory[] = [
     popular: true,
     filters: [],
   },
-];
+
+  // ─────────────────────────────────────────────
+  // Jobs / Employment
+  // ─────────────────────────────────────────────
+  {
+    id: "jobs",
+    title: "هەلی کار",
+    translations: {
+      ckb: "هەلی کار",
+      ar: "فرص العمل",
+      en: "Job Opportunities",
+    },
+    icon: "briefcase",
+    imageSrc: "/images/jobs.webp",
+    featured: true,
+    filters: [],
+  },
+]; 

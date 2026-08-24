@@ -16,6 +16,7 @@ import {
   House,
   GraduationCap,
   Wrench,
+  BriefcaseBusiness,
   Heart,
   Sparkles,
   Flame,
@@ -74,6 +75,9 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   house: House,
   "graduation-cap": GraduationCap,
   wrench: Wrench,
+
+  // Job Opportunities icon
+  "briefcase-business": BriefcaseBusiness,
 };
 
 const SERVICE_FILTERS = [
@@ -85,6 +89,7 @@ const SERVICE_FILTERS = [
       en: "All",
     },
   },
+
   {
     id: "popular",
     translations: {
@@ -93,6 +98,7 @@ const SERVICE_FILTERS = [
       en: "Most Popular",
     },
   },
+
   {
     id: "featured",
     translations: {
@@ -101,7 +107,18 @@ const SERVICE_FILTERS = [
       en: "Featured",
     },
   },
-  ...categories.flatMap((category) => category.filters),
+
+  ...categories.flatMap((category) =>
+    category.filters.map((filter) => ({
+      id: filter.id,
+
+      translations: {
+        ckb: filter.label,
+        ar: getFilterArabic(filter.id, filter.label),
+        en: getFilterEnglish(filter.id, filter.label),
+      },
+    }))
+  ),
 ];
 
 const SERVICE_UI_TEXT: Record<
@@ -121,6 +138,7 @@ const SERVICE_UI_TEXT: Record<
     popular: "پڕداواکاری",
     favoriteAdd: "زیادکردن بۆ دڵخوازەکان",
   },
+
   ar: {
     categoryTypes: "نوع / خدمة",
     servicesList: "قائمة الخدمات",
@@ -128,6 +146,7 @@ const SERVICE_UI_TEXT: Record<
     popular: "الأكثر طلبًا",
     favoriteAdd: "إضافة إلى المفضلة",
   },
+
   en: {
     categoryTypes: "types / services",
     servicesList: "Services List",
@@ -136,6 +155,62 @@ const SERVICE_UI_TEXT: Record<
     favoriteAdd: "Add to favorites",
   },
 };
+
+function getFilterArabic(
+  id: string,
+  fallback: string
+): string {
+  const translations: Record<string, string> = {
+    taxi: "تاكسي",
+    pickup: "بيك أب",
+    excavator: "حفارة",
+    shovel: "شيول",
+    filter: "فلاتر",
+    painter: "دهان",
+    puncture: "بنچر",
+    "car-wash": "غسيل السيارات",
+    "auto-electrician": "كهربائي سيارات",
+    "spare-parts": "قطع غيار السيارات",
+
+    barber: "حلاق",
+    salon: "صالون",
+
+    "full-time": "دوام كامل",
+    "part-time": "دوام جزئي",
+    "daily-work": "عمل يومي",
+    internship: "تدريب",
+  };
+
+  return translations[id] ?? fallback;
+}
+
+function getFilterEnglish(
+  id: string,
+  fallback: string
+): string {
+  const translations: Record<string, string> = {
+    taxi: "Taxi",
+    pickup: "Pickup",
+    excavator: "Excavator",
+    shovel: "Shovel",
+    filter: "Car Filter",
+    painter: "Painter",
+    puncture: "Tire Repair",
+    "car-wash": "Car Wash",
+    "auto-electrician": "Auto Electrician",
+    "spare-parts": "Spare Parts",
+
+    barber: "Barber",
+    salon: "Salon",
+
+    "full-time": "Full-time",
+    "part-time": "Part-time",
+    "daily-work": "Daily Work",
+    internship: "Internship",
+  };
+
+  return translations[id] ?? fallback;
+}
 
 function getLocalizedText(
   language: LanguageCode,
@@ -146,6 +221,34 @@ function getLocalizedText(
   }
 ) {
   return translations[language];
+}
+
+const CATEGORY_TITLES: Record<
+  string,
+  {
+    ckb: string;
+    ar: string;
+    en: string;
+  }
+> = {
+  jobs: {
+    ckb: "هەلی کار",
+    ar: "فرص العمل",
+    en: "Job Opportunities",
+  },
+};
+
+function getCategoryTitle(
+  category: ServiceCategory,
+  language: LanguageCode
+) {
+  const localized = CATEGORY_TITLES[category.id];
+
+  if (localized) {
+    return localized[language];
+  }
+
+  return category.title;
 }
 
 export function ServicesSection() {
@@ -165,7 +268,10 @@ export function ServicesSection() {
     useState<Record<string, boolean>>({});
 
   const isRTL = currentLanguage !== "en";
-  const ArrowIcon = isRTL ? ArrowLeft : ArrowRight;
+
+  const ArrowIcon = isRTL
+    ? ArrowLeft
+    : ArrowRight;
 
   const visibleCategories = useMemo(() => {
     if (activeFilter === "all") {
@@ -248,13 +354,10 @@ export function ServicesSection() {
             const isActive =
               activeFilter === filter.id;
 
-            const label =
-              "label" in filter
-                ? filter.translations[currentLanguage]
-                : getLocalizedText(
-                    currentLanguage,
-                    filter.translations
-                  );
+            const label = getLocalizedText(
+              currentLanguage,
+              filter.translations
+            );
 
             return (
               <button
@@ -294,9 +397,10 @@ export function ServicesSection() {
                   !!favorites[category.id];
 
                 const categoryTitle =
-                  category.translations[
+                  getCategoryTitle(
+                    category,
                     currentLanguage
-                  ];
+                  );
 
                 return (
                   <motion.div
