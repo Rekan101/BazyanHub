@@ -53,23 +53,13 @@ const FILTER_TRANSLATIONS: Record<
     en: "Full-time",
   },
 
-  "part-time": {
-    ckb: "نیوەکات",
-    ar: "دوام جزئي",
-    en: "Part-time",
-  },
-
+ 
   "daily-work": {
     ckb: "کار بۆ ڕۆژ",
     ar: "عمل يومي",
     en: "Daily Work",
   },
 
-  internship: {
-    ckb: "کارامۆزی",
-    ar: "تدريب",
-    en: "Internship",
-  },
 };
 
 function getLanguage(): LanguageCode {
