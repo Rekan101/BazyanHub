@@ -44,7 +44,13 @@ function InstagramIcon() {
     >
       <rect x="3" y="3" width="18" height="18" rx="5" />
       <circle cx="12" cy="12" r="4" />
-      <circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none" />
+      <circle
+        cx="17.3"
+        cy="6.7"
+        r="1"
+        fill="currentColor"
+        stroke="none"
+      />
     </svg>
   );
 }
@@ -106,17 +112,28 @@ export default function Footer() {
       createdAt: new Date().toISOString(),
     };
 
-    const existingFeedback = localStorage.getItem("bazian-feedback");
-    const feedbackList = existingFeedback
-      ? JSON.parse(existingFeedback)
-      : [];
+    try {
+      const existingFeedback = localStorage.getItem(
+        "bazian-feedback"
+      );
 
-    feedbackList.push(feedbackData);
+      const feedbackList: Array<{
+        rating: number;
+        feedback: string;
+        createdAt: string;
+      }> = existingFeedback
+        ? JSON.parse(existingFeedback)
+        : [];
 
-    localStorage.setItem(
-      "bazian-feedback",
-      JSON.stringify(feedbackList)
-    );
+      feedbackList.push(feedbackData);
+
+      localStorage.setItem(
+        "bazian-feedback",
+        JSON.stringify(feedbackList)
+      );
+    } catch {
+      // Ignore localStorage errors.
+    }
 
     setFeedback("");
     setRating(0);
@@ -135,142 +152,102 @@ export default function Footer() {
       {/* Info strip */}
       <div className="mx-auto max-w-[1440px] px-4 py-12 sm:px-6 lg:px-10">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Contact */}
-          <div className="rounded-2xl border border-[#E5E7EB] bg-white p-5 dark:border-white/10 dark:bg-[#111827]">
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#16A34A]/10 text-[#16A34A]">
-              <Phone className="h-5 w-5" />
-            </div>
+          {/* Contact Card */}
+          <div className="group relative overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-[0_10px_35px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(15,23,42,0.10)] dark:border-white/10 dark:bg-[#111827]">
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#16A34A] via-[#22C55E] to-[#15803D]" />
 
-            <h3 className="mb-2 text-sm font-bold text-[#1F2937] dark:text-white">
-              ڕاستەوخۆ پەیوەندی بە تیمی بازیان هەب بکە :
-            </h3>
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#16A34A]/10 text-[#16A34A] shadow-sm transition-transform duration-300 group-hover:scale-105">
+                <Phone className="h-5 w-5" />
+              </div>
 
-            <p
-              dir="ltr"
-              className="text-end text-sm text-[#4B5563] dark:text-gray-400"
-            >
-              +964 775 799 7904
-            </p>
+              <h3 className="text-base font-extrabold tracking-tight text-[#1F2937] dark:text-white">
+                ڕاستەوخۆ پەیوەندی بە تیمی بازیان هەب بکە :
+              </h3>
 
-            {/* بۆ گۆڕینی ئیمەیڵەکە لە داهاتوودا، تەنها info@bazyanhub.com لە خوارەوە بگۆڕە. */}
-            <a
-              href="mailto:info@bazyanhub.com"
-              className="mt-2 flex items-center gap-1.5 text-sm text-[#4B5563] transition-colors hover:text-[#16A34A] dark:text-gray-400"
-            >
-              <Mail className="h-3.5 w-3.5" />
-              info@bazyanhub.com
-            </a>
+              <div className="mt-4 w-full space-y-2.5">
+                <a
+                  href="tel:+9647757997904"
+                  dir="ltr"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3 text-sm font-semibold text-[#374151] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#16A34A]/40 hover:bg-[#16A34A]/5 hover:text-[#16A34A] dark:border-white/10 dark:bg-white/[0.03] dark:text-gray-200 dark:hover:border-[#16A34A]/40"
+                >
+                  <Phone className="h-4 w-4 shrink-0" />
+                  <span>+964 775 799 7904</span>
+                </a>
 
-            {/* دواتر بۆ زیادکردنی لینکی Facebook، href ـی "#" بگۆڕە بۆ لینکی ڕاستەقینە و target="_blank" بهێڵەوە. */}
-            <a
-              href="#"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="بازیان هەب لە فەیسبووک"
-              className="group flex h-11 w-11 items-center justify-center rounded-full bg-[#16A34A]/10 text-[#4B5563] transition-all duration-200 hover:scale-110 hover:bg-[#1877F2] hover:text-white dark:text-gray-300"
-            >
-              <FacebookIcon />
-            </a>
+                {/* بۆ گۆڕینی ئیمەیڵەکە لە داهاتوودا، تەنها info@bazyanhub.com لەم href و دەقەکەی خوارەوە بگۆڕە. */}
+                <a
+                  href="mailto:info@bazyanhub.com"
+                  dir="ltr"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3 text-sm font-semibold text-[#374151] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#16A34A]/40 hover:bg-[#16A34A]/5 hover:text-[#16A34A] dark:border-white/10 dark:bg-white/[0.03] dark:text-gray-200 dark:hover:border-[#16A34A]/40"
+                >
+                  <Mail className="h-4 w-4 shrink-0" />
+                  <span>info@bazyanhub.com</span>
+                </a>
+              </div>
 
-            {/* دواتر بۆ زیادکردنی لینکی Instagram، href ـی "#" بگۆڕە بۆ لینکی ڕاستەقینە و target="_blank" بهێڵەوە. */}
-            <a
-              href="#"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="بازیان هەب لە ئینستاگرام"
-              className="group flex h-11 w-11 items-center justify-center rounded-full bg-[#16A34A]/10 text-[#4B5563] transition-all duration-200 hover:scale-110 hover:bg-[#E4405F] hover:text-white dark:text-gray-300"
-            >
-              <InstagramIcon />
-            </a>
+              {/* دواتر بۆ زیادکردنی لینکی ڕاستەقینەی Facebook، هەردوو href ـی "#" لەم row ـەدا بگۆڕە بۆ لینکی خۆت و target="_blank" بەجێبهێڵە. */}
+              <div className="mt-6 flex w-full flex-row items-center justify-center gap-4">
+                {/* دواتر href="#" ـی ئەم Facebook ـە بگۆڕە بۆ لینکی ڕاستەقینەی Facebook. */}
+                <a
+                  href="#"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="بازیان هەب لە فەیسبووک"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-500 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:scale-110 hover:border-[#1877F2] hover:bg-[#1877F2] hover:text-white hover:shadow-lg hover:shadow-[#1877F2]/20 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-300"
+                >
+                  <FacebookIcon />
+                </a>
 
-            {/* دواتر بۆ زیادکردنی لینکی TikTok، href ـی "#" بگۆڕە بۆ لینکی ڕاستەقینە و target="_blank" بهێڵەوە. */}
-            <a
-              href="#"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="بازیان هەب لە تیکتۆک"
-              className="group flex h-11 w-11 items-center justify-center rounded-full bg-[#16A34A]/10 text-[#4B5563] transition-all duration-200 hover:scale-110 hover:bg-black hover:text-white dark:text-gray-300"
-            >
-              <TikTokIcon />
-            </a>
+                {/* دواتر href="#" ـی ئەم Instagram ـە بگۆڕە بۆ لینکی ڕاستەقینەی Instagram. */}
+                <a
+                  href="#"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="بازیان هەب لە ئینستاگرام"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-500 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:scale-110 hover:border-[#E4405F] hover:bg-[#E4405F] hover:text-white hover:shadow-lg hover:shadow-[#E4405F]/20 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-300"
+                >
+                  <InstagramIcon />
+                </a>
 
-            {/* دواتر بۆ زیادکردنی لینکی WhatsApp، href ـی "#" بگۆڕە بۆ لینکی ڕاستەقینە و target="_blank" بهێڵەوە. */}
-            <a
-              href="#"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="بازیان هەب لە واتسەپ"
-              className="group flex h-11 w-11 items-center justify-center rounded-full bg-[#16A34A]/10 text-[#4B5563] transition-all duration-200 hover:scale-110 hover:bg-[#25D366] hover:text-white dark:text-gray-300"
-            >
-              <WhatsAppIcon />
-            </a>
+                {/* دواتر href="#" ـی ئەم TikTok ـە بگۆڕە بۆ لینکی ڕاستەقینەی TikTok. */}
+                <a
+                  href="#"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="بازیان هەب لە تیکتۆک"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-500 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:scale-110 hover:border-black hover:bg-black hover:text-white hover:shadow-lg hover:shadow-black/20 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-300 dark:hover:bg-black"
+                >
+                  <TikTokIcon />
+                </a>
 
-            {/* دواتر بۆ زیادکردنی لینکی Viber، href ـی "#" بگۆڕە بۆ لینکی ڕاستەقینە و target="_blank" بهێڵەوە. */}
-            <a
-              href="#"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="بازیان هەب لە ڤایبەر"
-              className="group flex h-11 w-11 items-center justify-center rounded-full bg-[#16A34A]/10 text-[#4B5563] transition-all duration-200 hover:scale-110 hover:bg-[#7360F2] hover:text-white dark:text-gray-300"
-            >
-              <ViberIcon />
-            </a>
+                {/* دواتر href="#" ـی ئەم WhatsApp ـە بگۆڕە بۆ لینکی ڕاستەقینەی WhatsApp. */}
+                <a
+                  href="#"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="بازیان هەب لە واتسەپ"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-500 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:scale-110 hover:border-[#25D366] hover:bg-[#25D366] hover:text-white hover:shadow-lg hover:shadow-[#25D366]/20 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-300"
+                >
+                  <WhatsAppIcon />
+                </a>
 
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
-              <a
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="بازیان هەب لە فەیسبووک"
-                className="group flex h-11 w-11 items-center justify-center rounded-full bg-[#16A34A]/10 text-[#4B5563] transition-all duration-200 hover:scale-110 hover:bg-[#1877F2] hover:text-white dark:text-gray-300"
-              >
-                <FacebookIcon />
-              </a>
-
-              <a
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="بازیان هەب لە ئینستاگرام"
-                className="group flex h-11 w-11 items-center justify-center rounded-full bg-[#16A34A]/10 text-[#4B5563] transition-all duration-200 hover:scale-110 hover:bg-[#E4405F] hover:text-white dark:text-gray-300"
-              >
-                <InstagramIcon />
-              </a>
-
-              <a
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="بازیان هەب لە تیکتۆک"
-                className="group flex h-11 w-11 items-center justify-center rounded-full bg-[#16A34A]/10 text-[#4B5563] transition-all duration-200 hover:scale-110 hover:bg-black hover:text-white dark:text-gray-300"
-              >
-                <TikTokIcon />
-              </a>
-
-              <a
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="بازیان هەب لە واتسەپ"
-                className="group flex h-11 w-11 items-center justify-center rounded-full bg-[#16A34A]/10 text-[#4B5563] transition-all duration-200 hover:scale-110 hover:bg-[#25D366] hover:text-white dark:text-gray-300"
-              >
-                <WhatsAppIcon />
-              </a>
-
-              <a
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="بازیان هەب لە ڤایبەر"
-                className="group flex h-11 w-11 items-center justify-center rounded-full bg-[#16A34A]/10 text-[#4B5563] transition-all duration-200 hover:scale-110 hover:bg-[#7360F2] hover:text-white dark:text-gray-300"
-              >
-                <ViberIcon />
-              </a>
+                {/* دواتر href="#" ـی ئەم Viber ـە بگۆڕە بۆ لینکی ڕاستەقینەی Viber. */}
+                <a
+                  href="#"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="بازیان هەب لە ڤایبەر"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-500 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:scale-110 hover:border-[#7360F2] hover:bg-[#7360F2] hover:text-white hover:shadow-lg hover:shadow-[#7360F2]/20 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-300"
+                >
+                  <ViberIcon />
+                </a>
+              </div>
             </div>
           </div>
 
           {/* Working Hours */}
-          <div className="rounded-2xl border border-[#E5E7EB] bg-white p-5 dark:border-white/10 dark:bg-[#111827]">
+          <div className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-[0_10px_35px_rgba(15,23,42,0.04)] dark:border-white/10 dark:bg-[#111827]">
             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#16A34A]/10 text-[#16A34A]">
               <Clock3 className="h-5 w-5" />
             </div>
@@ -285,7 +262,7 @@ export default function Footer() {
           </div>
 
           {/* Address */}
-          <div className="rounded-2xl border border-[#E5E7EB] bg-white p-5 dark:border-white/10 dark:bg-[#111827]">
+          <div className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-[0_10px_35px_rgba(15,23,42,0.04)] dark:border-white/10 dark:bg-[#111827]">
             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#16A34A]/10 text-[#16A34A]">
               <MapPin className="h-5 w-5" />
             </div>
@@ -300,7 +277,7 @@ export default function Footer() {
           </div>
 
           {/* Map */}
-          <div className="overflow-hidden rounded-2xl border border-[#E5E7EB] dark:border-white/10">
+          <div className="overflow-hidden rounded-2xl border border-[#E5E7EB] shadow-[0_10px_35px_rgba(15,23,42,0.04)] dark:border-white/10">
             <iframe
               title="نەخشەی شوێنی بازیان"
               src="https://maps.google.com/maps?q=Bazyan,Sulaymaniyah,Iraq&z=11&output=embed"
@@ -318,7 +295,10 @@ export default function Footer() {
           <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
             {/* Brand */}
             <div>
-              <Link href="/" className="flex items-center gap-2.5">
+              <Link
+                href="/"
+                className="flex items-center gap-2.5"
+              >
                 <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10 text-white">
                   <Mountain
                     className="h-5 w-5"
@@ -388,7 +368,6 @@ export default function Footer() {
                   کورت و بێ ناو بنووسە.
                 </p>
 
-                {/* Anonymous Rating */}
                 <div className="mt-4">
                   <p className="mb-2 text-xs font-semibold text-white/90">
                     هەڵسەنگاندنی وێبسایت
@@ -399,7 +378,9 @@ export default function Footer() {
                       <button
                         key={value}
                         type="button"
-                        onClick={() => setRating(value)}
+                        onClick={() =>
+                          setRating(value)
+                        }
                         aria-label={`${value} لە 5`}
                         className="rounded-md p-1 transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white/30"
                       >
@@ -428,7 +409,9 @@ export default function Footer() {
                 <button
                   type="button"
                   onClick={submitFeedback}
-                  disabled={!rating && !feedback.trim()}
+                  disabled={
+                    !rating && !feedback.trim()
+                  }
                   className="mt-3 w-full rounded-xl bg-white px-4 py-2.5 text-xs font-bold text-[#14532D] transition-all hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   ناردنی فییدباک
