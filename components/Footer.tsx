@@ -425,26 +425,8 @@ export default function Footer() {
               </div>
             </div>
 
-            {/* Language */}
-            <div>
-              <h3 className="mb-4 text-sm font-bold text-white">
-                زمان
-              </h3>
-
-              <div className="flex flex-wrap gap-2">
-                {["کوردی", "العربية", "English"].map(
-                  (lang) => (
-                    <button
-                      key={lang}
-                      type="button"
-                      className="rounded-lg border border-white/20 px-3 py-1.5 text-xs font-medium text-white/80 transition-colors hover:border-white/40 hover:text-white"
-                    >
-                      {lang}
-                    </button>
-                  )
-                )}
-              </div>
-            </div>
+           
+            
           </div>
 
           <div className="mt-10 border-t border-white/10 pt-6 text-center text-xs text-white/60">
