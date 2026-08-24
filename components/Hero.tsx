@@ -36,9 +36,9 @@ export default function Hero() {
       href: "/favorites",
       icon: "favorites",
     },
-    {
+        {
       label: t("servicesList"),
-      href: "/services",
+      href: "#services",
       icon: "list",
     },
   ];

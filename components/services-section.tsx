@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
@@ -38,6 +37,8 @@ type ServiceFilterKey = "all" | string;
 type CategoryWithFilter = ServiceCategory & {
   filterKey?: ServiceFilterKey;
 };
+
+const FAVORITES_STORAGE_KEY = "bazianhub-favorites";
 
 const GRID_ANIMATION = {
   hidden: {
@@ -252,6 +253,57 @@ function getCategoryTitle(
   return category.title;
 }
 
+function readFavorites(): Record<string, boolean> {
+  if (typeof window === "undefined") {
+    return {};
+  }
+
+  try {
+    const stored = localStorage.getItem(
+      FAVORITES_STORAGE_KEY
+    );
+
+    if (!stored) {
+      return {};
+    }
+
+    const parsed = JSON.parse(stored);
+
+    if (
+      parsed &&
+      typeof parsed === "object" &&
+      !Array.isArray(parsed)
+    ) {
+      return parsed;
+    }
+
+    return {};
+  } catch {
+    return {};
+  }
+}
+
+function saveFavorites(
+  favorites: Record<string, boolean>
+) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    localStorage.setItem(
+      FAVORITES_STORAGE_KEY,
+      JSON.stringify(favorites)
+    );
+
+    window.dispatchEvent(
+      new CustomEvent("bazianhub-favorites-changed")
+    );
+  } catch {
+    // Ignore localStorage errors.
+  }
+}
+
 export function ServicesSection() {
   const { t, language } = useLanguage();
 
@@ -273,6 +325,36 @@ export function ServicesSection() {
   const ArrowIcon = isRTL
     ? ArrowLeft
     : ArrowRight;
+
+  useEffect(() => {
+    setFavorites(readFavorites());
+
+    const handleFavoritesChanged = () => {
+      setFavorites(readFavorites());
+    };
+
+    window.addEventListener(
+      "bazianhub-favorites-changed",
+      handleFavoritesChanged
+    );
+
+    window.addEventListener(
+      "storage",
+      handleFavoritesChanged
+    );
+
+    return () => {
+      window.removeEventListener(
+        "bazianhub-favorites-changed",
+        handleFavoritesChanged
+      );
+
+      window.removeEventListener(
+        "storage",
+        handleFavoritesChanged
+      );
+    };
+  }, []);
 
   const visibleCategories = useMemo(() => {
     if (activeFilter === "all") {
@@ -314,10 +396,16 @@ export function ServicesSection() {
     e.preventDefault();
     e.stopPropagation();
 
-    setFavorites((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
+    setFavorites((prev) => {
+      const updated = {
+        ...prev,
+        [id]: !prev[id],
+      };
+
+      saveFavorites(updated);
+
+      return updated;
+    });
   };
 
   return (
@@ -479,6 +567,7 @@ export function ServicesSection() {
                                   ? "Remove from favorites"
                                   : ui.favoriteAdd
                               }
+                              aria-pressed={isFavorite}
                               className={cn(
                                 "flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-300 sm:h-9 sm:w-9",
                                 "bg-slate-100/80 hover:bg-rose-50 dark:bg-slate-800/80 dark:hover:bg-rose-950/40",
