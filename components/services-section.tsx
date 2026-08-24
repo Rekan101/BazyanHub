@@ -27,6 +27,7 @@ import {
   categories,
   type ServiceCategory,
   type ServiceFilter,
+  type LanguageCode,
 } from "@/lib/data/categories";
 import { useLanguage } from "@/lib/i18n";
 
@@ -78,21 +79,84 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
 const SERVICE_FILTERS = [
   {
     id: "all",
-    label: "هەموو",
+    translations: {
+      ckb: "هەموو",
+      ar: "الكل",
+      en: "All",
+    },
   },
   {
     id: "popular",
-    label: "پڕداواکاریترین",
+    translations: {
+      ckb: "پڕداواکاریترین",
+      ar: "الأكثر طلبًا",
+      en: "Most Popular",
+    },
   },
   {
     id: "featured",
-    label: "تایبەت",
+    translations: {
+      ckb: "تایبەت",
+      ar: "مميز",
+      en: "Featured",
+    },
   },
   ...categories.flatMap((category) => category.filters),
 ];
 
+const SERVICE_UI_TEXT: Record<
+  string,
+  {
+    categoryTypes: string;
+    servicesList: string;
+    featured: string;
+    popular: string;
+    favoriteAdd: string;
+  }
+> = {
+  ckb: {
+    categoryTypes: "جۆر / خزمەتگوزاری",
+    servicesList: "لیستی خزمەتگوزارییەکان",
+    featured: "تایبەت",
+    popular: "پڕداواکاری",
+    favoriteAdd: "زیادکردن بۆ دڵخوازەکان",
+  },
+  ar: {
+    categoryTypes: "نوع / خدمة",
+    servicesList: "قائمة الخدمات",
+    featured: "مميز",
+    popular: "الأكثر طلبًا",
+    favoriteAdd: "إضافة إلى المفضلة",
+  },
+  en: {
+    categoryTypes: "types / services",
+    servicesList: "Services List",
+    featured: "Featured",
+    popular: "Popular",
+    favoriteAdd: "Add to favorites",
+  },
+};
+
+function getLocalizedText(
+  language: LanguageCode,
+  translations: {
+    ckb: string;
+    ar: string;
+    en: string;
+  }
+) {
+  return translations[language];
+}
+
 export function ServicesSection() {
   const { t, language } = useLanguage();
+
+  const currentLanguage =
+    language as LanguageCode;
+
+  const ui =
+    SERVICE_UI_TEXT[currentLanguage] ??
+    SERVICE_UI_TEXT.ckb;
 
   const [activeFilter, setActiveFilter] =
     useState<ServiceFilterKey>("all");
@@ -100,7 +164,7 @@ export function ServicesSection() {
   const [favorites, setFavorites] =
     useState<Record<string, boolean>>({});
 
-  const isRTL = language !== "en";
+  const isRTL = currentLanguage !== "en";
   const ArrowIcon = isRTL ? ArrowLeft : ArrowRight;
 
   const visibleCategories = useMemo(() => {
@@ -109,11 +173,15 @@ export function ServicesSection() {
     }
 
     if (activeFilter === "popular") {
-      return categories.filter((category) => category.popular);
+      return categories.filter(
+        (category) => category.popular
+      );
     }
 
     if (activeFilter === "featured") {
-      return categories.filter((category) => category.featured);
+      return categories.filter(
+        (category) => category.featured
+      );
     }
 
     return categories.filter(
@@ -126,9 +194,9 @@ export function ServicesSection() {
   }, [activeFilter]);
 
   const locale =
-    language === "en"
+    currentLanguage === "en"
       ? "en-US"
-      : language === "ar"
+      : currentLanguage === "ar"
         ? "ar-IQ"
         : "ckb";
 
@@ -180,6 +248,14 @@ export function ServicesSection() {
             const isActive =
               activeFilter === filter.id;
 
+            const label =
+              "label" in filter
+                ? filter.translations[currentLanguage]
+                : getLocalizedText(
+                    currentLanguage,
+                    filter.translations
+                  );
+
             return (
               <button
                 key={filter.id}
@@ -197,9 +273,7 @@ export function ServicesSection() {
                     : "border-slate-200 bg-white/80 text-slate-700 hover:border-primary/40 hover:text-primary dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-300"
                 )}
               >
-                {filter.id === "all"
-                  ? t("allServices")
-                  : filter.label}
+                {label}
               </button>
             );
           })}
@@ -218,6 +292,11 @@ export function ServicesSection() {
 
                 const isFavorite =
                   !!favorites[category.id];
+
+                const categoryTitle =
+                  category.translations[
+                    currentLanguage
+                  ];
 
                 return (
                   <motion.div
@@ -270,14 +349,14 @@ export function ServicesSection() {
                             {category.featured && (
                               <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-1.5 py-1 text-[9px] font-semibold text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 sm:gap-1 sm:px-2.5 sm:text-[11px]">
                                 <Sparkles className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                                تایبەت
+                                {ui.featured}
                               </span>
                             )}
 
                             {category.popular && (
                               <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full border border-rose-500/30 bg-rose-500/10 px-1.5 py-1 text-[9px] font-semibold text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 sm:gap-1 sm:px-2.5 sm:text-[11px]">
                                 <Flame className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                                پڕداواکاری
+                                {ui.popular}
                               </span>
                             )}
 
@@ -290,7 +369,11 @@ export function ServicesSection() {
                                   category.id
                                 )
                               }
-                              aria-label="تۆمارکردن لە دڵخوازەکان"
+                              aria-label={
+                                isFavorite
+                                  ? "Remove from favorites"
+                                  : ui.favoriteAdd
+                              }
                               className={cn(
                                 "flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-300 sm:h-9 sm:w-9",
                                 "bg-slate-100/80 hover:bg-rose-50 dark:bg-slate-800/80 dark:hover:bg-rose-950/40",
@@ -313,15 +396,15 @@ export function ServicesSection() {
                         {/* Category Information */}
                         <div className="mt-3 min-w-0 sm:mt-4">
                           <h3 className="line-clamp-2 break-words text-[15px] font-bold leading-6 text-slate-900 transition-colors group-hover:text-primary dark:text-slate-100 sm:text-lg sm:leading-7">
-                            {category.title}
+                            {categoryTitle}
                           </h3>
 
                           <p className="mt-0.5 text-[10px] font-medium leading-5 text-slate-500 dark:text-slate-400 sm:text-xs">
                             {category.filters.length > 0
                               ? `${category.filters.length.toLocaleString(
                                   locale
-                                )} جۆر / خزمەتگوزاری`
-                              : t("servicesList")}
+                                )} ${ui.categoryTypes}`
+                              : ui.servicesList}
                           </p>
                         </div>
                       </div>
@@ -330,7 +413,7 @@ export function ServicesSection() {
                       <div className="relative mt-auto h-32 w-full overflow-hidden border-t border-slate-100 dark:border-slate-800/80 sm:h-40">
                         <Image
                           src={category.imageSrc}
-                          alt={category.title}
+                          alt={categoryTitle}
                           fill
                           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
                           className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
@@ -340,7 +423,11 @@ export function ServicesSection() {
 
                         <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between gap-2 text-white sm:bottom-3 sm:left-4 sm:right-4">
                           <span className="min-w-0 truncate text-[10px] font-semibold drop-shadow-sm sm:text-xs">
-                            بینینی زانیارییەکان
+                            {currentLanguage === "ckb"
+                              ? "بینینی زانیارییەکان"
+                              : currentLanguage === "ar"
+                                ? "عرض التفاصيل"
+                                : "View details"}
                           </span>
 
                           <ArrowIcon
