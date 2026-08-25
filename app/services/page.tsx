@@ -17,18 +17,18 @@ import {
   Wrench,
   Briefcase,
   Heart,
-  Sparkles,
   Flame,
+  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import {
-  categories,
   type ServiceCategory,
   type LanguageCode,
 } from "@/lib/data/categories";
 import { useLanguage } from "@/lib/i18n";
+import { supabase } from "@/lib/supabase";
 
 const FAVORITES_STORAGE_KEY = "bazianhub-favorites";
 
@@ -58,6 +58,11 @@ const CATEGORY_TITLES: Record<
     ar: "فرص العمل",
     en: "Job Opportunities",
   },
+};
+
+type ServiceCategoryFromDatabase = ServiceCategory & {
+  is_featured: boolean;
+  is_popular: boolean;
 };
 
 function getCategoryTitle(
@@ -136,8 +141,84 @@ export default function ServicesPage() {
     ? ArrowLeft
     : ArrowRight;
 
+  const [categories, setCategories] =
+    useState<ServiceCategoryFromDatabase[]>([]);
+
+  const [isLoading, setIsLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState<string | null>(null);
+
   const [favorites, setFavorites] =
     useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    async function loadCategories() {
+      setIsLoading(true);
+      setError(null);
+
+      const { data, error } = await supabase
+        .from("service_categories")
+        .select("*")
+        .eq("is_active", true)
+        .order("sort_order", {
+          ascending: true,
+        });
+
+      if (error) {
+        console.error(
+          "Failed to load categories:",
+          error
+        );
+
+        setError(
+          "Failed to load service categories."
+        );
+
+        setIsLoading(false);
+
+        return;
+      }
+
+      const mappedCategories: ServiceCategoryFromDatabase[] =
+        ((data ?? []) as Array<{
+          id: string;
+          slug: string;
+          name_ckb: string;
+          name_ar: string;
+          name_en: string;
+          icon: string | null;
+          image_url: string | null;
+          sort_order: number;
+          is_active: boolean;
+          is_featured: boolean;
+          is_popular: boolean;
+        }>).map((category) => ({
+          id: category.slug,
+          title: category.name_ckb,
+          translations: {
+            ckb: category.name_ckb,
+            ar: category.name_ar,
+            en: category.name_en,
+          },
+          icon: category.icon ?? "",
+          filters: [],
+          imageSrc:
+            category.image_url ??
+            "/images/placeholder.webp",
+          is_featured:
+            category.is_featured ?? false,
+          is_popular:
+            category.is_popular ?? false,
+        }));
+
+      setCategories(mappedCategories);
+      setIsLoading(false);
+    }
+
+    loadCategories();
+  }, []);
 
   useEffect(() => {
     setFavorites(readFavorites());
@@ -188,10 +269,40 @@ export default function ServicesPage() {
     });
   };
 
+  if (isLoading) {
+    return (
+      <main className="min-h-screen w-full bg-slate-50 py-6 dark:bg-slate-950 sm:py-10">
+        <div className="mx-auto w-full max-w-7xl px-3 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 lg:gap-5">
+            {Array.from({ length: 10 }).map(
+              (_, index) => (
+                <div
+                  key={index}
+                  className="h-48 animate-pulse rounded-2xl bg-slate-200 dark:bg-slate-800 sm:h-64"
+                />
+              )
+            )}
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="flex min-h-screen w-full items-center justify-center bg-slate-50 px-4 dark:bg-slate-950">
+        <div className="rounded-2xl border border-red-200 bg-white p-6 text-center shadow-sm dark:border-red-900/50 dark:bg-slate-900">
+          <p className="font-semibold text-red-600 dark:text-red-400">
+            {error}
+          </p>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen w-full bg-slate-50 py-6 dark:bg-slate-950 sm:py-10">
       <div className="mx-auto w-full max-w-7xl px-3 sm:px-6 lg:px-8">
-
         <div
           className="
             grid
@@ -204,7 +315,9 @@ export default function ServicesPage() {
           "
         >
           {categories.map(
-            (category: ServiceCategory) => {
+            (
+              category: ServiceCategoryFromDatabase
+            ) => {
               const Icon =
                 CATEGORY_ICONS[category.icon];
 
@@ -230,9 +343,7 @@ export default function ServicesPage() {
                 >
                   {/* Top Area */}
                   <div className="p-2.5 sm:p-5">
-
                     <div className="flex items-start justify-between gap-1.5">
-
                       {/* Icon */}
                       <span
                         className="
@@ -261,53 +372,85 @@ export default function ServicesPage() {
 
                       {/* Badges + Favorite */}
                       <div className="flex items-center gap-1">
+                        {/* Popular Badge */}
+                       {category.is_popular && (
+                                  <span
+                                    className="
+                                      inline-flex
+                                      h-7
+                                      items-center
+                                      gap-1
+                                      rounded-full
+                                      bg-rose-50
+                                      px-2
+                                      text-[9px]
+                                      font-bold
+                                      text-rose-600
+                                      ring-1
+                                      ring-rose-200
+                                      sm:h-9
+                                      sm:px-2.5
+                                      sm:text-[11px]
+                                      dark:bg-rose-950/40
+                                      dark:text-rose-400
+                                      dark:ring-rose-900/50
+                                    "
+                                  >
+                            <Flame
+                              className="h-3 w-3 sm:h-3.5 sm:w-3.5"
+                              aria-hidden="true"
+                            />
 
-                        {category.featured && (
-                          <span
-                            className="
-                              hidden
-                              items-center
-                              gap-1
-                              rounded-full
-                              border
-                              border-amber-500/30
-                              bg-amber-500/10
-                              px-2
-                              py-1
-                              text-[10px]
-                              font-semibold
-                              text-amber-700
-                              sm:inline-flex
-                            "
-                          >
-                            <Sparkles className="h-3 w-3" />
-                            Featured
+                            <span className="hidden sm:inline">
+                              {currentLanguage === "ckb"
+                                ? "پڕداواکارترین"
+                                : currentLanguage === "ar"
+                                  ? "الأكثر طلبًا"
+                                  : "Most Popular"}
+                            </span>
                           </span>
                         )}
 
-                        {category.popular && (
+                        {/* Featured Badge */}
+                        {category.is_featured && (
                           <span
                             className="
-                              hidden
+                              inline-flex
+                              h-7
                               items-center
                               gap-1
                               rounded-full
-                              border
-                              border-rose-500/30
-                              bg-rose-500/10
+                              bg-amber-50
                               px-2
-                              py-1
-                              text-[10px]
-                              font-semibold
-                              text-rose-700
-                              sm:inline-flex
+                              text-[9px]
+                              font-bold
+                              text-amber-600
+                              ring-1
+                              ring-amber-200
+                              sm:h-9
+                              sm:px-2.5
+                              sm:text-[11px]
+                              dark:bg-amber-950/40
+                              dark:text-amber-400
+                              dark:ring-amber-900/50
                             "
                           >
-                            <Flame className="h-3 w-3" />
-                            Popular
+                            <Sparkles
+                              className="h-3 w-3 sm:h-3.5 sm:w-3.5"
+                              aria-hidden="true"
+                            />
+
+                            <span className="hidden sm:inline">
+                              {currentLanguage === "ckb"
+                                ? "تایبەت"
+                                : currentLanguage === "ar"
+                                  ? "مميز"
+                                  : "Featured"}
+                            </span>
                           </span>
                         )}
 
+                        {/* Favorite */}
                         <button
                           type="button"
                           onClick={(e) =>
@@ -382,7 +525,6 @@ export default function ServicesPage() {
 
                   {/* Image */}
                   <div className="relative mt-auto h-24 w-full overflow-hidden border-t border-slate-100 dark:border-slate-800 sm:h-40">
-
                     <Image
                       src={category.imageSrc}
                       alt={categoryTitle}
@@ -403,7 +545,6 @@ export default function ServicesPage() {
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
 
                     <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between gap-1 text-white sm:bottom-3 sm:left-4 sm:right-4">
-
                       <span className="truncate text-[8px] font-semibold sm:text-xs">
                         {currentLanguage === "ckb"
                           ? "بینینی زانیارییەکان"
