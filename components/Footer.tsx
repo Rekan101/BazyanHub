@@ -14,7 +14,7 @@ import {
 const QUICK_LINKS = [
   { label: "سەرەتا", href: "/" },
   { label: "خزمەتگوزارییەکان", href: "/services" },
-  { label: "بازرگانییەکان", href: "/businesses" },
+  { label: "دەربارەی بازیان", href: "/#about" },
   { label: "دڵخوازەکان", href: "/favorites" },
   { label: "پرسیارە باوەکان", href: "/#contact" },
 ];
@@ -436,4 +436,4 @@ export default function Footer() {
       </div>
     </footer>
   );
-}
+} 
