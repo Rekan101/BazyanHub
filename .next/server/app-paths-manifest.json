@@ -1,7 +1,11 @@
 {
-  "/services/page": "app/services/page.js",
-  "/services/[category]/page": "app/services/[category]/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/favorites/page": "app/favorites/page.js",
+  "/legal/page": "app/legal/page.js",
   "/services/[category]/[provider]/page": "app/services/[category]/[provider]/page.js",
   "/page": "app/page.js",
-  "/places/[id]/page": "app/places/[id]/page.js"
+  "/places/[id]/page": "app/places/[id]/page.js",
+  "/services/[category]/page": "app/services/[category]/page.js",
+  "/services/page": "app/services/page.js",
+  "/search/page": "app/search/page.js"
 }
