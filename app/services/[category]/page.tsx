@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -22,7 +22,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import { supabase } from "@/lib/supabase";
 import { useLanguage } from "@/lib/i18n";
 
 type LanguageCode = "ckb" | "ar" | "en";
@@ -82,14 +81,226 @@ const CATEGORY_ICONS: Record<
   briefcase: BriefcaseBusiness,
 };
 
-const DEFAULT_CATEGORY_DESCRIPTIONS: Record<
-  LanguageCode,
-  string
-> = {
-  ckb: "خزمەتگوزاری و کاروبارەکانی ئەم بەشە بدۆزەرەوە.",
-  ar: "اكتشف الخدمات والأعمال التجارية في هذا القسم.",
-  en: "Discover services and businesses in this category.",
-};
+const CATEGORIES: Category[] = [
+  {
+    id: "vehicles",
+    slug: "vehicles",
+    name_ckb: "سەیارە و گواستنەوە",
+    name_ar: "السيارات والنقل",
+    name_en: "Vehicles & Transportation",
+    description_ckb:
+      "خزمەتگوزاری و کاروبارەکانی ئەم بەشە بدۆزەرەوە.",
+    description_ar:
+      "اكتشف الخدمات والأعمال التجارية في هذا القسم.",
+    description_en:
+      "Discover services and businesses in this category.",
+    icon: "car",
+    image_url: "/images/vehicles.webp",
+    is_active: true,
+  },
+
+  {
+    id: "restaurants",
+    slug: "restaurants",
+    name_ckb: "چێشتخانە و خواردن",
+    name_ar: "المطاعم والطعام",
+    name_en: "Restaurants & Food",
+    description_ckb:
+      "خزمەتگوزاری و کاروبارەکانی ئەم بەشە بدۆزەرەوە.",
+    description_ar:
+      "اكتشف الخدمات والأعمال التجارية في هذا القسم.",
+    description_en:
+      "Discover services and businesses in this category.",
+    icon: "utensils",
+    image_url: "/images/restaurants.webp",
+    is_active: true,
+  },
+
+  {
+    id: "shopping",
+    slug: "shopping",
+    name_ckb: "بازاڕ و کڕین",
+    name_ar: "الأسواق والتسوق",
+    name_en: "Shopping & Markets",
+    description_ckb:
+      "خزمەتگوزاری و کاروبارەکانی ئەم بەشە بدۆزەرەوە.",
+    description_ar:
+      "اكتشف الخدمات والأعمال التجارية في هذا القسم.",
+    description_en:
+      "Discover services and businesses in this category.",
+    icon: "shopping-cart",
+    image_url: "/images/shopping.webp",
+    is_active: true,
+  },
+
+  {
+    id: "health",
+    slug: "health",
+    name_ckb: "تەندروستی",
+    name_ar: "الصحة",
+    name_en: "Health",
+    description_ckb:
+      "خزمەتگوزاری و کاروبارەکانی ئەم بەشە بدۆزەرەوە.",
+    description_ar:
+      "اكتشف الخدمات والأعمال التجارية في هذا القسم.",
+    description_en:
+      "Discover services and businesses in this category.",
+    icon: "heart-pulse",
+    image_url: "/images/health.webp",
+    is_active: true,
+  },
+
+  {
+    id: "mobile",
+    slug: "mobile",
+    name_ckb: "مۆبایل و تەکنەلۆجیا",
+    name_ar: "الهواتف والتكنولوجيا",
+    name_en: "Mobile & Technology",
+    description_ckb:
+      "خزمەتگوزاری و کاروبارەکانی ئەم بەشە بدۆزەرەوە.",
+    description_ar:
+      "اكتشف الخدمات والأعمال التجارية في هذا القسم.",
+    description_en:
+      "Discover services and businesses in this category.",
+    icon: "smartphone",
+    image_url: "/images/mobile.webp",
+    is_active: true,
+  },
+
+  {
+    id: "beauty",
+    slug: "beauty",
+    name_ckb: "جوانکاری",
+    name_ar: "التجميل",
+    name_en: "Beauty",
+    description_ckb:
+      "خزمەتگوزاری و کاروبارەکانی ئەم بەشە بدۆزەرەوە.",
+    description_ar:
+      "اكتشف الخدمات والأعمال التجارية في هذا القسم.",
+    description_en:
+      "Discover services and businesses in this category.",
+    icon: "scissors",
+    image_url: "/images/beauty.webp",
+    is_active: true,
+  },
+
+  {
+    id: "real-estate",
+    slug: "real-estate",
+    name_ckb: "خانووبەرە",
+    name_ar: "العقارات",
+    name_en: "Real Estate",
+    description_ckb:
+      "خزمەتگوزاری و کاروبارەکانی ئەم بەشە بدۆزەرەوە.",
+    description_ar:
+      "اكتشف الخدمات والأعمال التجارية في هذا القسم.",
+    description_en:
+      "Discover services and businesses in this category.",
+    icon: "house",
+    image_url: "/images/real-estate.webp",
+    is_active: true,
+  },
+
+  {
+    id: "institutes",
+    slug: "institutes",
+    name_ckb: "پەروەردە و فێرکاری",
+    name_ar: "التعليم والتدريب",
+    name_en: "Education & Training",
+    description_ckb:
+      "خزمەتگوزاری و کاروبارەکانی ئەم بەشە بدۆزەرەوە.",
+    description_ar:
+      "اكتشف الخدمات والأعمال التجارية في هذا القسم.",
+    description_en:
+      "Discover services and businesses in this category.",
+    icon: "graduation-cap",
+    image_url: "/images/institutes.webp",
+    is_active: true,
+  },
+
+  {
+    id: "workers",
+    slug: "workers",
+    name_ckb: "کرێکار و پیشەکار",
+    name_ar: "العمال والحرفيون",
+    name_en: "Workers & Handymen",
+    description_ckb:
+      "خزمەتگوزاری و کاروبارەکانی ئەم بەشە بدۆزەرەوە.",
+    description_ar:
+      "اكتشف الخدمات والأعمال التجارية في هذا القسم.",
+    description_en:
+      "Discover services and businesses in this category.",
+    icon: "wrench",
+    image_url: "/images/workers.webp",
+    is_active: true,
+  },
+
+  {
+    id: "jobs",
+    slug: "jobs",
+    name_ckb: "هەلی کار",
+    name_ar: "فرص العمل",
+    name_en: "Job Opportunities",
+    description_ckb:
+      "هەلی کار و دامەزراندنەکانی ئەم بەشە بدۆزەرەوە.",
+    description_ar:
+      "اكتشف فرص العمل والتوظيف في هذا القسم.",
+    description_en:
+      "Discover jobs and employment opportunities.",
+    icon: "briefcase",
+    image_url: "/images/jobs.webp",
+    is_active: true,
+  },
+];
+
+/*
+|--------------------------------------------------------------------------
+| Local Providers
+|--------------------------------------------------------------------------
+| No Supabase.
+|
+| ئەم بەشە ئێستا local ـە.
+| کاتێک provider ـی ڕاستەقینە زیاد دەکەیت،
+| تەنها ئەم array ـە زیاد دەکەین.
+|--------------------------------------------------------------------------
+*/
+
+const PROVIDERS: Provider[] = [
+  {
+    id: "bazian-transport-test",
+    category_id: "vehicles",
+    slug: "bazian-transport-test",
+
+    name_ckb: "گواستنەوەی بازیان",
+    name_ar: "نقل بازیان",
+    name_en: "Bazian Transport",
+
+    description_ckb:
+      "خزمەتگوزاری گواستنەوە و ئۆتۆمبێل لە بازیان.",
+    description_ar:
+      "خدمة النقل والمواصلات في بازیان.",
+    description_en:
+      "Transportation and vehicle services in Bazian.",
+
+    address_ckb: "ناوچەی تایقەرەدۆمە، بازیان",
+    address_ar: "منطقة تاكيگردومة، بازیان",
+    address_en: "Taqaradoma Area, Bazian",
+
+    city_ckb: "بازیان",
+    city_ar: "بازیان",
+    city_en: "Bazian",
+
+    avatar_url: null,
+    cover_image_url: null,
+
+    is_verified: false,
+    is_featured: false,
+    is_active: true,
+
+    average_rating: 0,
+    review_count: 0,
+  },
+];
 
 const UI_TEXT = {
   ckb: {
@@ -102,9 +313,8 @@ const UI_TEXT = {
     viewDetails: "بینینی زانیارییەکان",
     verified: "پشتڕاستکراوە",
     reviews: "پێداچوونەوە",
-    loading: "چاوەڕوان بە...",
-    error: "کێشەیەک لە بارکردنی زانیارییەکان ڕوویدا.",
   },
+
   ar: {
     back: "العودة إلى الخدمات",
     providersTitle: "الخدمات والأماكن",
@@ -115,9 +325,8 @@ const UI_TEXT = {
     viewDetails: "عرض التفاصيل",
     verified: "موثق",
     reviews: "مراجعة",
-    loading: "جارٍ التحميل...",
-    error: "حدث خطأ أثناء تحميل البيانات.",
   },
+
   en: {
     back: "Back to services",
     providersTitle: "Services & Places",
@@ -128,8 +337,6 @@ const UI_TEXT = {
     viewDetails: "View details",
     verified: "Verified",
     reviews: "reviews",
-    loading: "Loading...",
-    error: "Something went wrong while loading the data.",
   },
 } satisfies Record<
   LanguageCode,
@@ -158,20 +365,20 @@ function getCategoryDescription(
   if (language === "ckb") {
     return (
       category.description_ckb ??
-      DEFAULT_CATEGORY_DESCRIPTIONS.ckb
+      "خزمەتگوزاری و کاروبارەکانی ئەم بەشە بدۆزەرەوە."
     );
   }
 
   if (language === "ar") {
     return (
       category.description_ar ??
-      DEFAULT_CATEGORY_DESCRIPTIONS.ar
+      "اكتشف الخدمات والأعمال التجارية في هذا القسم."
     );
   }
 
   return (
     category.description_en ??
-    DEFAULT_CATEGORY_DESCRIPTIONS.en
+    "Discover services and businesses in this category."
   );
 }
 
@@ -225,7 +432,10 @@ function getProviderLocation(
 
   return (
     [address, city]
-      .filter(Boolean)
+      .filter(
+        (value): value is string =>
+          Boolean(value)
+      )
       .join("، ") || null
   );
 }
@@ -238,7 +448,7 @@ export default function CategoryPage() {
   const { language } = useLanguage();
 
   const currentLanguage =
-    language as LanguageCode;
+    (language as LanguageCode) || "ckb";
 
   const t = UI_TEXT[currentLanguage];
 
@@ -252,233 +462,31 @@ export default function CategoryPage() {
   const categorySlug =
     params.category;
 
-  const [category, setCategory] =
-    useState<Category | null>(null);
+  const category = useMemo(() => {
+    return CATEGORIES.find(
+      (item) =>
+        item.slug === categorySlug &&
+        item.is_active
+    ) ?? null;
+  }, [categorySlug]);
 
-  const [providers, setProviders] =
-    useState<Provider[]>([]);
-
-  const [isLoading, setIsLoading] =
-    useState(true);
-
-  const [error, setError] =
-    useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadPage() {
-      setIsLoading(true);
-      setError(null);
-
-      const {
-        data: categoryData,
-        error: categoryError,
-      } = await supabase
-        .from("service_categories")
-        .select(
-          `
-            id,
-            slug,
-            name_ckb,
-            name_ar,
-            name_en,
-            description_ckb,
-            description_ar,
-            description_en,
-            icon,
-            image_url,
-            is_active
-          `
-        )
-        .eq("slug", categorySlug)
-        .eq("is_active", true)
-        .maybeSingle();
-
-      if (cancelled) {
-        return;
-      }
-
-      if (categoryError) {
-        console.error(
-          "Failed to load category:",
-          categoryError
-        );
-
-        setError(t.error);
-        setIsLoading(false);
-
-        return;
-      }
-
-      if (!categoryData) {
-        setCategory(null);
-        setProviders([]);
-        setIsLoading(false);
-
-        return;
-      }
-
-      const {
-        data: providerData,
-        error: providerError,
-      } = await supabase
-        .from("service_providers")
-        .select(
-          `
-            id,
-            category_id,
-            slug,
-            name_ckb,
-            name_ar,
-            name_en,
-            description_ckb,
-            description_ar,
-            description_en,
-            address_ckb,
-            address_ar,
-            address_en,
-            city_ckb,
-            city_ar,
-            city_en,
-            avatar_url,
-            cover_image_url,
-            is_verified,
-            is_featured,
-            is_active,
-            average_rating,
-            review_count
-          `
-        )
-        .eq(
-          "category_id",
-          categoryData.id
-        )
-        .eq("is_active", true)
-        .order("is_featured", {
-          ascending: false,
-        })
-        .order("average_rating", {
-          ascending: false,
-        });
-
-      if (cancelled) {
-        return;
-      }
-
-      if (providerError) {
-        console.error(
-          "Failed to load providers:",
-          providerError
-        );
-      }
-
-      setCategory(
-        categoryData as Category
-      );
-
-      setProviders(
-        (providerData ?? []) as Provider[]
-      );
-
-      setIsLoading(false);
+  const providers = useMemo(() => {
+    if (!category) {
+      return [];
     }
 
-    if (categorySlug) {
-      loadPage();
-    }
-
-    return () => {
-      cancelled = true;
-    };
-  }, [categorySlug, currentLanguage, t.error]);
-
-  if (isLoading) {
-    return (
-      <main
-        dir={isRTL ? "rtl" : "ltr"}
-        className="
-          min-h-screen
-          bg-slate-50
-          px-3
-          py-6
-          dark:bg-slate-950
-          sm:px-6
-          sm:py-10
-        "
-      >
-        <div className="mx-auto w-full max-w-7xl">
-          <div className="animate-pulse">
-            <div className="h-5 w-32 rounded bg-slate-200 dark:bg-slate-800" />
-            <div className="mt-5 h-10 w-72 rounded bg-slate-200 dark:bg-slate-800" />
-            <div className="mt-3 h-5 w-full max-w-xl rounded bg-slate-200 dark:bg-slate-800" />
-          </div>
-
-          <div
-            className="
-              mt-8
-              grid
-              grid-cols-1
-              gap-4
-              sm:grid-cols-2
-              lg:grid-cols-3
-            "
-          >
-            {Array.from({ length: 6 }).map(
-              (_, index) => (
-                <div
-                  key={index}
-                  className="
-                    h-72
-                    animate-pulse
-                    rounded-2xl
-                    bg-slate-200
-                    dark:bg-slate-800
-                  "
-                />
-              )
-            )}
-          </div>
-        </div>
-      </main>
+    return PROVIDERS.filter(
+      (provider) =>
+        provider.category_id === category.id &&
+        provider.is_active
+    ).sort(
+      (a, b) =>
+        Number(b.is_featured) -
+          Number(a.is_featured) ||
+        b.average_rating -
+          a.average_rating
     );
-  }
-
-  if (error) {
-    return (
-      <main
-        dir={isRTL ? "rtl" : "ltr"}
-        className="
-          flex
-          min-h-screen
-          items-center
-          justify-center
-          bg-slate-50
-          px-4
-          dark:bg-slate-950
-        "
-      >
-        <div
-          className="
-            rounded-2xl
-            border
-            border-red-200
-            bg-white
-            px-6
-            py-5
-            text-center
-            shadow-sm
-            dark:border-red-900/50
-            dark:bg-slate-900
-          "
-        >
-          <p className="font-semibold text-red-600 dark:text-red-400">
-            {error}
-          </p>
-        </div>
-      </main>
-    );
-  }
+  }, [category]);
 
   if (!category) {
     return (
@@ -566,7 +574,6 @@ export default function CategoryPage() {
       "
     >
       <div className="mx-auto w-full max-w-7xl">
-
         {/* Header */}
 
         <div className="mb-8">

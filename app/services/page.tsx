@@ -23,14 +23,235 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import {
-  type ServiceCategory,
-  type LanguageCode,
-} from "@/lib/data/categories";
 import { useLanguage } from "@/lib/i18n";
-import { supabase } from "@/lib/supabase";
 
-const FAVORITES_STORAGE_KEY = "bazianhub-favorites";
+type LanguageCode = "ckb" | "ar" | "en";
+
+type ServiceCategory = {
+  id: string;
+  title: string;
+  translations: {
+    ckb: string;
+    ar: string;
+    en: string;
+  };
+  icon: string;
+  filters: string[];
+  imageSrc: string;
+  is_featured?: boolean;
+  is_popular?: boolean;
+};
+
+/*
+|--------------------------------------------------------------------------
+| Local Service Categories
+|--------------------------------------------------------------------------
+| No Supabase.
+| All service categories are stored locally in the code.
+|--------------------------------------------------------------------------
+*/
+
+const CATEGORIES: ServiceCategory[] = [
+  {
+    id: "vehicles",
+    title: "سەیارە و گواستنەوە",
+    translations: {
+      ckb: "سەیارە و گواستنەوە",
+      ar: "السيارات والنقل",
+      en: "Vehicles & Transportation",
+    },
+    icon: "car",
+    filters: [
+      "taxi",
+      "pickup",
+      "delivery",
+      "driver",
+      "rental",
+    ],
+    imageSrc: "/images/vehicles.webp",
+    is_featured: true,
+    is_popular: true,
+  },
+
+  {
+    id: "restaurants",
+    title: "چێشتخانە و خواردن",
+    translations: {
+      ckb: "چێشتخانە و خواردن",
+      ar: "المطاعم والطعام",
+      en: "Restaurants & Food",
+    },
+    icon: "utensils",
+    filters: [
+      "restaurants",
+      "fast-food",
+      "cafes",
+      "bakery",
+    ],
+    imageSrc: "/images/restaurants.webp",
+    is_featured: true,
+    is_popular: true,
+  },
+
+  {
+    id: "shopping",
+    title: "بازاڕ و کڕین",
+    translations: {
+      ckb: "بازاڕ و کڕین",
+      ar: "الأسواق والتسوق",
+      en: "Shopping & Markets",
+    },
+    icon: "shopping-cart",
+    filters: [
+      "markets",
+      "shops",
+      "supermarkets",
+    ],
+    imageSrc: "/images/shopping.webp",
+    is_featured: false,
+    is_popular: true,
+  },
+
+  {
+    id: "health",
+    title: "تەندروستی",
+    translations: {
+      ckb: "تەندروستی",
+      ar: "الصحة",
+      en: "Health",
+    },
+    icon: "heart-pulse",
+    filters: [
+      "pharmacies",
+      "clinics",
+      "doctors",
+      "health-centers",
+    ],
+    imageSrc: "/images/health.webp",
+    is_featured: true,
+    is_popular: false,
+  },
+
+  {
+    id: "mobile",
+    title: "مۆبایل و تەکنەلۆجیا",
+    translations: {
+      ckb: "مۆبایل و تەکنەلۆجیا",
+      ar: "الهواتف والتكنولوجيا",
+      en: "Mobile & Technology",
+    },
+    icon: "smartphone",
+    filters: [
+      "mobile",
+      "accessories",
+      "repair",
+      "technology",
+    ],
+    imageSrc: "/images/mobile.webp",
+    is_featured: false,
+    is_popular: false,
+  },
+
+  {
+    id: "beauty",
+    title: "جوانکاری",
+    translations: {
+      ckb: "جوانکاری",
+      ar: "التجميل",
+      en: "Beauty",
+    },
+    icon: "scissors",
+    filters: [
+      "salons",
+      "barbers",
+      "beauty",
+      "makeup",
+    ],
+    imageSrc: "/images/beauty.webp",
+    is_featured: false,
+    is_popular: true,
+  },
+
+  {
+    id: "real-estate",
+    title: "خانووبەرە",
+    translations: {
+      ckb: "خانووبەرە",
+      ar: "العقارات",
+      en: "Real Estate",
+    },
+    icon: "house",
+    filters: [
+      "houses",
+      "apartments",
+      "land",
+      "rent",
+    ],
+    imageSrc: "/images/real-estate.webp",
+    is_featured: false,
+    is_popular: false,
+  },
+
+  {
+    id: "institutes",
+    title: "پەروەردە و فێرکاری",
+    translations: {
+      ckb: "پەروەردە و فێرکاری",
+      ar: "التعليم والتدريب",
+      en: "Education & Training",
+    },
+    icon: "graduation-cap",
+    filters: [
+      "institutes",
+      "courses",
+      "training",
+      "education",
+    ],
+    imageSrc: "/images/institutes.webp",
+    is_featured: false,
+    is_popular: false,
+  },
+
+  {
+    id: "workers",
+    title: "کرێکار و پیشەکار",
+    translations: {
+      ckb: "کرێکار و پیشەکار",
+      ar: "العمال والحرفيون",
+      en: "Workers & Handymen",
+    },
+    icon: "wrench",
+    filters: [
+      "workers",
+      "electricians",
+      "plumbers",
+      "repair",
+    ],
+    imageSrc: "/images/workers.webp",
+    is_featured: false,
+    is_popular: false,
+  },
+
+  {
+    id: "jobs",
+    title: "هەلی کار",
+    translations: {
+      ckb: "هەلی کار",
+      ar: "فرص العمل",
+      en: "Job Opportunities",
+    },
+    icon: "briefcase",
+    filters: [
+      "full-time",
+      "part-time",
+      "remote",
+      "freelance",
+    ],
+    imageSrc: "/images/jobs.webp",
+    is_featured: true,
+    is_popular: false,
+  },
+];
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
   car: Car,
@@ -45,36 +266,12 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   briefcase: Briefcase,
 };
 
-const CATEGORY_TITLES: Record<
-  string,
-  {
-    ckb: string;
-    ar: string;
-    en: string;
-  }
-> = {
-  jobs: {
-    ckb: "هەلی کار",
-    ar: "فرص العمل",
-    en: "Job Opportunities",
-  },
-};
-
-type ServiceCategoryFromDatabase = ServiceCategory & {
-  is_featured: boolean;
-  is_popular: boolean;
-};
+const FAVORITES_STORAGE_KEY = "bazianhub-favorites";
 
 function getCategoryTitle(
   category: ServiceCategory,
   language: LanguageCode
 ) {
-  const localized = CATEGORY_TITLES[category.id];
-
-  if (localized) {
-    return localized[language];
-  }
-
   return category.translations[language];
 }
 
@@ -133,7 +330,7 @@ export default function ServicesPage() {
   const { language } = useLanguage();
 
   const currentLanguage =
-    language as LanguageCode;
+    (language as LanguageCode) || "ckb";
 
   const isRTL = currentLanguage !== "en";
 
@@ -141,84 +338,8 @@ export default function ServicesPage() {
     ? ArrowLeft
     : ArrowRight;
 
-  const [categories, setCategories] =
-    useState<ServiceCategoryFromDatabase[]>([]);
-
-  const [isLoading, setIsLoading] =
-    useState(true);
-
-  const [error, setError] =
-    useState<string | null>(null);
-
   const [favorites, setFavorites] =
     useState<Record<string, boolean>>({});
-
-  useEffect(() => {
-    async function loadCategories() {
-      setIsLoading(true);
-      setError(null);
-
-      const { data, error } = await supabase
-        .from("service_categories")
-        .select("*")
-        .eq("is_active", true)
-        .order("sort_order", {
-          ascending: true,
-        });
-
-      if (error) {
-        console.error(
-          "Failed to load categories:",
-          error
-        );
-
-        setError(
-          "Failed to load service categories."
-        );
-
-        setIsLoading(false);
-
-        return;
-      }
-
-      const mappedCategories: ServiceCategoryFromDatabase[] =
-        ((data ?? []) as Array<{
-          id: string;
-          slug: string;
-          name_ckb: string;
-          name_ar: string;
-          name_en: string;
-          icon: string | null;
-          image_url: string | null;
-          sort_order: number;
-          is_active: boolean;
-          is_featured: boolean;
-          is_popular: boolean;
-        }>).map((category) => ({
-          id: category.slug,
-          title: category.name_ckb,
-          translations: {
-            ckb: category.name_ckb,
-            ar: category.name_ar,
-            en: category.name_en,
-          },
-          icon: category.icon ?? "",
-          filters: [],
-          imageSrc:
-            category.image_url ??
-            "/images/placeholder.webp",
-          is_featured:
-            category.is_featured ?? false,
-          is_popular:
-            category.is_popular ?? false,
-        }));
-
-      setCategories(mappedCategories);
-      setIsLoading(false);
-    }
-
-    loadCategories();
-  }, []);
 
   useEffect(() => {
     setFavorites(readFavorites());
@@ -269,39 +390,18 @@ export default function ServicesPage() {
     });
   };
 
-  if (isLoading) {
-    return (
-      <main className="min-h-screen w-full bg-slate-50 py-6 dark:bg-slate-950 sm:py-10">
-        <div className="mx-auto w-full max-w-7xl px-3 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 lg:gap-5">
-            {Array.from({ length: 10 }).map(
-              (_, index) => (
-                <div
-                  key={index}
-                  className="h-48 animate-pulse rounded-2xl bg-slate-200 dark:bg-slate-800 sm:h-64"
-                />
-              )
-            )}
-          </div>
-        </div>
-      </main>
-    );
-  }
-
-  if (error) {
-    return (
-      <main className="flex min-h-screen w-full items-center justify-center bg-slate-50 px-4 dark:bg-slate-950">
-        <div className="rounded-2xl border border-red-200 bg-white p-6 text-center shadow-sm dark:border-red-900/50 dark:bg-slate-900">
-          <p className="font-semibold text-red-600 dark:text-red-400">
-            {error}
-          </p>
-        </div>
-      </main>
-    );
-  }
-
   return (
-    <main className="min-h-screen w-full bg-slate-50 py-6 dark:bg-slate-950 sm:py-10">
+    <main
+      dir={isRTL ? "rtl" : "ltr"}
+      className="
+        min-h-screen
+        w-full
+        bg-slate-50
+        py-6
+        dark:bg-slate-950
+        sm:py-10
+      "
+    >
       <div className="mx-auto w-full max-w-7xl px-3 sm:px-6 lg:px-8">
         <div
           className="
@@ -314,10 +414,8 @@ export default function ServicesPage() {
             lg:gap-5
           "
         >
-          {categories.map(
-            (
-              category: ServiceCategoryFromDatabase
-            ) => {
+          {CATEGORIES.map(
+            (category: ServiceCategory) => {
               const Icon =
                 CATEGORY_ICONS[category.icon];
 
@@ -342,13 +440,19 @@ export default function ServicesPage() {
                   )}
                 >
                   {/* Top Area */}
+
                   <div className="p-2.5 sm:p-5">
                     <div className="flex items-start justify-between gap-1.5">
                       {/* Icon */}
+
                       <span
                         className="
-                          flex h-9 w-9 shrink-0
-                          items-center justify-center
+                          flex
+                          h-9
+                          w-9
+                          shrink-0
+                          items-center
+                          justify-center
                           rounded-xl
                           bg-primary/10
                           text-primary
@@ -356,13 +460,14 @@ export default function ServicesPage() {
                           duration-300
                           group-hover:bg-primary
                           group-hover:text-white
-                          sm:h-12 sm:w-12
+                          sm:h-12
+                          sm:w-12
                           sm:rounded-2xl
                         "
                       >
                         {Icon ? (
                           <Icon
-                            className="h-4.5 w-4.5 sm:h-6 sm:w-6"
+                            className="h-[18px] w-[18px] sm:h-6 sm:w-6"
                             aria-hidden="true"
                           />
                         ) : (
@@ -371,31 +476,33 @@ export default function ServicesPage() {
                       </span>
 
                       {/* Badges + Favorite */}
+
                       <div className="flex items-center gap-1">
-                        {/* Popular Badge */}
-                       {category.is_popular && (
-                                  <span
-                                    className="
-                                      inline-flex
-                                      h-7
-                                      items-center
-                                      gap-1
-                                      rounded-full
-                                      bg-rose-50
-                                      px-2
-                                      text-[9px]
-                                      font-bold
-                                      text-rose-600
-                                      ring-1
-                                      ring-rose-200
-                                      sm:h-9
-                                      sm:px-2.5
-                                      sm:text-[11px]
-                                      dark:bg-rose-950/40
-                                      dark:text-rose-400
-                                      dark:ring-rose-900/50
-                                    "
-                                  >
+                        {/* Popular */}
+
+                        {category.is_popular && (
+                          <span
+                            className="
+                              inline-flex
+                              h-7
+                              items-center
+                              gap-1
+                              rounded-full
+                              bg-rose-50
+                              px-2
+                              text-[9px]
+                              font-bold
+                              text-rose-600
+                              ring-1
+                              ring-rose-200
+                              sm:h-9
+                              sm:px-2.5
+                              sm:text-[11px]
+                              dark:bg-rose-950/40
+                              dark:text-rose-400
+                              dark:ring-rose-900/50
+                            "
+                          >
                             <Flame
                               className="h-3 w-3 sm:h-3.5 sm:w-3.5"
                               aria-hidden="true"
@@ -411,7 +518,8 @@ export default function ServicesPage() {
                           </span>
                         )}
 
-                        {/* Featured Badge */}
+                        {/* Featured */}
+
                         {category.is_featured && (
                           <span
                             className="
@@ -451,6 +559,7 @@ export default function ServicesPage() {
                         )}
 
                         {/* Favorite */}
+
                         <button
                           type="button"
                           onClick={(e) =>
@@ -485,6 +594,7 @@ export default function ServicesPage() {
                     </div>
 
                     {/* Title */}
+
                     <div className="mt-2.5 sm:mt-4">
                       <h2
                         className="
@@ -524,7 +634,20 @@ export default function ServicesPage() {
                   </div>
 
                   {/* Image */}
-                  <div className="relative mt-auto h-24 w-full overflow-hidden border-t border-slate-100 dark:border-slate-800 sm:h-40">
+
+                  <div
+                    className="
+                      relative
+                      mt-auto
+                      h-24
+                      w-full
+                      overflow-hidden
+                      border-t
+                      border-slate-100
+                      dark:border-slate-800
+                      sm:h-40
+                    "
+                  >
                     <Image
                       src={category.imageSrc}
                       alt={categoryTitle}
