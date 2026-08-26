@@ -127,7 +127,7 @@ export default function ProviderCard({
       ].join(" ")}
       dir="rtl"
     >
-      {/* Cover */}
+      {/* ================= COVER ================= */}
       <button
         type="button"
         onClick={handleClick}
@@ -150,20 +150,20 @@ export default function ProviderCard({
 
         {provider.featured && (
           <span className="absolute right-4 top-4 rounded-full bg-yellow-400 px-3 py-1 text-xs font-bold text-yellow-950 shadow-lg">
-            تایبەت
+            پڕداواکاریترین
           </span>
         )}
 
         {provider.verified && (
           <span className="absolute left-4 top-4 flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-xs font-semibold text-green-700 shadow-md backdrop-blur">
             <BadgeCheck className="h-3.5 w-3.5" />
-            پشتڕاستکراوەتەوە
+            پشتڕاستکراوە
           </span>
         )}
       </button>
 
       <div className="relative px-5 pb-5">
-        {/* Logo */}
+        {/* ================= LOGO + STATUS ================= */}
         <div className="-mt-11 mb-4 flex items-end justify-between">
           <button
             type="button"
@@ -201,12 +201,15 @@ export default function ProviderCard({
                     : "bg-slate-400"
                 }`}
               />
-              {todayStatus.isOpen ? "کراوەیە" : "داخراوە"}
+
+              {todayStatus.isOpen
+                ? "کراوەیە"
+                : "داخراوە"}
             </span>
           </div>
         </div>
 
-        {/* Main content */}
+        {/* ================= MAIN CONTENT ================= */}
         <button
           type="button"
           onClick={handleClick}
@@ -248,11 +251,12 @@ export default function ProviderCard({
           </div>
         </button>
 
-        {/* Meta */}
+        {/* ================= META ================= */}
         <div className="mt-4 space-y-2 border-t border-slate-100 pt-4 dark:border-slate-800">
           {provider.location?.address && (
             <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
               <MapPin className="h-4 w-4 shrink-0 text-green-600" />
+
               <span className="line-clamp-1">
                 {provider.location.address}
               </span>
@@ -261,16 +265,18 @@ export default function ProviderCard({
 
           <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
             <Clock3 className="h-4 w-4 shrink-0 text-green-600" />
+
             <span>{todayStatus.label}</span>
           </div>
         </div>
 
-        {/* Socials */}
+        {/* ================= SOCIALS + MORE ================= */}
         <div className="mt-4 flex items-center justify-between gap-3">
           <ProviderSocials
             socials={provider.socials}
             phone={provider.phone}
             size="sm"
+            showLabels={false}
           />
 
           <button
