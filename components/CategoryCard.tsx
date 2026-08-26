@@ -41,7 +41,13 @@ export default function CategoryCard({
           "
         />
 
-        <div className="relative z-10 flex items-start justify-between gap-4">
+        <div
+          className="
+            relative z-10
+            flex items-start justify-between gap-4
+          "
+        >
+          {/* Category Icon */}
           <div
             className="
               flex h-14 w-14 shrink-0
@@ -63,9 +69,11 @@ export default function CategoryCard({
             </span>
           </div>
 
+          {/* Fixed Action Area */}
           <div
             className="
-              flex h-9 w-9 items-center justify-center
+              flex h-9 w-9 shrink-0
+              items-center justify-center
               rounded-full
               bg-gray-100
               text-gray-500
@@ -78,6 +86,7 @@ export default function CategoryCard({
               dark:group-hover:bg-blue-500/10
               dark:group-hover:text-blue-400
             "
+            aria-hidden="true"
           >
             →
           </div>

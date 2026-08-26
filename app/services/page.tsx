@@ -403,6 +403,64 @@ export default function ServicesPage() {
       "
     >
       <div className="mx-auto w-full max-w-7xl px-3 sm:px-6 lg:px-8">
+
+        {/* Back to Home */}
+        <div className="mb-5 flex">
+          <Link
+            href="/#services"
+            className="
+              inline-flex
+              items-center
+              gap-2
+              rounded-xl
+              border
+              border-slate-200
+              bg-white
+              px-3
+              py-2
+              text-sm
+              font-semibold
+              text-slate-700
+              shadow-sm
+              transition-all
+              duration-200
+              hover:-translate-y-0.5
+              hover:border-primary/30
+              hover:bg-primary/5
+              hover:text-primary
+              hover:shadow-md
+              focus-visible:outline-none
+              focus-visible:ring-2
+              focus-visible:ring-primary/60
+              dark:border-slate-800
+              dark:bg-slate-900
+              dark:text-slate-200
+              dark:hover:bg-slate-800
+              dark:hover:text-primary
+            "
+          >
+            {isRTL ? (
+              <ArrowRight
+                className="h-4 w-4"
+                aria-hidden="true"
+              />
+            ) : (
+              <ArrowLeft
+                className="h-4 w-4"
+                aria-hidden="true"
+              />
+            )}
+
+            <span>
+              {currentLanguage === "ckb"
+                ? "گەڕانەوە بۆ پەڕەی سەرەکی"
+                : currentLanguage === "ar"
+                  ? "العودة إلى الصفحة الرئيسية"
+                  : "Back to Home Page"}
+            </span>
+          </Link>
+        </div>
+
         <div
           className="
             grid
@@ -443,6 +501,7 @@ export default function ServicesPage() {
 
                   <div className="p-2.5 sm:p-5">
                     <div className="flex items-start justify-between gap-1.5">
+
                       {/* Icon */}
 
                       <span
@@ -477,7 +536,14 @@ export default function ServicesPage() {
 
                       {/* Badges + Favorite */}
 
-                      <div className="flex items-center gap-1">
+                      <div
+                        className="
+                          flex
+                          shrink-0
+                          items-center
+                          gap-1
+                        "
+                      >
                         {/* Popular */}
 
                         {category.is_popular && (
@@ -485,17 +551,21 @@ export default function ServicesPage() {
                             className="
                               inline-flex
                               h-7
+                              w-7
+                              shrink-0
                               items-center
+                              justify-center
                               gap-1
                               rounded-full
                               bg-rose-50
-                              px-2
+                              px-0
                               text-[9px]
                               font-bold
                               text-rose-600
                               ring-1
                               ring-rose-200
                               sm:h-9
+                              sm:w-auto
                               sm:px-2.5
                               sm:text-[11px]
                               dark:bg-rose-950/40
@@ -504,7 +574,7 @@ export default function ServicesPage() {
                             "
                           >
                             <Flame
-                              className="h-3 w-3 sm:h-3.5 sm:w-3.5"
+                              className="h-3.5 w-3.5 shrink-0 sm:h-3.5 sm:w-3.5"
                               aria-hidden="true"
                             />
 
@@ -525,17 +595,21 @@ export default function ServicesPage() {
                             className="
                               inline-flex
                               h-7
+                              w-7
+                              shrink-0
                               items-center
+                              justify-center
                               gap-1
                               rounded-full
                               bg-amber-50
-                              px-2
+                              px-0
                               text-[9px]
                               font-bold
                               text-amber-600
                               ring-1
                               ring-amber-200
                               sm:h-9
+                              sm:w-auto
                               sm:px-2.5
                               sm:text-[11px]
                               dark:bg-amber-950/40
@@ -544,7 +618,7 @@ export default function ServicesPage() {
                             "
                           >
                             <Sparkles
-                              className="h-3 w-3 sm:h-3.5 sm:w-3.5"
+                              className="h-3.5 w-3.5 shrink-0 sm:h-3.5 sm:w-3.5"
                               aria-hidden="true"
                             />
 
@@ -575,7 +649,7 @@ export default function ServicesPage() {
                           }
                           aria-pressed={isFavorite}
                           className={cn(
-                            "flex h-7 w-7 items-center justify-center rounded-full transition-all sm:h-9 sm:w-9",
+                            "flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-all sm:h-9 sm:w-9",
                             "bg-slate-100 dark:bg-slate-800",
                             isFavorite
                               ? "text-rose-500"
