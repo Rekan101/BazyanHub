@@ -800,7 +800,7 @@ export default function CategoryPage() {
           </h1>
 
           <Link
-            href="/services"
+            href="/#services"
             className="
               mt-5
               inline-flex
@@ -888,7 +888,7 @@ export default function CategoryPage() {
 
         <header className="mb-8">
           <Link
-            href="/services"
+            href="/#services"
             className="
               inline-flex
               items-center
