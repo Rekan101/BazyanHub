@@ -1,13 +1,16 @@
 "use client";
 
 import {
-  Facebook,
-  Instagram,
-  MessageCircle,
-  Music2,
-  Phone,
-} from "lucide-react";
-import type { ProviderSocials as ProviderSocialLinks } from "@/lib/types/provider";
+  SiFacebook,
+  SiInstagram,
+  SiTiktok,
+  SiViber,
+  SiWhatsapp,
+} from "react-icons/si";
+import type { IconType } from "react-icons";
+import type {
+  ProviderSocials as ProviderSocialLinks,
+} from "@/lib/types/provider";
 
 interface ProviderSocialsProps {
   socials?: ProviderSocialLinks;
@@ -17,118 +20,176 @@ interface ProviderSocialsProps {
   className?: string;
 }
 
-const socialConfig = {
+type SocialPlatform =
+  | "viber"
+  | "tiktok"
+  | "whatsapp"
+  | "instagram"
+  | "facebook";
+
+interface SocialConfig {
+  label: string;
+  icon: IconType;
+  color: string;
+  hoverBg: string;
+  hoverBorder: string;
+}
+
+const socialConfig: Record<
+  SocialPlatform,
+  SocialConfig
+> = {
   viber: {
     label: "Viber",
-    icon: Phone,
+    icon: SiViber,
+    color: "text-[#7360F2]",
+    hoverBg: "hover:bg-[#7360F2]/10",
+    hoverBorder: "hover:border-[#7360F2]/30",
   },
+
   tiktok: {
     label: "TikTok",
-    icon: Music2,
+    icon: SiTiktok,
+    color: "text-black dark:text-white",
+    hoverBg: "hover:bg-slate-100 dark:hover:bg-slate-800",
+    hoverBorder:
+      "hover:border-slate-300 dark:hover:border-slate-700",
   },
+
   whatsapp: {
     label: "WhatsApp",
-    icon: MessageCircle,
+    icon: SiWhatsapp,
+    color: "text-[#25D366]",
+    hoverBg: "hover:bg-[#25D366]/10",
+    hoverBorder: "hover:border-[#25D366]/30",
   },
+
   instagram: {
     label: "Instagram",
-    icon: Instagram,
+    icon: SiInstagram,
+    color: "text-[#E4405F]",
+    hoverBg: "hover:bg-[#E4405F]/10",
+    hoverBorder: "hover:border-[#E4405F]/30",
   },
+
   facebook: {
     label: "Facebook",
-    icon: Facebook,
+    icon: SiFacebook,
+    color: "text-[#1877F2]",
+    hoverBg: "hover:bg-[#1877F2]/10",
+    hoverBorder: "hover:border-[#1877F2]/30",
   },
-} as const;
-
-type SocialPlatform = keyof typeof socialConfig;
+};
 
 function normalizeSocialUrl(
   platform: SocialPlatform,
   value: string
 ): string {
+  const trimmedValue = value.trim();
+
   if (
-    value.startsWith("http://") ||
-    value.startsWith("https://") ||
-    value.startsWith("mailto:") ||
-    value.startsWith("tel:")
+    trimmedValue.startsWith("http://") ||
+    trimmedValue.startsWith("https://") ||
+    trimmedValue.startsWith("mailto:") ||
+    trimmedValue.startsWith("tel:") ||
+    trimmedValue.startsWith("viber://")
   ) {
-    return value;
+    return trimmedValue;
   }
 
   if (platform === "whatsapp") {
-    const cleanPhone = value.replace(/[^\d+]/g, "");
+    const cleanPhone = trimmedValue.replace(
+      /[^\d+]/g,
+      ""
+    );
 
-    return `https://wa.me/${cleanPhone.replace("+", "")}`;
+    return `https://wa.me/${cleanPhone.replace(
+      "+",
+      ""
+    )}`;
   }
 
   if (platform === "viber") {
-    const cleanPhone = value.replace(/[^\d+]/g, "");
+    const cleanPhone = trimmedValue.replace(
+      /[^\d+]/g,
+      ""
+    );
 
-    return `viber://chat?number=${encodeURIComponent(cleanPhone)}`;
+    return `viber://chat?number=${encodeURIComponent(
+      cleanPhone
+    )}`;
   }
 
-  return `https://${value}`;
+  return `https://${trimmedValue}`;
 }
 
-function getIconSize(
-  platform: SocialPlatform,
-  size: ProviderSocialsProps["size"]
+function getContainerSize(
+  size: ProviderSocialsProps["size"],
+  platform: SocialPlatform
 ): string {
   if (platform === "whatsapp") {
     switch (size) {
       case "sm":
-        return "h-8 w-8";
-      case "lg":
-        return "h-12 w-12";
-      case "md":
-      default:
-        return "h-10 w-10";
-    }
-  }
+        return "h-14 w-14";
 
-  switch (size) {
-    case "sm":
-      return "h-4 w-4";
-    case "lg":
-      return "h-6 w-6";
-    case "md":
-    default:
-      return "h-5 w-5";
-  }
-}
-
-function getButtonSize(
-  platform: SocialPlatform,
-  size: ProviderSocialsProps["size"]
-): string {
-  if (platform === "whatsapp") {
-    switch (size) {
-      case "sm":
-        return "h-16 w-16";
       case "lg":
-        return "h-24 w-24";
-      case "md":
-      default:
         return "h-20 w-20";
+
+      case "md":
+      default:
+        return "h-16 w-16";
     }
   }
 
   switch (size) {
     case "sm":
       return "h-10 w-10";
+
     case "lg":
       return "h-12 w-12";
+
     case "md":
     default:
       return "h-11 w-11";
   }
 }
 
+function getIconSize(
+  size: ProviderSocialsProps["size"],
+  platform: SocialPlatform
+): string {
+  if (platform === "whatsapp") {
+    switch (size) {
+      case "sm":
+        return "text-[30px]";
+
+      case "lg":
+        return "text-[42px]";
+
+      case "md":
+      default:
+        return "text-[36px]";
+    }
+  }
+
+  switch (size) {
+    case "sm":
+      return "text-[22px]";
+
+    case "lg":
+      return "text-[27px]";
+
+    case "md":
+    default:
+      return "text-[24px]";
+  }
+}
+
 export default function ProviderSocials({
   socials,
   phone,
-  size = "md",
-  showLabels = true,
+  size = "sm",
+  showLabels = false,
   className = "",
 }: ProviderSocialsProps) {
   const links: Partial<ProviderSocialLinks> = {
@@ -137,7 +198,8 @@ export default function ProviderSocials({
 
   /*
    * Keep the existing behavior:
-   * If Viber is not explicitly provided, use the provider phone.
+   * phone can be used as Viber when explicit Viber
+   * data is not available.
    */
   if (phone && !links.viber) {
     links.viber = phone;
@@ -157,46 +219,52 @@ export default function ProviderSocials({
       dir="ltr"
       aria-label="Social media links"
     >
-      <div className="grid w-full grid-cols-5 items-center gap-1 sm:gap-2">
+      <div className="grid w-full grid-cols-5 items-center gap-2">
         {platforms.map((platform) => {
           const config = socialConfig[platform];
           const Icon = config.icon;
-          const rawValue = links[platform];
-          const isWhatsApp = platform === "whatsapp";
+
+          const rawValue =
+            links[platform];
+
+          const isWhatsApp =
+            platform === "whatsapp";
 
           /*
-           * Keep the five-column structure even when a provider
-           * has not added a particular social platform yet.
+           * Empty platform:
+           * Keep the 5-column layout but make it visually
+           * inactive instead of removing its column.
            */
           if (!rawValue) {
             return (
               <div
                 key={platform}
-                className="flex min-w-0 flex-col items-center justify-center gap-1.5"
+                className="flex min-w-0 flex-col items-center justify-center"
                 aria-hidden="true"
               >
                 <span
                   className={[
                     "flex items-center justify-center rounded-full",
-                    "border border-slate-200 bg-slate-50",
-                    "text-slate-300",
-                    "dark:border-slate-800 dark:bg-slate-900",
-                    isWhatsApp
-                      ? getButtonSize(platform, size)
-                      : getButtonSize(platform, size),
+                    "bg-slate-50",
+                    "text-slate-200",
+                    "dark:bg-slate-900",
+                    "dark:text-slate-700",
+                    getContainerSize(
+                      size,
+                      platform
+                    ),
                   ].join(" ")}
                 >
                   <Icon
-                    className={[
-                      getIconSize(platform, size),
-                      isWhatsApp ? "opacity-50" : "opacity-40",
-                    ].join(" ")}
-                    strokeWidth={1.8}
+                    className={getIconSize(
+                      size,
+                      platform
+                    )}
                   />
                 </span>
 
                 {showLabels && (
-                  <span className="max-w-full truncate text-[9px] font-medium text-slate-300 sm:text-[10px]">
+                  <span className="mt-1 max-w-full truncate text-[9px] font-medium text-slate-300 sm:text-[10px]">
                     {config.label}
                   </span>
                 )}
@@ -204,12 +272,15 @@ export default function ProviderSocials({
             );
           }
 
-          const href = normalizeSocialUrl(platform, rawValue);
+          const href = normalizeSocialUrl(
+            platform,
+            rawValue
+          );
 
           return (
             <div
               key={platform}
-              className="flex min-w-0 flex-col items-center justify-center gap-1.5"
+              className="flex min-w-0 flex-col items-center justify-center"
             >
               <a
                 href={href}
@@ -217,46 +288,58 @@ export default function ProviderSocials({
                 rel="noopener noreferrer"
                 aria-label={`Open ${config.label}`}
                 title={config.label}
+                onClick={(event) => {
+                  /*
+                   * Prevent the click from reaching any
+                   * parent interactive element.
+                   */
+                  event.stopPropagation();
+                }}
                 className={[
-                  "group flex shrink-0 items-center justify-center rounded-full",
-                  "border transition-all duration-200",
-                  "focus:outline-none focus:ring-2 focus:ring-green-500/30",
+                  "group flex items-center justify-center rounded-full",
+                  "border border-transparent",
+                  "bg-white dark:bg-slate-900",
+                  "transition-all duration-200",
+                  "focus:outline-none",
+                  "focus:ring-2 focus:ring-green-500/30",
+                  config.hoverBg,
+                  config.hoverBorder,
                   isWhatsApp
                     ? [
-                        "border-green-200 bg-green-50 text-green-600",
-                        "shadow-md shadow-green-100",
-                        "hover:-translate-y-1 hover:border-green-300",
-                        "hover:bg-green-100 hover:text-green-700",
-                        "dark:border-green-900/50 dark:bg-green-950/30",
+                        "shadow-md shadow-green-200/40",
+                        "hover:scale-110",
                       ].join(" ")
-                    : [
-                        "border-slate-200 bg-white text-slate-600 shadow-sm",
-                        "hover:-translate-y-0.5 hover:border-green-200",
-                        "hover:bg-green-50 hover:text-green-700",
-                        "dark:border-slate-800 dark:bg-slate-900",
-                      ].join(" "),
-                  getButtonSize(platform, size),
+                    : "hover:-translate-y-0.5 hover:scale-105",
+                  getContainerSize(
+                    size,
+                    platform
+                  ),
                 ].join(" ")}
               >
                 <Icon
                   className={[
-                    getIconSize(platform, size),
-                    "shrink-0 transition-transform duration-200",
+                    getIconSize(
+                      size,
+                      platform
+                    ),
+                    config.color,
+                    "shrink-0",
+                    "transition-transform duration-200",
                     isWhatsApp
                       ? "group-hover:scale-105"
                       : "group-hover:scale-110",
                   ].join(" ")}
-                  strokeWidth={isWhatsApp ? 1.9 : 1.8}
+                  aria-hidden="true"
                 />
               </a>
 
               {showLabels && (
                 <span
                   className={[
-                    "max-w-full truncate text-center font-medium",
+                    "mt-1 max-w-full truncate text-center",
                     isWhatsApp
-                      ? "text-[10px] font-bold text-green-700 sm:text-[11px]"
-                      : "text-[9px] text-slate-500 sm:text-[10px]",
+                      ? "text-[10px] font-bold text-[#25D366] sm:text-[11px]"
+                      : "text-[9px] font-medium text-slate-500 sm:text-[10px]",
                   ].join(" ")}
                 >
                   {config.label}
