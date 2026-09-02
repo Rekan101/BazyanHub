@@ -110,7 +110,7 @@ export const restaurants: Provider[] = [
     description:
       "چێشتخانەیەکی خۆش و گونجاو بۆ خێزان و هاوڕێیان لە بازیان.",
 
-    logo: "/images/providers/restaurants/food-house.jpg",
+    logo: "/images/providers/restaurants/food-houseL.jpg",
 
     coverImage: "/images/providers/restaurants/food-house.jpg",
 
