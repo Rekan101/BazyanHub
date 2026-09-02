@@ -557,50 +557,6 @@ const RESTAURANT_PROVIDERS: Provider[] =
 |--------------------------------------------------------------------------
 */
 
-const OTHER_PROVIDERS: Provider[] = [
-  {
-    id: "bazian-transport-test",
-
-    name: "گواستنەوەی بازیان",
-
-    category: "ئۆتۆمبێل",
-
-    subcategory: "گواستنەوە",
-
-    description:
-      "خزمەتگوزاری گواستنەوە و ئۆتۆمبێل لە بازیان.",
-
-    phone: undefined,
-    email: undefined,
-    website: undefined,
-
-    logo: undefined,
-    coverImage: undefined,
-
-    location: {
-      address:
-        "ناوچەی تایقەرەدۆمە، بازیان",
-      city: "بازیان",
-      googleMapsUrl: undefined,
-      latitude: undefined,
-      longitude: undefined,
-    },
-
-    rating: 0,
-    reviewCount: 0,
-
-    verified: false,
-    featured: false,
-
-    services: [],
-    tags: [],
-    hours: [],
-
-    socials: undefined,
-    updatedAt: undefined,
-  } as unknown as Provider,
-];
-
 /*
 |--------------------------------------------------------------------------
 | All Providers
@@ -608,7 +564,6 @@ const OTHER_PROVIDERS: Provider[] = [
 */
 
 const PROVIDERS: Provider[] = [
-  ...OTHER_PROVIDERS,
   ...RESTAURANT_PROVIDERS,
 ];
 

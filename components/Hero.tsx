@@ -66,7 +66,7 @@ type StoryItem = {
 
 /* ==========================================================================
    STORY CONFIGURATION
-   --------------------------------------------------------------------------
+
    To add/edit a story:
 
    1. Put the image inside:
@@ -75,9 +75,6 @@ type StoryItem = {
    2. Add/edit one object below.
 
    3. Change "href" to your own external link.
-
-   Example:
-   href: "https://example.com"
 
    Maximum supported stories: 10
    ========================================================================== */
@@ -236,17 +233,11 @@ function getExpirationTime(story: StoryItem): number {
   }
 
   if (story.duration.unit === "hours") {
-    return (
-      createdAt +
-      story.duration.amount * 60 * 60 * 1000
-    );
+    return createdAt + story.duration.amount * 60 * 60 * 1000;
   }
 
   if (story.duration.unit === "days") {
-    return (
-      createdAt +
-      story.duration.amount * 24 * 60 * 60 * 1000
-    );
+    return createdAt + story.duration.amount * 24 * 60 * 60 * 1000;
   }
 
   const expiration = new Date(story.createdAt);
@@ -264,9 +255,7 @@ function getRemainingStories(
 ): StoryItem[] {
   return stories
     .slice(0, 10)
-    .filter(
-      (story) => getExpirationTime(story) > now
-    );
+    .filter((story) => getExpirationTime(story) > now);
 }
 
 /* ==========================================================================
@@ -280,16 +269,13 @@ export default function Hero() {
      Current time for story expiration
      ------------------------------------------------------------------------ */
 
-  const [now, setNow] = useState<number>(() =>
-    Date.now()
-  );
+  const [now, setNow] = useState<number>(() => Date.now());
 
   /* ------------------------------------------------------------------------
      Current story
      ------------------------------------------------------------------------ */
 
-  const [activeStoryIndex, setActiveStoryIndex] =
-    useState(0);
+  const [activeStoryIndex, setActiveStoryIndex] = useState(0);
 
   /* ------------------------------------------------------------------------
      Update current time every minute
@@ -324,15 +310,10 @@ export default function Hero() {
       return;
     }
 
-    if (
-      activeStoryIndex >= activeStories.length
-    ) {
+    if (activeStoryIndex >= activeStories.length) {
       setActiveStoryIndex(0);
     }
-  }, [
-    activeStoryIndex,
-    activeStories.length,
-  ]);
+  }, [activeStoryIndex, activeStories.length]);
 
   /* ------------------------------------------------------------------------
      AUTOMATIC STORY SLIDER
@@ -356,8 +337,7 @@ export default function Hero() {
       return;
     }
 
-    const currentStory =
-      activeStories[activeStoryIndex];
+    const currentStory = activeStories[activeStoryIndex];
 
     if (!currentStory) {
       return;
@@ -366,18 +346,14 @@ export default function Hero() {
     const timeout = window.setTimeout(() => {
       setActiveStoryIndex(
         (currentIndex) =>
-          (currentIndex + 1) %
-          activeStories.length
+          (currentIndex + 1) % activeStories.length
       );
     }, currentStory.durationSeconds * 1000);
 
     return () => {
       window.clearTimeout(timeout);
     };
-  }, [
-    activeStoryIndex,
-    activeStories,
-  ]);
+  }, [activeStoryIndex, activeStories]);
 
   /* ------------------------------------------------------------------------
      Quick actions
@@ -550,11 +526,7 @@ export default function Hero() {
                       items-center
                       gap-2
                       text-white/90
-                      ${
-                        isRTL
-                          ? "flex-row-reverse"
-                          : ""
-                      }
+                      ${isRTL ? "flex-row-reverse" : ""}
                     `}
                   >
                     <span
@@ -600,11 +572,10 @@ export default function Hero() {
                 </div>
 
                 {/* ==========================================================
-                    SINGLE STORY CARD
+                    SINGLE PORTRAIT STORY CARD
 
-                    Only ONE story is visible.
-                    It automatically changes every 3 seconds.
-                    Clicking opens the story's external URL.
+                    IMPORTANT:
+                    9/16 = Portrait / Vertical Story ratio
                     ========================================================== */}
 
                 <AnimatePresence mode="wait">
@@ -632,8 +603,9 @@ export default function Hero() {
                     className="
                       mx-auto
                       w-full
-                      max-w-[360px]
-                      sm:max-w-[390px]
+                      max-w-[300px]
+                      sm:max-w-[320px]
+                      md:max-w-[340px]
                     "
                   >
                     <a
@@ -645,7 +617,7 @@ export default function Hero() {
                         group
                         relative
                         block
-                        aspect-[16/9]
+                        aspect-[9/16]
                         w-full
                         overflow-hidden
                         rounded-[1.75rem]
@@ -678,8 +650,9 @@ export default function Hero() {
                         fill
                         priority
                         sizes="
-                          (max-width: 640px) 92vw,
-                          390px
+                          (max-width: 640px) 82vw,
+                          (max-width: 768px) 320px,
+                          340px
                         "
                         className="
                           object-cover
@@ -700,7 +673,7 @@ export default function Hero() {
                           absolute
                           inset-0
                           bg-gradient-to-t
-                          from-black/85
+                          from-black/90
                           via-black/10
                           to-black/20
                         "
@@ -716,9 +689,9 @@ export default function Hero() {
                           absolute
                           inset-x-0
                           top-0
-                          h-20
+                          h-28
                           bg-gradient-to-b
-                          from-black/30
+                          from-black/35
                           to-transparent
                         "
                       />
@@ -753,10 +726,7 @@ export default function Hero() {
                       >
                         <ExternalLink
                           aria-hidden="true"
-                          className="
-                            h-4
-                            w-4
-                          "
+                          className="h-4 w-4"
                           strokeWidth={2}
                         />
                       </div>
@@ -770,19 +740,19 @@ export default function Hero() {
                           absolute
                           inset-x-0
                           bottom-0
-                          p-4
+                          p-5
                           text-right
-                          sm:p-5
+                          sm:p-6
                         "
                       >
                         <p
                           className="
-                            text-base
+                            text-lg
                             font-extrabold
                             leading-tight
                             text-white
                             drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]
-                            sm:text-lg
+                            sm:text-xl
                           "
                         >
                           {currentStory.title}
@@ -791,13 +761,13 @@ export default function Hero() {
                         {currentStory.subtitle && (
                           <p
                             className="
-                              mt-1
-                              line-clamp-1
-                              text-xs
+                              mt-1.5
+                              line-clamp-2
+                              text-sm
                               font-medium
+                              leading-relaxed
                               text-white/80
                               drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]
-                              sm:text-sm
                             "
                           >
                             {currentStory.subtitle}
@@ -831,9 +801,6 @@ export default function Hero() {
 
                 {/* ==========================================================
                     PROGRESS BARS
-
-                    10 small bars.
-                    Current story fills automatically in 3 seconds.
                     ========================================================== */}
 
                 <div
@@ -842,77 +809,72 @@ export default function Hero() {
                     mt-3
                     flex
                     w-full
-                    max-w-[360px]
+                    max-w-[300px]
                     gap-1
                     px-1
-                    sm:max-w-[390px]
+                    sm:max-w-[320px]
+                    md:max-w-[340px]
                   "
                   aria-hidden="true"
                 >
-                  {activeStories.map(
-                    (story, index) => {
-                      const isPast =
-                        index <
-                        activeStoryIndex;
+                  {activeStories.map((story, index) => {
+                    const isPast =
+                      index < activeStoryIndex;
 
-                      const isCurrent =
-                        index ===
-                        activeStoryIndex;
+                    const isCurrent =
+                      index === activeStoryIndex;
 
-                      return (
-                        <div
-                          key={story.id}
-                          className="
-                            relative
-                            h-1
-                            flex-1
-                            overflow-hidden
-                            rounded-full
-                            bg-white/20
-                            shadow-sm
-                          "
-                        >
-                          {isPast && (
-                            <div
-                              className="
-                                absolute
-                                inset-0
-                                rounded-full
-                                bg-white/90
-                              "
-                            />
-                          )}
+                    return (
+                      <div
+                        key={story.id}
+                        className="
+                          relative
+                          h-1
+                          flex-1
+                          overflow-hidden
+                          rounded-full
+                          bg-white/20
+                          shadow-sm
+                        "
+                      >
+                        {isPast && (
+                          <div
+                            className="
+                              absolute
+                              inset-0
+                              rounded-full
+                              bg-white/90
+                            "
+                          />
+                        )}
 
-                          {isCurrent && (
-                            <motion.div
-                              key={
-                                currentStory.id
-                              }
-                              initial={{
-                                width: "0%",
-                              }}
-                              animate={{
-                                width: "100%",
-                              }}
-                              transition={{
-                                duration:
-                                  currentStory.durationSeconds,
-                                ease: "linear",
-                              }}
-                              className="
-                                absolute
-                                inset-y-0
-                                left-0
-                                rounded-full
-                                bg-[#34d399]
-                                shadow-[0_0_8px_rgba(52,211,153,0.8)]
-                              "
-                            />
-                          )}
-                        </div>
-                      );
-                    }
-                  )}
+                        {isCurrent && (
+                          <motion.div
+                            key={currentStory.id}
+                            initial={{
+                              width: "0%",
+                            }}
+                            animate={{
+                              width: "100%",
+                            }}
+                            transition={{
+                              duration:
+                                currentStory.durationSeconds,
+                              ease: "linear",
+                            }}
+                            className="
+                              absolute
+                              inset-y-0
+                              left-0
+                              rounded-full
+                              bg-[#34d399]
+                              shadow-[0_0_8px_rgba(52,211,153,0.8)]
+                            "
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
 
                 {/* ==========================================================
@@ -1104,87 +1066,79 @@ export default function Hero() {
                 sm:gap-3
               "
             >
-              {translatedActions.map(
-                (action) => {
-                  const Icon =
-                    QUICK_ACTION_ICON[
-                      action.icon
-                    ];
+              {translatedActions.map((action) => {
+                const Icon =
+                  QUICK_ACTION_ICON[action.icon];
 
-                  const isExternal =
-                    action.href.startsWith(
-                      "http"
-                    );
+                const isExternal =
+                  action.href.startsWith("http");
 
-                  return (
-                    <Link
-                      key={action.href}
-                      href={action.href}
-                      target={
-                        isExternal
-                          ? "_blank"
-                          : undefined
-                      }
-                      rel={
-                        isExternal
-                          ? "noopener noreferrer"
-                          : undefined
-                      }
+                return (
+                  <Link
+                    key={action.href}
+                    href={action.href}
+                    target={
+                      isExternal ? "_blank" : undefined
+                    }
+                    rel={
+                      isExternal
+                        ? "noopener noreferrer"
+                        : undefined
+                    }
+                    className="
+                      group
+                      flex
+                      min-w-0
+                      items-center
+                      justify-center
+                      gap-1.5
+                      rounded-full
+                      border
+                      border-white/25
+                      bg-white/10
+                      px-2
+                      py-2.5
+                      text-[10px]
+                      font-semibold
+                      text-white
+                      shadow-lg
+                      shadow-black/10
+                      backdrop-blur-md
+                      transition-all
+                      duration-300
+                      hover:-translate-y-0.5
+                      hover:bg-white/20
+                      hover:shadow-xl
+                      focus-visible:outline-none
+                      focus-visible:ring-2
+                      focus-visible:ring-white/80
+                      sm:gap-2
+                      sm:px-4
+                      sm:py-3
+                      sm:text-sm
+                    "
+                  >
+                    <Icon
+                      aria-hidden="true"
                       className="
-                        group
-                        flex
-                        min-w-0
-                        items-center
-                        justify-center
-                        gap-1.5
-                        rounded-full
-                        border
-                        border-white/25
-                        bg-white/10
-                        px-2
-                        py-2.5
-                        text-[10px]
-                        font-semibold
-                        text-white
-                        shadow-lg
-                        shadow-black/10
-                        backdrop-blur-md
-                        transition-all
+                        h-4
+                        w-4
+                        shrink-0
+                        transition-transform
                         duration-300
-                        hover:-translate-y-0.5
-                        hover:bg-white/20
-                        hover:shadow-xl
-                        focus-visible:outline-none
-                        focus-visible:ring-2
-                        focus-visible:ring-white/80
-                        sm:gap-2
-                        sm:px-4
-                        sm:py-3
-                        sm:text-sm
+                        group-hover:scale-110
+                        sm:h-[18px]
+                        sm:w-[18px]
                       "
-                    >
-                      <Icon
-                        aria-hidden="true"
-                        className="
-                          h-4
-                          w-4
-                          shrink-0
-                          transition-transform
-                          duration-300
-                          group-hover:scale-110
-                          sm:h-[18px]
-                          sm:w-[18px]
-                        "
-                        strokeWidth={2}
-                      />
+                      strokeWidth={2}
+                    />
 
-                      <span className="truncate">
-                        {action.label}
-                      </span>
-                    </Link>
-                  );
-                }
-              )}
+                    <span className="truncate">
+                      {action.label}
+                    </span>
+                  </Link>
+                );
+              })}
             </motion.div>
 
             {/* ==============================================================
@@ -1233,11 +1187,7 @@ export default function Hero() {
 
                 <motion.span
                   animate={{
-                    opacity: [
-                      0.8,
-                      1,
-                      0.8,
-                    ],
+                    opacity: [0.8, 1, 0.8],
                     y: [0, -2, 0, 2, 0],
                     color: [
                       "#ffffff",
