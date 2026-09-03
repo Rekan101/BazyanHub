@@ -57,21 +57,6 @@ type StoryItem = {
 
 /* ==========================================================================
    STORY CONFIGURATION
-
-   Images:
-   /public/images/stories/
-
-   Recommended:
-   - High quality image
-   - 5:6 or similar compact portrait/square composition
-   - Maximum 10 stories
-
-   Story duration:
-   durationSeconds: 3
-   = story changes every 3 seconds
-
-   Expiration:
-   24 hours / 7 days / 1 month etc.
    ========================================================================== */
 
 const STORY_ITEMS: StoryItem[] = [
@@ -220,12 +205,8 @@ const STORY_ITEMS: StoryItem[] = [
    STORY EXPIRATION
    ========================================================================== */
 
-function getExpirationTime(
-  story: StoryItem
-): number {
-  const createdAt = new Date(
-    story.createdAt
-  ).getTime();
+function getExpirationTime(story: StoryItem): number {
+  const createdAt = new Date(story.createdAt).getTime();
 
   if (Number.isNaN(createdAt)) {
     return 0;
@@ -252,9 +233,7 @@ function getExpirationTime(
     );
   }
 
-  const expiration = new Date(
-    story.createdAt
-  );
+  const expiration = new Date(story.createdAt);
 
   expiration.setMonth(
     expiration.getMonth() +
@@ -490,16 +469,6 @@ export default function Hero() {
 
       {/* ====================================================================
           HERO CONTENT
-
-          Mobile:
-          1. Badge
-          2. Story
-          3. Headline
-          4. Description
-          5. Quick actions
-          6. Scroll indicator
-
-          Desktop keeps the same logical order with larger spacing.
           ==================================================================== */}
 
       <div
@@ -603,17 +572,6 @@ export default function Hero() {
                 sm:mb-5
               "
             >
-              {/* ================================================================
-                  STORY CARD
-
-                  Compact shape:
-                  5:6
-
-                  This keeps it slightly taller than square,
-                  but prevents the card from taking over
-                  the entire mobile screen.
-                  ================================================================ */}
-
               <div
                 className="
                   mx-auto
@@ -821,10 +779,6 @@ export default function Hero() {
 
                 {/* ============================================================
                     STORY PROGRESS
-
-                    Only the progress remains.
-                    The old "Story & Ads" header and 1/10 counter
-                    have been removed.
                     ============================================================ */}
 
                 <div
@@ -877,20 +831,27 @@ export default function Hero() {
                                 currentStory.id
                               }
                               initial={{
-                                width: "0%",
+                                scaleX: 0,
                               }}
                               animate={{
-                                width: "100%",
+                                scaleX: 1,
                               }}
                               transition={{
                                 duration:
                                   currentStory.durationSeconds,
                                 ease: "linear",
                               }}
+                              style={{
+                                transformOrigin:
+                                  isRTL
+                                    ? "right center"
+                                    : "left center",
+                              }}
                               className="
                                 absolute
                                 inset-y-0
                                 left-0
+                                right-0
                                 rounded-full
                                 bg-[#34d399]
                                 shadow-[0_0_7px_rgba(52,211,153,0.85)]
@@ -934,26 +895,6 @@ export default function Hero() {
                 ================================================================== */}
 
             <motion.h1
-              animate={{
-                y: [0, -3, 0, 3, 0],
-                backgroundPosition: [
-                  "0% 50%",
-                  "100% 50%",
-                  "0% 50%",
-                ],
-              }}
-              transition={{
-                y: {
-                  duration: 5,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                },
-                backgroundPosition: {
-                  duration: 6,
-                  repeat: Infinity,
-                  ease: "linear",
-                },
-              }}
               className="
                 text-balance
                 bg-[linear-gradient(90deg,rgb(4,120,87),rgb(255,255,255),rgb(180,110,8))]
@@ -977,26 +918,6 @@ export default function Hero() {
                 ================================================================== */}
 
             <motion.p
-              animate={{
-                opacity: [
-                  0.84,
-                  1,
-                  0.84,
-                ],
-                y: [0, -1, 0],
-              }}
-              transition={{
-                opacity: {
-                  duration: 3.5,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                },
-                y: {
-                  duration: 3.5,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                },
-              }}
               className="
                 mx-auto
                 mt-2
@@ -1182,40 +1103,10 @@ export default function Hero() {
                   ================================================================ */}
 
               <motion.span
-                animate={{
-                  opacity: [
-                    0.8,
-                    1,
-                    0.8,
-                  ],
-                  y: [0, -1, 0, 1, 0],
-                  color: [
-                    "#ffffff",
-                    "#34d399",
-                    "#fbbf24",
-                    "#ffffff",
-                  ],
-                }}
-                transition={{
-                  opacity: {
-                    duration: 2.4,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  },
-                  y: {
-                    duration: 1.8,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  },
-                  color: {
-                    duration: 4,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  },
-                }}
                 className="
                   text-[11px]
                   font-bold
+                  text-white
                   drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]
                 "
               >
@@ -1227,33 +1118,6 @@ export default function Hero() {
                   ================================================================ */}
 
               <motion.span
-                animate={{
-                  y: [0, 5, 0],
-                  scale: [1, 1.06, 1],
-                  color: [
-                    "#ffffff",
-                    "#34d399",
-                    "#fbbf24",
-                    "#ffffff",
-                  ],
-                }}
-                transition={{
-                  y: {
-                    duration: 1.5,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  },
-                  scale: {
-                    duration: 1.5,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  },
-                  color: {
-                    duration: 4,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  },
-                }}
                 className="
                   mt-1
                   inline-flex
@@ -1265,6 +1129,7 @@ export default function Hero() {
                   border
                   border-white/25
                   bg-black/20
+                  text-white
                   shadow-lg
                   shadow-black/30
                   backdrop-blur-md
