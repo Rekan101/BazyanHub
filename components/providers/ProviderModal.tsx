@@ -250,6 +250,7 @@ export default function ProviderModal({
           absolute
           inset-0
           cursor-default
+          touch-manipulation
         "
       />
 
@@ -350,13 +351,14 @@ export default function ProviderModal({
               bg-black/35
               text-white
               backdrop-blur-md
-              transition-all
+              transition-[transform,background-color]
               duration-200
               hover:scale-105
               hover:bg-black/55
               focus:outline-none
               focus:ring-2
               focus:ring-white/50
+              touch-manipulation
             "
             aria-label="داخستن"
           >
@@ -369,7 +371,7 @@ export default function ProviderModal({
 
         {/* ================= CONTENT ================= */}
 
-        <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           <div
             className="
               px-5
@@ -632,7 +634,7 @@ export default function ProviderModal({
                   px-4
                   py-3.5
                   text-left
-                  transition-all
+                  transition-[border-color,background-color,box-shadow]
                   duration-200
                   hover:border-green-200
                   hover:bg-green-50
@@ -640,6 +642,7 @@ export default function ProviderModal({
                   dark:border-slate-800
                   dark:bg-slate-900
                   dark:hover:border-green-900/50
+                  touch-manipulation
                 "
               >
                 <span

@@ -133,7 +133,7 @@ export default function ProviderCard({
       className={[
         "group relative overflow-hidden rounded-3xl",
         "border border-slate-200/80 bg-white",
-        "shadow-sm transition-all duration-300",
+        "shadow-sm transition-[transform,box-shadow] duration-300",
         "hover:-translate-y-1",
         "hover:shadow-xl hover:shadow-slate-200/50",
         "dark:border-slate-800 dark:bg-slate-900",
@@ -150,7 +150,7 @@ export default function ProviderCard({
       <button
         type="button"
         onClick={handleCardClick}
-        className="relative block h-48 w-full overflow-hidden text-right"
+        className="relative block h-48 w-full overflow-hidden text-right touch-manipulation"
         aria-label={`بینینی زانیاری ${provider.name}`}
       >
         {provider.coverImage ? (
@@ -273,6 +273,7 @@ export default function ProviderCard({
               shadow-lg
               dark:border-slate-900
               dark:bg-slate-800
+              touch-manipulation
             "
             aria-label={`بینینی ${provider.name}`}
           >
@@ -348,6 +349,7 @@ export default function ProviderCard({
             block
             w-full
             text-right
+            touch-manipulation
           "
         >
           {/* Provider name + Arrow */}
@@ -378,7 +380,7 @@ export default function ProviderCard({
                     rounded-full
                     bg-slate-100
                     text-slate-500
-                    transition-all
+                    transition-[transform,background-color,color]
                     duration-200
                     group-hover:-translate-x-0.5
                     group-hover:bg-green-50

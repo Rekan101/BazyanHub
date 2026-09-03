@@ -64,7 +64,7 @@ export const places: PlaceWithTranslations[] = [
     reviewCount: 189,
     description:
       "شوێنێکی سروشتی جوان و گونجاو بۆ پشوودان و گەشتی خێزانی.",
-    image: "/images/chapa-chanara.jpg",
+    image: "/images/chapa-chanara.webp",
     href: "/attractions/chapa-chanara",
 
     translations: {
@@ -85,7 +85,7 @@ export const places: PlaceWithTranslations[] = [
     reviewCount: 512,
     description:
       "یەکێک لە ناسراوترین شوێنە مێژووییەکانی ناوچەی بازیان.",
-    image: "/images/bazian-pass.jpg",
+    image: "/images/bazian-pass.webp",
     href: "/attractions/darbandi-bazyan",
 
     translations: {

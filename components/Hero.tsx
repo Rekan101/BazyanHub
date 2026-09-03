@@ -535,7 +535,7 @@ export default function Hero() {
               text-white
               shadow-lg
               shadow-black/20
-              backdrop-blur-xl
+              backdrop-blur-md
               sm:mb-5
               sm:px-4
               sm:py-2
@@ -601,7 +601,7 @@ export default function Hero() {
                     shadow-2xl
                     shadow-black/35
                     outline-none
-                    backdrop-blur-xl
+                    backdrop-blur-md
                     transition-all
                     duration-300
                     hover:-translate-y-0.5
@@ -692,7 +692,7 @@ export default function Hero() {
                       bg-black/25
                       text-white
                       shadow-lg
-                      backdrop-blur-xl
+                      backdrop-blur-md
                       transition-all
                       duration-300
                       group-hover:scale-105

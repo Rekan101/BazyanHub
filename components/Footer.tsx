@@ -42,7 +42,13 @@ function InstagramIcon() {
       className="h-5 w-5"
       aria-hidden="true"
     >
-      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <rect
+        x="3"
+        y="3"
+        width="18"
+        height="18"
+        rx="5"
+      />
       <circle cx="12" cy="12" r="4" />
       <circle
         cx="17.3"
@@ -175,7 +181,6 @@ export default function Footer() {
                   <span>+964 775 799 7904</span>
                 </a>
 
-                {/* بۆ گۆڕینی ئیمەیڵەکە لە داهاتوودا، تەنها info@bazyanhub.com لەم href و دەقەکەی خوارەوە بگۆڕە. */}
                 <a
                   href="mailto:info@bazyanhub.com"
                   dir="ltr"
@@ -186,9 +191,7 @@ export default function Footer() {
                 </a>
               </div>
 
-              {/* دواتر بۆ زیادکردنی لینکی ڕاستەقینەی Facebook، هەردوو href ـی "#" لەم row ـەدا بگۆڕە بۆ لینکی خۆت و target="_blank" بەجێبهێڵە. */}
-              <div className="mt-6 flex w-full flex-row items-center justify-center gap-4">
-                {/* دواتر href="#" ـی ئەم Facebook ـە بگۆڕە بۆ لینکی ڕاستەقینەی Facebook. */}
+              <div className="mt-6 flex w-full flex-row flex-wrap items-center justify-center gap-4">
                 <a
                   href="#"
                   target="_blank"
@@ -199,7 +202,6 @@ export default function Footer() {
                   <FacebookIcon />
                 </a>
 
-                {/* دواتر href="#" ـی ئەم Instagram ـە بگۆڕە بۆ لینکی ڕاستەقینەی Instagram. */}
                 <a
                   href="#"
                   target="_blank"
@@ -210,7 +212,6 @@ export default function Footer() {
                   <InstagramIcon />
                 </a>
 
-                {/* دواتر href="#" ـی ئەم TikTok ـە بگۆڕە بۆ لینکی ڕاستەقینەی TikTok. */}
                 <a
                   href="#"
                   target="_blank"
@@ -221,7 +222,6 @@ export default function Footer() {
                   <TikTokIcon />
                 </a>
 
-                {/* دواتر href="#" ـی ئەم WhatsApp ـە بگۆڕە بۆ لینکی ڕاستەقینەی WhatsApp. */}
                 <a
                   href="#"
                   target="_blank"
@@ -232,7 +232,6 @@ export default function Footer() {
                   <WhatsAppIcon />
                 </a>
 
-                {/* دواتر href="#" ـی ئەم Viber ـە بگۆڕە بۆ لینکی ڕاستەقینەی Viber. */}
                 <a
                   href="#"
                   target="_blank"
@@ -424,9 +423,6 @@ export default function Footer() {
                 )}
               </div>
             </div>
-
-           
-            
           </div>
 
           <div className="mt-10 border-t border-white/10 pt-6 text-center text-xs text-white/60">
@@ -436,4 +432,4 @@ export default function Footer() {
       </div>
     </footer>
   );
-} 
+}

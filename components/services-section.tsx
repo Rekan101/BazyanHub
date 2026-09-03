@@ -570,7 +570,6 @@ export function ServicesSection() {
                     initial="hidden"
                     animate="visible"
                     exit="exit"
-                    layout
                     className="min-w-0"
                   >
                     <Link

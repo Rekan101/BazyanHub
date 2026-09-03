@@ -136,7 +136,7 @@ export default function PlacesGrid({
       className="mx-auto max-w-[1440px] px-4 py-14 sm:px-6 lg:px-10 lg:py-20"
     >
       {/* Section Header */}
-      <div className="mb-8 flex items-end justify-between gap-4">
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-[#1F2937] dark:text-white sm:text-2xl">
             شوێنە گەشتیاری و مێژووییەکان
