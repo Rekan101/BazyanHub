@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import Link from "next/link";
 import { Star, MapPin, Heart, ArrowLeft } from "lucide-react";
@@ -39,15 +40,14 @@ export default function PlaceCard({
     >
       {/* IMAGE */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
-        <img
+        <Image
           src={imageSrc}
           alt={placeTitle}
-          loading={priority ? "eager" : "lazy"}
-          decoding="async"
+          fill
+          priority={priority}
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
           onError={(event) => {
-            console.error("IMAGE FAILED:", imageSrc);
-
             event.currentTarget.style.display = "none";
           }}
         />

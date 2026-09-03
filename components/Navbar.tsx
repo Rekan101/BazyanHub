@@ -239,7 +239,7 @@ export default function Navbar() {
     />
 
     <Image 
-      src="/images/logo.png" 
+      src="/images/logo.webp" 
       alt={t("brand")} 
       width={88} 
       height={88} 
@@ -998,7 +998,7 @@ export default function Navbar() {
                   "
                 >
                   <Image
-                    src="/images/logo.png"
+                    src="/images/logo.webp"
                     alt={t("brand")}
                     width={48}
                     height={48}

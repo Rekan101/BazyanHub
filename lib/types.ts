@@ -19,5 +19,5 @@ export interface NavLink {
 export interface QuickAction {
   label: string;
   href: string;
-  icon: "map" | "favorites" | "list" | "outage";
+  icon: "map" | "favorites" | "list";
 }

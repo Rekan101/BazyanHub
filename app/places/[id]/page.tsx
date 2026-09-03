@@ -13,17 +13,17 @@ import {
 import { places } from "@/lib/data/places";
 
 interface PlaceDetailsPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default function PlaceDetailsPage({
+export default async function PlaceDetailsPage({
   params,
 }: PlaceDetailsPageProps) {
-  const place = places.find(
-    (item) => item.id === params.id
-  );
+  const { id } = await params;
+
+  const place = places.find((item) => item.id === id);
 
   if (!place) {
     notFound();
@@ -153,9 +153,7 @@ export default function PlaceDetailsPage({
                   </p>
 
                   <p className="mt-1 text-sm font-bold">
-                    {place.reviewCount.toLocaleString(
-                      "ckb-IQ"
-                    )}
+                    {place.reviewCount.toLocaleString("ckb-IQ")}
                   </p>
                 </div>
               </div>

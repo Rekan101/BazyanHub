@@ -54,7 +54,7 @@ const GRID_ANIMATION = {
     transition: {
       duration: 0.4,
       delay: index * 0.04,
-      ease: [0.22, 1, 0.36, 1],
+      ease: [0.22, 1, 0.36, 1] as const,
     },
   }),
 
@@ -114,14 +114,8 @@ const SERVICE_FILTERS = [
 
       translations: {
         ckb: filter.label,
-        ar: getFilterArabic(
-          filter.id,
-          filter.label
-        ),
-        en: getFilterEnglish(
-          filter.id,
-          filter.label
-        ),
+        ar: getFilterArabic(filter.id, filter.label),
+        en: getFilterEnglish(filter.id, filter.label),
       },
     }))
   ),
@@ -162,10 +156,7 @@ const SERVICE_UI_TEXT: Record<
   },
 };
 
-function getFilterArabic(
-  id: string,
-  fallback: string
-): string {
+function getFilterArabic(id: string, fallback: string): string {
   const translations: Record<string, string> = {
     taxi: "تاكسي",
     pickup: "بيك أب",
@@ -190,10 +181,7 @@ function getFilterArabic(
   return translations[id] ?? fallback;
 }
 
-function getFilterEnglish(
-  id: string,
-  fallback: string
-): string {
+function getFilterEnglish(id: string, fallback: string): string {
   const translations: Record<string, string> = {
     taxi: "Taxi",
     pickup: "Pickup",
@@ -248,8 +236,7 @@ function getCategoryTitle(
   category: ServiceCategory,
   language: LanguageCode
 ) {
-  const localized =
-    CATEGORY_TITLES[category.id];
+  const localized = CATEGORY_TITLES[category.id];
 
   if (localized) {
     return localized[language];
@@ -264,27 +251,20 @@ function readFavorites(): Record<string, boolean> {
   }
 
   try {
-    const stored =
-      localStorage.getItem(
-        FAVORITES_STORAGE_KEY
-      );
+    const stored = localStorage.getItem(FAVORITES_STORAGE_KEY);
 
     if (!stored) {
       return {};
     }
 
-    const parsed: unknown =
-      JSON.parse(stored);
+    const parsed: unknown = JSON.parse(stored);
 
     if (
       parsed &&
       typeof parsed === "object" &&
       !Array.isArray(parsed)
     ) {
-      return parsed as Record<
-        string,
-        boolean
-      >;
+      return parsed as Record<string, boolean>;
     }
 
     return {};
@@ -293,9 +273,7 @@ function readFavorites(): Record<string, boolean> {
   }
 }
 
-function saveFavorites(
-  favorites: Record<string, boolean>
-) {
+function saveFavorites(favorites: Record<string, boolean>) {
   if (typeof window === "undefined") {
     return;
   }
@@ -307,9 +285,7 @@ function saveFavorites(
     );
 
     window.dispatchEvent(
-      new CustomEvent(
-        "bazianhub-favorites-changed"
-      )
+      new CustomEvent("bazianhub-favorites-changed")
     );
   } catch {
     // Ignore localStorage errors.
@@ -317,43 +293,29 @@ function saveFavorites(
 }
 
 export function ServicesSection() {
-  const { t, language } =
-    useLanguage();
+  const { t, language } = useLanguage();
 
-  const currentLanguage =
-    language as LanguageCode;
+  const currentLanguage = language as LanguageCode;
 
   const ui =
-    SERVICE_UI_TEXT[
-      currentLanguage
-    ] ?? SERVICE_UI_TEXT.ckb;
+    SERVICE_UI_TEXT[currentLanguage] ?? SERVICE_UI_TEXT.ckb;
 
   const [activeFilter, setActiveFilter] =
     useState<ServiceFilterKey>("all");
 
   const [favorites, setFavorites] =
-    useState<
-      Record<string, boolean>
-    >({});
+    useState<Record<string, boolean>>({});
 
-  const isRTL =
-    currentLanguage !== "en";
+  const isRTL = currentLanguage !== "en";
 
-  const ArrowIcon = isRTL
-    ? ArrowLeft
-    : ArrowRight;
+  const ArrowIcon = isRTL ? ArrowLeft : ArrowRight;
 
   useEffect(() => {
-    setFavorites(
-      readFavorites()
-    );
+    setFavorites(readFavorites());
 
-    const handleFavoritesChanged =
-      () => {
-        setFavorites(
-          readFavorites()
-        );
-      };
+    const handleFavoritesChanged = () => {
+      setFavorites(readFavorites());
+    };
 
     window.addEventListener(
       "bazianhub-favorites-changed",
@@ -378,48 +340,27 @@ export function ServicesSection() {
     };
   }, []);
 
-  const visibleCategories =
-    useMemo(() => {
-      if (
-        activeFilter ===
-        "all"
-      ) {
-        return categories;
-      }
+  const visibleCategories = useMemo(() => {
+    if (activeFilter === "all") {
+      return categories;
+    }
 
-      if (
-        activeFilter ===
-        "popular"
-      ) {
-        return categories.filter(
-          (category) =>
-            category.popular
-        );
-      }
+    if (activeFilter === "popular") {
+      return categories.filter((category) => category.popular);
+    }
 
-      if (
-        activeFilter ===
-        "featured"
-      ) {
-        return categories.filter(
-          (category) =>
-            category.featured
-        );
-      }
+    if (activeFilter === "featured") {
+      return categories.filter((category) => category.featured);
+    }
 
-      return categories.filter(
-        (
-          category: CategoryWithFilter
-        ) =>
-          category.filters.some(
-            (
-              filter: ServiceFilter
-            ) =>
-              filter.id ===
-              activeFilter
-          )
-      );
-    }, [activeFilter]);
+    return categories.filter(
+      (category: CategoryWithFilter) =>
+        category.filters.some(
+          (filter: ServiceFilter) =>
+            filter.id === activeFilter
+        )
+    );
+  }, [activeFilter]);
 
   const locale =
     currentLanguage === "en"
@@ -441,9 +382,7 @@ export function ServicesSection() {
         [id]: !prev[id],
       };
 
-      saveFavorites(
-        updated
-      );
+      saveFavorites(updated);
 
       return updated;
     });
@@ -510,9 +449,7 @@ export function ServicesSection() {
         {/* Filters */}
         <div
           role="tablist"
-          aria-label={t(
-            "servicesFilter"
-          )}
+          aria-label={t("servicesFilter")}
           className="
             mt-10
             flex
@@ -528,76 +465,68 @@ export function ServicesSection() {
             sm:overflow-visible
           "
         >
-          {SERVICE_FILTERS.map(
-            (filter) => {
-              const isActive =
-                activeFilter ===
-                filter.id;
+          {SERVICE_FILTERS.map((filter) => {
+            const isActive =
+              activeFilter === filter.id;
 
-              const label =
-                getLocalizedText(
-                  currentLanguage,
-                  filter.translations
-                );
+            const label = getLocalizedText(
+              currentLanguage,
+              filter.translations
+            );
 
-              return (
-                <button
-                  key={filter.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={
-                    isActive
-                  }
-                  onClick={() =>
-                    setActiveFilter(
-                      filter.id
-                    )
-                  }
-                  className={cn(
-                    `
-                      relative
-                      shrink-0
-                      snap-start
-                      rounded-full
-                      border
-                      px-5
-                      py-2.5
-                      text-sm
-                      font-semibold
-                      outline-none
-                      transition-all
-                      duration-300
-                    `,
-                    `
-                      focus-visible:ring-2
-                      focus-visible:ring-primary/60
-                      focus-visible:ring-offset-2
-                    `,
-                    isActive
-                      ? `
-                          border-primary
-                          bg-primary
-                          text-white
-                          shadow-md
-                          shadow-primary/25
-                        `
-                      : `
-                          border-slate-200
-                          bg-white/80
-                          text-slate-700
-                          hover:border-primary/40
-                          hover:text-primary
-                          dark:border-slate-800
-                          dark:bg-slate-900/80
-                          dark:text-slate-300
-                        `
-                  )}
-                >
-                  {label}
-                </button>
-              );
-            }
-          )}
+            return (
+              <button
+                key={filter.id}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                onClick={() =>
+                  setActiveFilter(filter.id)
+                }
+                className={cn(
+                  `
+                    relative
+                    shrink-0
+                    snap-start
+                    rounded-full
+                    border
+                    px-5
+                    py-2.5
+                    text-sm
+                    font-semibold
+                    outline-none
+                    transition-all
+                    duration-300
+                  `,
+                  `
+                    focus-visible:ring-2
+                    focus-visible:ring-primary/60
+                    focus-visible:ring-offset-2
+                  `,
+                  isActive
+                    ? `
+                        border-primary
+                        bg-primary
+                        text-white
+                        shadow-md
+                        shadow-primary/25
+                      `
+                    : `
+                        border-slate-200
+                        bg-white/80
+                        text-slate-700
+                        hover:border-primary/40
+                        hover:text-primary
+                        dark:border-slate-800
+                        dark:bg-slate-900/80
+                        dark:text-slate-300
+                      `
+                )}
+              >
+                {label}
+              </button>
+            );
+          })}
         </div>
 
         {/* Cards Grid */}
@@ -625,9 +554,7 @@ export function ServicesSection() {
                   ];
 
                 const isFavorite =
-                  !!favorites[
-                    category.id
-                  ];
+                  !!favorites[category.id];
 
                 const categoryTitle =
                   getCategoryTitle(
@@ -639,9 +566,7 @@ export function ServicesSection() {
                   <motion.div
                     key={category.id}
                     custom={index}
-                    variants={
-                      GRID_ANIMATION
-                    }
+                    variants={GRID_ANIMATION}
                     initial="hidden"
                     animate="visible"
                     exit="exit"
@@ -785,9 +710,7 @@ export function ServicesSection() {
                                   sm:py-1
                                   sm:text-[11px]
                                 "
-                                title={
-                                  ui.featured
-                                }
+                                title={ui.featured}
                               >
                                 <Sparkles
                                   className="
@@ -800,9 +723,7 @@ export function ServicesSection() {
                                 />
 
                                 <span className="hidden sm:inline">
-                                  {
-                                    ui.featured
-                                  }
+                                  {ui.featured}
                                 </span>
                               </span>
                             )}
@@ -829,9 +750,7 @@ export function ServicesSection() {
                                   sm:py-1
                                   sm:text-[11px]
                                 "
-                                title={
-                                  ui.popular
-                                }
+                                title={ui.popular}
                               >
                                 <Flame
                                   className="
@@ -844,9 +763,7 @@ export function ServicesSection() {
                                 />
 
                                 <span className="hidden sm:inline">
-                                  {
-                                    ui.popular
-                                  }
+                                  {ui.popular}
                                 </span>
                               </span>
                             )}
@@ -854,9 +771,7 @@ export function ServicesSection() {
                             {/* Favorite Button */}
                             <button
                               type="button"
-                              onClick={(
-                                e
-                              ) =>
+                              onClick={(e) =>
                                 toggleFavorite(
                                   e,
                                   category.id
@@ -941,9 +856,7 @@ export function ServicesSection() {
                               sm:leading-7
                             "
                           >
-                            {
-                              categoryTitle
-                            }
+                            {categoryTitle}
                           </h3>
 
                           <p
@@ -959,10 +872,7 @@ export function ServicesSection() {
                               sm:leading-5
                             "
                           >
-                            {category
-                              .filters
-                              .length >
-                            0
+                            {category.filters.length > 0
                               ? `${category.filters.length.toLocaleString(
                                   locale
                                 )} ${ui.categoryTypes}`
@@ -986,12 +896,8 @@ export function ServicesSection() {
                         "
                       >
                         <Image
-                          src={
-                            category.imageSrc
-                          }
-                          alt={
-                            categoryTitle
-                          }
+                          src={category.imageSrc}
+                          alt={categoryTitle}
                           fill
                           sizes="
                             (max-width: 640px) 33vw,
@@ -1048,11 +954,9 @@ export function ServicesSection() {
                               sm:text-xs
                             "
                           >
-                            {currentLanguage ===
-                            "ckb"
+                            {currentLanguage === "ckb"
                               ? "بینینی زانیارییەکان"
-                              : currentLanguage ===
-                                  "ar"
+                              : currentLanguage === "ar"
                                 ? "عرض التفاصيل"
                                 : "View details"}
                           </span>
