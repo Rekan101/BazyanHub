@@ -1,9 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useState, type MouseEvent } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type MouseEvent,
+} from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
+import {
+  AnimatePresence,
+  motion,
+} from "framer-motion";
 import {
   ArrowLeft,
   ArrowRight,
@@ -38,7 +46,8 @@ type CategoryWithFilter = ServiceCategory & {
   filterKey?: ServiceFilterKey;
 };
 
-const FAVORITES_STORAGE_KEY = "bazianhub-favorites";
+const FAVORITES_STORAGE_KEY =
+  "bazianhub-favorites";
 
 const GRID_ANIMATION = {
   hidden: {
@@ -67,7 +76,10 @@ const GRID_ANIMATION = {
   },
 } as const;
 
-const CATEGORY_ICONS: Record<string, LucideIcon> = {
+const CATEGORY_ICONS: Record<
+  string,
+  LucideIcon
+> = {
   car: Car,
   utensils: Utensils,
   "shopping-cart": ShoppingCart,
@@ -114,8 +126,14 @@ const SERVICE_FILTERS = [
 
       translations: {
         ckb: filter.label,
-        ar: getFilterArabic(filter.id, filter.label),
-        en: getFilterEnglish(filter.id, filter.label),
+        ar: getFilterArabic(
+          filter.id,
+          filter.label
+        ),
+        en: getFilterEnglish(
+          filter.id,
+          filter.label
+        ),
       },
     }))
   ),
@@ -133,10 +151,12 @@ const SERVICE_UI_TEXT: Record<
 > = {
   ckb: {
     categoryTypes: "جۆر / خزمەتگوزاری",
-    servicesList: "لیستی خزمەتگوزارییەکان",
+    servicesList:
+      "لیستی خزمەتگوزارییەکان",
     featured: "تایبەت",
     popular: "پڕداواکاری",
-    favoriteAdd: "زیادکردن بۆ دڵخوازەکان",
+    favoriteAdd:
+      "زیادکردن بۆ دڵخوازەکان",
   },
 
   ar: {
@@ -144,7 +164,8 @@ const SERVICE_UI_TEXT: Record<
     servicesList: "قائمة الخدمات",
     featured: "مميز",
     popular: "الأكثر طلبًا",
-    favoriteAdd: "إضافة إلى المفضلة",
+    favoriteAdd:
+      "إضافة إلى المفضلة",
   },
 
   en: {
@@ -152,12 +173,19 @@ const SERVICE_UI_TEXT: Record<
     servicesList: "Services List",
     featured: "Featured",
     popular: "Popular",
-    favoriteAdd: "Add to favorites",
+    favoriteAdd:
+      "Add to favorites",
   },
 };
 
-function getFilterArabic(id: string, fallback: string): string {
-  const translations: Record<string, string> = {
+function getFilterArabic(
+  id: string,
+  fallback: string
+): string {
+  const translations: Record<
+    string,
+    string
+  > = {
     taxi: "تاكسي",
     pickup: "بيك أب",
     excavator: "حفارة",
@@ -166,8 +194,10 @@ function getFilterArabic(id: string, fallback: string): string {
     painter: "دهان",
     puncture: "بنچر",
     "car-wash": "غسيل السيارات",
-    "auto-electrician": "كهربائي سيارات",
-    "spare-parts": "قطع غيار السيارات",
+    "auto-electrician":
+      "كهربائي سيارات",
+    "spare-parts":
+      "قطع غيار السيارات",
 
     barber: "حلاق",
     salon: "صالون",
@@ -181,8 +211,14 @@ function getFilterArabic(id: string, fallback: string): string {
   return translations[id] ?? fallback;
 }
 
-function getFilterEnglish(id: string, fallback: string): string {
-  const translations: Record<string, string> = {
+function getFilterEnglish(
+  id: string,
+  fallback: string
+): string {
+  const translations: Record<
+    string,
+    string
+  > = {
     taxi: "Taxi",
     pickup: "Pickup",
     excavator: "Excavator",
@@ -191,7 +227,8 @@ function getFilterEnglish(id: string, fallback: string): string {
     painter: "Painter",
     puncture: "Tire Repair",
     "car-wash": "Car Wash",
-    "auto-electrician": "Auto Electrician",
+    "auto-electrician":
+      "Auto Electrician",
     "spare-parts": "Spare Parts",
 
     barber: "Barber",
@@ -236,7 +273,8 @@ function getCategoryTitle(
   category: ServiceCategory,
   language: LanguageCode
 ) {
-  const localized = CATEGORY_TITLES[category.id];
+  const localized =
+    CATEGORY_TITLES[category.id];
 
   if (localized) {
     return localized[language];
@@ -245,26 +283,35 @@ function getCategoryTitle(
   return category.translations[language];
 }
 
-function readFavorites(): Record<string, boolean> {
+function readFavorites(): Record<
+  string,
+  boolean
+> {
   if (typeof window === "undefined") {
     return {};
   }
 
   try {
-    const stored = localStorage.getItem(FAVORITES_STORAGE_KEY);
+    const stored = localStorage.getItem(
+      FAVORITES_STORAGE_KEY
+    );
 
     if (!stored) {
       return {};
     }
 
-    const parsed: unknown = JSON.parse(stored);
+    const parsed: unknown =
+      JSON.parse(stored);
 
     if (
       parsed &&
       typeof parsed === "object" &&
       !Array.isArray(parsed)
     ) {
-      return parsed as Record<string, boolean>;
+      return parsed as Record<
+        string,
+        boolean
+      >;
     }
 
     return {};
@@ -273,7 +320,9 @@ function readFavorites(): Record<string, boolean> {
   }
 }
 
-function saveFavorites(favorites: Record<string, boolean>) {
+function saveFavorites(
+  favorites: Record<string, boolean>
+) {
   if (typeof window === "undefined") {
     return;
   }
@@ -285,7 +334,9 @@ function saveFavorites(favorites: Record<string, boolean>) {
     );
 
     window.dispatchEvent(
-      new CustomEvent("bazianhub-favorites-changed")
+      new CustomEvent(
+        "bazianhub-favorites-changed"
+      )
     );
   } catch {
     // Ignore localStorage errors.
@@ -293,29 +344,47 @@ function saveFavorites(favorites: Record<string, boolean>) {
 }
 
 export function ServicesSection() {
-  const { t, language } = useLanguage();
+  const { t, language } =
+    useLanguage();
 
-  const currentLanguage = language as LanguageCode;
+  const currentLanguage =
+    language as LanguageCode;
 
   const ui =
-    SERVICE_UI_TEXT[currentLanguage] ?? SERVICE_UI_TEXT.ckb;
+    SERVICE_UI_TEXT[
+      currentLanguage
+    ] ?? SERVICE_UI_TEXT.ckb;
 
-  const [activeFilter, setActiveFilter] =
-    useState<ServiceFilterKey>("all");
+  const [
+    activeFilter,
+    setActiveFilter,
+  ] = useState<ServiceFilterKey>(
+    "all"
+  );
 
   const [favorites, setFavorites] =
-    useState<Record<string, boolean>>({});
+    useState<
+      Record<string, boolean>
+    >({});
 
-  const isRTL = currentLanguage !== "en";
+  const isRTL =
+    currentLanguage !== "en";
 
-  const ArrowIcon = isRTL ? ArrowLeft : ArrowRight;
+  const ArrowIcon = isRTL
+    ? ArrowLeft
+    : ArrowRight;
 
   useEffect(() => {
-    setFavorites(readFavorites());
+    setFavorites(
+      readFavorites()
+    );
 
-    const handleFavoritesChanged = () => {
-      setFavorites(readFavorites());
-    };
+    const handleFavoritesChanged =
+      () => {
+        setFavorites(
+          readFavorites()
+        );
+      };
 
     window.addEventListener(
       "bazianhub-favorites-changed",
@@ -340,34 +409,43 @@ export function ServicesSection() {
     };
   }, []);
 
-  const visibleCategories = useMemo(() => {
-    if (activeFilter === "all") {
-      return categories;
-    }
+  const visibleCategories =
+    useMemo(() => {
+      if (activeFilter === "all") {
+        return categories;
+      }
 
-    if (activeFilter === "popular") {
-      return categories.filter((category) => category.popular);
-    }
+      if (
+        activeFilter === "popular"
+      ) {
+        return categories.filter(
+          (category) =>
+            category.popular
+        );
+      }
 
-    if (activeFilter === "featured") {
-      return categories.filter((category) => category.featured);
-    }
+      if (
+        activeFilter === "featured"
+      ) {
+        return categories.filter(
+          (category) =>
+            category.featured
+        );
+      }
 
-    return categories.filter(
-      (category: CategoryWithFilter) =>
-        category.filters.some(
-          (filter: ServiceFilter) =>
-            filter.id === activeFilter
-        )
-    );
-  }, [activeFilter]);
-
-  const locale =
-    currentLanguage === "en"
-      ? "en-US"
-      : currentLanguage === "ar"
-        ? "ar-IQ"
-        : "ckb";
+      return categories.filter(
+        (
+          category: CategoryWithFilter
+        ) =>
+          category.filters.some(
+            (
+              filter: ServiceFilter
+            ) =>
+              filter.id ===
+              activeFilter
+          )
+      );
+    }, [activeFilter]);
 
   const toggleFavorite = (
     e: MouseEvent,
@@ -467,21 +545,27 @@ export function ServicesSection() {
         >
           {SERVICE_FILTERS.map((filter) => {
             const isActive =
-              activeFilter === filter.id;
+              activeFilter ===
+              filter.id;
 
-            const label = getLocalizedText(
-              currentLanguage,
-              filter.translations
-            );
+            const label =
+              getLocalizedText(
+                currentLanguage,
+                filter.translations
+              );
 
             return (
               <button
                 key={filter.id}
                 type="button"
                 role="tab"
-                aria-selected={isActive}
+                aria-selected={
+                  isActive
+                }
                 onClick={() =>
-                  setActiveFilter(filter.id)
+                  setActiveFilter(
+                    filter.id
+                  )
                 }
                 className={cn(
                   `
@@ -554,7 +638,9 @@ export function ServicesSection() {
                   ];
 
                 const isFavorite =
-                  !!favorites[category.id];
+                  !!favorites[
+                    category.id
+                  ];
 
                 const categoryTitle =
                   getCategoryTitle(
@@ -566,7 +652,9 @@ export function ServicesSection() {
                   <motion.div
                     key={category.id}
                     custom={index}
-                    variants={GRID_ANIMATION}
+                    variants={
+                      GRID_ANIMATION
+                    }
                     initial="hidden"
                     animate="visible"
                     exit="exit"
@@ -709,7 +797,9 @@ export function ServicesSection() {
                                   sm:py-1
                                   sm:text-[11px]
                                 "
-                                title={ui.featured}
+                                title={
+                                  ui.featured
+                                }
                               >
                                 <Sparkles
                                   className="
@@ -722,7 +812,9 @@ export function ServicesSection() {
                                 />
 
                                 <span className="hidden sm:inline">
-                                  {ui.featured}
+                                  {
+                                    ui.featured
+                                  }
                                 </span>
                               </span>
                             )}
@@ -749,7 +841,9 @@ export function ServicesSection() {
                                   sm:py-1
                                   sm:text-[11px]
                                 "
-                                title={ui.popular}
+                                title={
+                                  ui.popular
+                                }
                               >
                                 <Flame
                                   className="
@@ -762,7 +856,9 @@ export function ServicesSection() {
                                 />
 
                                 <span className="hidden sm:inline">
-                                  {ui.popular}
+                                  {
+                                    ui.popular
+                                  }
                                 </span>
                               </span>
                             )}
@@ -872,9 +968,7 @@ export function ServicesSection() {
                             "
                           >
                             {category.filters.length > 0
-                              ? `${category.filters.length.toLocaleString(
-                                  locale
-                                )} ${ui.categoryTypes}`
+                              ? `${category.filters.length} ${ui.categoryTypes}`
                               : ui.servicesList}
                           </p>
                         </div>
@@ -898,11 +992,9 @@ export function ServicesSection() {
                           src={category.imageSrc}
                           alt={categoryTitle}
                           fill
-                          sizes="
-                            (max-width: 640px) 33vw,
-                            (max-width: 1024px) 50vw,
-                            33vw
-                          "
+                          loading="lazy"
+                          fetchPriority="low"
+                          sizes="(max-width: 640px) 33vw, (max-width: 1024px) 50vw, 33vw"
                           className="
                             object-cover
                             transition-transform
@@ -953,9 +1045,11 @@ export function ServicesSection() {
                               sm:text-xs
                             "
                           >
-                            {currentLanguage === "ckb"
+                            {currentLanguage ===
+                            "ckb"
                               ? "بینینی زانیارییەکان"
-                              : currentLanguage === "ar"
+                              : currentLanguage ===
+                                  "ar"
                                 ? "عرض التفاصيل"
                                 : "View details"}
                           </span>

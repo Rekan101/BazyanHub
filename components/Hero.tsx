@@ -1,6 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type MouseEvent,
+} from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -209,14 +214,20 @@ const STORY_ITEMS: StoryItem[] = [
    STORY EXPIRATION
    ========================================================================== */
 
-function getExpirationTime(story: StoryItem): number {
-  const createdAt = new Date(story.createdAt).getTime();
+function getExpirationTime(
+  story: StoryItem
+): number {
+  const createdAt = new Date(
+    story.createdAt
+  ).getTime();
 
   if (Number.isNaN(createdAt)) {
     return 0;
   }
 
-  if (story.duration.unit === "hours") {
+  if (
+    story.duration.unit === "hours"
+  ) {
     return (
       createdAt +
       story.duration.amount *
@@ -226,7 +237,9 @@ function getExpirationTime(story: StoryItem): number {
     );
   }
 
-  if (story.duration.unit === "days") {
+  if (
+    story.duration.unit === "days"
+  ) {
     return (
       createdAt +
       story.duration.amount *
@@ -237,7 +250,9 @@ function getExpirationTime(story: StoryItem): number {
     );
   }
 
-  const expiration = new Date(story.createdAt);
+  const expiration = new Date(
+    story.createdAt
+  );
 
   expiration.setMonth(
     expiration.getMonth() +
@@ -259,7 +274,8 @@ function getRemainingStories(
     .slice(0, 10)
     .filter(
       (story) =>
-        getExpirationTime(story) > now
+        getExpirationTime(story) >
+        now
     );
 }
 
@@ -268,21 +284,26 @@ function getRemainingStories(
    ========================================================================== */
 
 export default function Hero() {
-  const { language, t } = useLanguage();
+  const { language, t } =
+    useLanguage();
 
   /* ------------------------------------------------------------------------
      Current time
      ------------------------------------------------------------------------ */
 
   const [now, setNow] =
-    useState<number>(() => Date.now());
+    useState<number>(
+      () => Date.now()
+    );
 
   /* ------------------------------------------------------------------------
      Current story
      ------------------------------------------------------------------------ */
 
-  const [activeStoryIndex, setActiveStoryIndex] =
-    useState(0);
+  const [
+    activeStoryIndex,
+    setActiveStoryIndex,
+  ] = useState(0);
 
   /* ------------------------------------------------------------------------
      Update time every minute
@@ -295,7 +316,9 @@ export default function Hero() {
       }, 60 * 1000);
 
     return () => {
-      window.clearInterval(interval);
+      window.clearInterval(
+        interval
+      );
     };
   }, []);
 
@@ -335,8 +358,6 @@ export default function Hero() {
 
   /* ------------------------------------------------------------------------
      AUTO STORY LOOP
-
-     1 → 2 → 3 → ... → 10 → 1 → 2 ...
      ------------------------------------------------------------------------ */
 
   useEffect(() => {
@@ -373,12 +394,14 @@ export default function Hero() {
      ------------------------------------------------------------------------ */
 
   const handleServicesScroll = (
-    event: React.MouseEvent<HTMLAnchorElement>
+    event: MouseEvent<HTMLAnchorElement>
   ) => {
     event.preventDefault();
 
     const servicesSection =
-      document.getElementById("services");
+      document.getElementById(
+        "services"
+      );
 
     if (!servicesSection) {
       return;
@@ -400,26 +423,27 @@ export default function Hero() {
      QUICK ACTIONS
      ------------------------------------------------------------------------ */
 
-  const translatedActions: QuickAction[] = [
-    {
-      label: t("map"),
-      href:
-        "https://www.google.com/maps/search/?api=1&query=35.5947,45.13686",
-      icon: "map",
-    },
+  const translatedActions: QuickAction[] =
+    [
+      {
+        label: t("map"),
+        href:
+          "https://www.google.com/maps/search/?api=1&query=35.5947,45.13686",
+        icon: "map",
+      },
 
-    {
-      label: t("favorites"),
-      href: "/favorites",
-      icon: "favorites",
-    },
+      {
+        label: t("favorites"),
+        href: "/favorites",
+        icon: "favorites",
+      },
 
-    {
-      label: t("servicesList"),
-      href: "#services",
-      icon: "list",
-    },
-  ];
+      {
+        label: t("servicesList"),
+        href: "#services",
+        icon: "list",
+      },
+    ];
 
   /* ------------------------------------------------------------------------
      RTL
@@ -433,8 +457,9 @@ export default function Hero() {
      ------------------------------------------------------------------------ */
 
   const currentStory =
-    activeStories[activeStoryIndex] ??
-    null;
+    activeStories[
+      activeStoryIndex
+    ] ?? null;
 
   return (
     <LazyMotion features={domAnimation}>
@@ -452,23 +477,23 @@ export default function Hero() {
         "
       >
         {/* ====================================================================
-            BACKGROUND
+            BACKGROUND — LCP
             ==================================================================== */}
 
-            <Image
-        src="/images/hero-bg.jpg"
-        alt=""
-        fill
-        priority
-        fetchPriority="high"
-        quality={60}
-        sizes="100vw"
-        className="
-          object-cover
-          object-[center_35%]
-          sm:object-top
-        "
-      />  
+        <Image
+          src="/images/hero-bg.jpg"
+          alt=""
+          fill
+          priority
+          fetchPriority="high"
+          quality={60}
+          sizes="100vw"
+          className="
+            object-cover
+            object-[center_35%]
+            sm:object-top
+          "
+        />
 
         {/* ====================================================================
             DARK OVERLAY
@@ -618,7 +643,9 @@ export default function Hero() {
                   "
                 >
                   <Link
-                    href={currentStory.href}
+                    href={
+                      currentStory.href
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={`کردنەوەی ${currentStory.title}`}
@@ -649,22 +676,20 @@ export default function Hero() {
                       sm:rounded-[1.6rem]
                     "
                   >
-                    {/* ==========================================================
-                        STORY IMAGE
-                        ========================================================== */}
+                    {/* STORY IMAGE */}
 
                     <Image
-                      src={currentStory.image}
-                      alt={currentStory.title}
+                      src={
+                        currentStory.image
+                      }
+                      alt={
+                        currentStory.title
+                      }
                       fill
-                      priority
+                      loading="lazy"
+                      fetchPriority="low"
                       quality={80}
-                      sizes="
-                        (max-width: 640px) 220px,
-                        (max-width: 768px) 250px,
-                        (max-width: 1024px) 285px,
-                        300px
-                      "
+                      sizes="(max-width: 640px) 220px, (max-width: 768px) 250px, (max-width: 1024px) 285px, 300px"
                       className="
                         object-cover
                         transition-transform
@@ -674,9 +699,7 @@ export default function Hero() {
                       "
                     />
 
-                    {/* ==========================================================
-                        IMAGE OVERLAY
-                        ========================================================== */}
+                    {/* IMAGE OVERLAY */}
 
                     <div
                       aria-hidden="true"
@@ -690,9 +713,7 @@ export default function Hero() {
                       "
                     />
 
-                    {/* ==========================================================
-                        TOP SOFT GRADIENT
-                        ========================================================== */}
+                    {/* TOP SOFT GRADIENT */}
 
                     <div
                       aria-hidden="true"
@@ -707,9 +728,7 @@ export default function Hero() {
                       "
                     />
 
-                    {/* ==========================================================
-                        EXTERNAL LINK ICON
-                        ========================================================== */}
+                    {/* EXTERNAL LINK ICON */}
 
                     <div
                       aria-hidden="true"
@@ -746,9 +765,7 @@ export default function Hero() {
                       />
                     </div>
 
-                    {/* ==========================================================
-                        STORY TEXT
-                        ========================================================== */}
+                    {/* STORY TEXT */}
 
                     <div
                       className="
@@ -770,7 +787,9 @@ export default function Hero() {
                           sm:text-lg
                         "
                       >
-                        {currentStory.title}
+                        {
+                          currentStory.title
+                        }
                       </p>
 
                       {currentStory.subtitle && (
@@ -786,14 +805,14 @@ export default function Hero() {
                             sm:text-xs
                           "
                         >
-                          {currentStory.subtitle}
+                          {
+                            currentStory.subtitle
+                          }
                         </p>
                       )}
                     </div>
 
-                    {/* ==========================================================
-                        HOVER SHINE
-                        ========================================================== */}
+                    {/* HOVER SHINE */}
 
                     <div
                       aria-hidden="true"
@@ -813,9 +832,7 @@ export default function Hero() {
                     />
                   </Link>
 
-                  {/* ============================================================
-                      STORY PROGRESS
-                      ============================================================ */}
+                  {/* STORY PROGRESS */}
 
                   <div
                     className="
@@ -926,9 +943,7 @@ export default function Hero() {
                 w-full
               "
             >
-              {/* ==================================================================
-                  HEADLINE
-                  ================================================================== */}
+              {/* HEADLINE */}
 
               <m.h1
                 className="
@@ -949,9 +964,7 @@ export default function Hero() {
                 {t("heroTitle")}
               </m.h1>
 
-              {/* ==================================================================
-                  DESCRIPTION
-                  ================================================================== */}
+              {/* DESCRIPTION */}
 
               <m.p
                 className="
@@ -1024,7 +1037,8 @@ export default function Hero() {
                       key={action.href}
                       href={action.href}
                       onClick={
-                        action.href === "#services"
+                        action.href ===
+                        "#services"
                           ? handleServicesScroll
                           : undefined
                       }
@@ -1127,7 +1141,9 @@ export default function Hero() {
             >
               <Link
                 href="#services"
-                onClick={handleServicesScroll}
+                onClick={
+                  handleServicesScroll
+                }
                 aria-label="بۆ بینینی خزمەتگوزاریەکان"
                 className="
                   flex
@@ -1140,9 +1156,7 @@ export default function Hero() {
                   focus-visible:ring-offset-black/20
                 "
               >
-                {/* ================================================================
-                    TEXT
-                    ================================================================ */}
+                {/* TEXT */}
 
                 <m.span
                   className="
@@ -1155,9 +1169,7 @@ export default function Hero() {
                   بۆ بینینی خزمەتگوزاریەکان
                 </m.span>
 
-                {/* ================================================================
-                    ARROW
-                    ================================================================ */}
+                {/* ARROW */}
 
                 <m.span
                   className="

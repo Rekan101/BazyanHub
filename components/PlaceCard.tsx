@@ -54,18 +54,10 @@ export default function PlaceCard({
           alt={placeTitle}
           fill
           priority={priority}
-          loading={
-            priority ? "eager" : "lazy"
-          }
-          fetchPriority={
-            priority ? "high" : "low"
-          }
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : "low"}
           quality={75}
-          sizes="
-            (max-width: 640px) 78vw,
-            (max-width: 1024px) 50vw,
-            25vw
-          "
+          sizes="(max-width: 640px) 78vw, (max-width: 1024px) 50vw, 25vw"
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
           onError={(event) => {
             event.currentTarget.style.display =
