@@ -3,7 +3,12 @@
 import Image from "next/image";
 import { useState } from "react";
 import Link from "next/link";
-import { Star, MapPin, Heart, ArrowLeft } from "lucide-react";
+import {
+  Star,
+  MapPin,
+  Heart,
+  ArrowLeft,
+} from "lucide-react";
 import type { PlaceWithTranslations } from "@/lib/data/places";
 import { useLanguage } from "@/lib/i18n";
 
@@ -16,7 +21,9 @@ export default function PlaceCard({
   place,
   priority = false,
 }: PlaceCardProps) {
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavorite, setIsFavorite] =
+    useState(false);
+
   const { language } = useLanguage();
 
   const currentLanguage =
@@ -30,7 +37,9 @@ export default function PlaceCard({
     place.translations[currentLanguage];
 
   // Normalize image path
-  const imageName = place.image.split("/").pop() || "";
+  const imageName =
+    place.image.split("/").pop() || "";
+
   const imageSrc = `/images/${imageName}`;
 
   return (
@@ -45,10 +54,22 @@ export default function PlaceCard({
           alt={placeTitle}
           fill
           priority={priority}
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          loading={
+            priority ? "eager" : "lazy"
+          }
+          fetchPriority={
+            priority ? "high" : "low"
+          }
+          quality={75}
+          sizes="
+            (max-width: 640px) 78vw,
+            (max-width: 1024px) 50vw,
+            25vw
+          "
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
           onError={(event) => {
-            event.currentTarget.style.display = "none";
+            event.currentTarget.style.display =
+              "none";
           }}
         />
 
@@ -61,7 +82,9 @@ export default function PlaceCard({
         <button
           type="button"
           onClick={() =>
-            setIsFavorite((value) => !value)
+            setIsFavorite(
+              (value) => !value
+            )
           }
           aria-pressed={isFavorite}
           aria-label={

@@ -19,18 +19,27 @@ export default function Home() {
         </section>
 
         {/* SERVICES */}
-        <section id="services" className="scroll-mt-24">
+        <section
+          id="services"
+          className="scroll-mt-24 [content-visibility:auto] [contain-intrinsic-size:900px]"
+        >
           <ServicesSection />
         </section>
 
         {/* ABOUT + TOURISM / HISTORICAL PLACES */}
-        <section id="about" className="scroll-mt-24">
+        <section
+          id="about"
+          className="scroll-mt-24 [content-visibility:auto] [contain-intrinsic-size:900px]"
+        >
           <AboutSection />
           <PlacesGrid places={places} />
         </section>
 
         {/* FAQ + CONTACT + FOOTER */}
-        <section id="contact" className="scroll-mt-24">
+        <section
+          id="contact"
+          className="scroll-mt-24 [content-visibility:auto] [contain-intrinsic-size:1000px]"
+        >
           <FaqSection />
           <Footer />
         </section>

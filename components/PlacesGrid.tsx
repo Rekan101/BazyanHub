@@ -1,7 +1,15 @@
 "use client";
 
-import { useRef, useState, useEffect, useCallback } from "react";
-import { ChevronRight, ChevronLeft } from "lucide-react";
+import {
+  useRef,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
+import {
+  ChevronRight,
+  ChevronLeft,
+} from "lucide-react";
 import PlaceCard from "@/components/PlaceCard";
 import type { PlaceWithTranslations } from "@/lib/data/places";
 
@@ -15,6 +23,9 @@ export default function PlacesGrid({
   const trackRef =
     useRef<HTMLDivElement | null>(null);
 
+  const animationFrameRef =
+    useRef<number | null>(null);
+
   const [activeIndex, setActiveIndex] =
     useState(0);
 
@@ -25,48 +36,79 @@ export default function PlacesGrid({
       return;
     }
 
-    const cards = Array.from(
-      track.children
-    ) as HTMLElement[];
-
-    if (cards.length === 0) {
+    if (animationFrameRef.current !== null) {
       return;
     }
 
-    const trackRect =
-      track.getBoundingClientRect();
+    animationFrameRef.current =
+      window.requestAnimationFrame(() => {
+        animationFrameRef.current = null;
 
-    const trackCenter =
-      trackRect.left +
-      trackRect.width / 2;
+        const currentTrack =
+          trackRef.current;
 
-    let closestIndex = 0;
-    let closestDistance = Infinity;
+        if (
+          !currentTrack ||
+          places.length === 0
+        ) {
+          return;
+        }
 
-    cards.forEach((card, index) => {
-      const cardRect =
-        card.getBoundingClientRect();
+        const cards = Array.from(
+          currentTrack.children
+        ) as HTMLElement[];
 
-      const cardCenter =
-        cardRect.left +
-        cardRect.width / 2;
+        if (cards.length === 0) {
+          return;
+        }
 
-      const distance = Math.abs(
-        cardCenter - trackCenter
-      );
+        const trackRect =
+          currentTrack.getBoundingClientRect();
 
-      if (distance < closestDistance) {
-        closestDistance = distance;
-        closestIndex = index;
-      }
-    });
+        const trackCenter =
+          trackRect.left +
+          trackRect.width / 2;
 
-    setActiveIndex(
-      Math.min(
-        Math.max(closestIndex, 0),
-        places.length - 1
-      )
-    );
+        let closestIndex = 0;
+        let closestDistance = Infinity;
+
+        for (
+          let index = 0;
+          index < cards.length;
+          index += 1
+        ) {
+          const card = cards[index];
+
+          const cardRect =
+            card.getBoundingClientRect();
+
+          const cardCenter =
+            cardRect.left +
+            cardRect.width / 2;
+
+          const distance = Math.abs(
+            cardCenter - trackCenter
+          );
+
+          if (
+            distance < closestDistance
+          ) {
+            closestDistance = distance;
+            closestIndex = index;
+          }
+        }
+
+        const nextIndex = Math.min(
+          Math.max(closestIndex, 0),
+          places.length - 1
+        );
+
+        setActiveIndex((currentIndex) =>
+          currentIndex === nextIndex
+            ? currentIndex
+            : nextIndex
+        );
+      });
   }, [places.length]);
 
   useEffect(() => {
@@ -88,7 +130,10 @@ export default function PlacesGrid({
 
     window.addEventListener(
       "resize",
-      updateActiveIndex
+      updateActiveIndex,
+      {
+        passive: true,
+      }
     );
 
     return () => {
@@ -101,6 +146,17 @@ export default function PlacesGrid({
         "resize",
         updateActiveIndex
       );
+
+      if (
+        animationFrameRef.current !==
+        null
+      ) {
+        window.cancelAnimationFrame(
+          animationFrameRef.current
+        );
+
+        animationFrameRef.current = null;
+      }
     };
   }, [updateActiveIndex]);
 
@@ -127,7 +183,10 @@ export default function PlacesGrid({
         ? -cardWidth
         : cardWidth;
 
-    track.scrollBy(distance, 0);
+    track.scrollBy({
+      left: distance,
+      behavior: "smooth",
+    });
   };
 
   return (
@@ -187,16 +246,14 @@ export default function PlacesGrid({
             className="-mx-4 flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth px-4 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-4"
           >
             {places.map(
-              (place, index) => (
+              (place) => (
                 <div
                   key={place.id}
                   className="w-[78vw] shrink-0 snap-start sm:w-auto"
                 >
                   <PlaceCard
                     place={place}
-                    priority={
-                      index === 0
-                    }
+                    priority={false}
                   />
                 </div>
               )
