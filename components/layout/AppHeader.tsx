@@ -10,6 +10,7 @@ import { useLanguage } from "@/lib/i18n";
 import { useTheme } from "@/components/ThemeProvider";
 
 import MenuSheet from "@/components/layout/MenuSheet";
+import NotificationPanel from "@/components/layout/NotificationPanel";
 
 /* ---------------------------------------------------------
    Shared styling for the header action buttons.
@@ -56,6 +57,11 @@ export default function AppHeader() {
   const [isMenuOpen, setIsMenuOpen] =
     useState(false);
 
+  const [
+    isNotificationsOpen,
+    setIsNotificationsOpen,
+  ] = useState(false);
+
   /* ---------------------------------------------------------
      Scroll state
   --------------------------------------------------------- */
@@ -85,6 +91,7 @@ export default function AppHeader() {
 
   useEffect(() => {
     setIsMenuOpen(false);
+    setIsNotificationsOpen(false);
   }, [pathname]);
 
   return (
@@ -252,7 +259,14 @@ export default function AppHeader() {
 
             <button
               type="button"
+              onClick={() =>
+                setIsNotificationsOpen(
+                  (value) => !value
+                )
+              }
               aria-label={t("notifications")}
+              aria-expanded={isNotificationsOpen}
+              aria-haspopup="dialog"
               className={`relative ${ACTION_BUTTON_CLASS}`}
             >
               <Bell
@@ -291,6 +305,17 @@ export default function AppHeader() {
           </div>
         </div>
       </header>
+
+      {/* =====================================================
+          NOTIFICATIONS
+      ====================================================== */}
+
+      <NotificationPanel
+        open={isNotificationsOpen}
+        onClose={() =>
+          setIsNotificationsOpen(false)
+        }
+      />
 
       {/* =====================================================
           MOBILE SHEET

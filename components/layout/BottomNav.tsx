@@ -6,6 +6,7 @@ import {
   Heart,
   Home,
   Landmark,
+  Newspaper,
   User,
   type LucideIcon,
 } from "lucide-react";
@@ -16,7 +17,7 @@ import {
 } from "@/lib/i18n";
 
 /* ---------------------------------------------------------
-   Bottom tabs
+   Bottom tabs — News sits in the middle
 --------------------------------------------------------- */
 
 const TABS: Array<{
@@ -33,6 +34,11 @@ const TABS: Array<{
     label: "tabAbout",
     href: "/about",
     icon: Landmark,
+  },
+  {
+    label: "tabNews",
+    href: "/news",
+    icon: Newspaper,
   },
   {
     label: "tabFavorites",
@@ -80,25 +86,25 @@ export default function BottomNav() {
         dark:shadow-[0_-10px_30px_rgba(0,0,0,0.4)]
       "
     >
-      <ul className="grid grid-cols-4">
+      <ul className="grid grid-cols-5">
         {TABS.map((tab) => {
           const active = isActive(tab.href);
 
           const Icon = tab.icon;
 
           return (
-            <li key={tab.href}>
+            <li key={tab.href} className="min-w-0">
               <Link
                 href={tab.href}
                 aria-current={
                   active ? "page" : undefined
                 }
                 className={`
-                  flex min-h-[64px]
+                  flex min-h-[64px] min-w-0
                   flex-col
                   items-center justify-center
                   gap-1
-                  px-1 py-2
+                  px-0.5 py-2
                   outline-none
                   transition-colors duration-200
 
@@ -122,7 +128,7 @@ export default function BottomNav() {
               >
                 <span
                   className={`
-                    flex h-8 w-12
+                    flex h-7 w-11
                     items-center justify-center
                     rounded-full
                     transition-all duration-300
@@ -140,7 +146,7 @@ export default function BottomNav() {
                   <Icon
                     aria-hidden="true"
                     className={`
-                      h-[21px] w-[21px]
+                      h-5 w-5
                       transition-transform duration-300
                       ${
                         active
@@ -161,8 +167,9 @@ export default function BottomNav() {
                 <span
                   className={`
                     max-w-full truncate
-                    text-[10px]
-                    leading-none
+                    text-[9px]
+                    leading-tight
+                    tracking-tight
                     ${
                       active
                         ? "font-bold"

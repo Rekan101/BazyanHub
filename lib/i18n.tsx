@@ -38,8 +38,28 @@ export const TRANSLATIONS = {
 
     tabHome: "سەرەکی",
     tabAbout: "دەربارەی بازیان",
+    tabNews: "هەواڵەکان",
     tabFavorites: "دڵخوازەکان",
     tabProfile: "هەژمارەکەم",
+
+    newsTitle: "هەواڵەکانی بازیان",
+    newsSubtitle:
+      "دوایین هەواڵ، ڕاگەیاندن و هەلی کاری ناوچەکە.",
+    newsAddPost: "پۆستکردن",
+    newsComposerPlaceholder: "شتێک بنووسە...",
+    newsAuthRequired:
+      "پێویستە هەژمار دروست بکەیت بۆ بڵاوکردنەوەی پۆست",
+    newsApprovalTitle: "پەسەندکردنی ئادمین",
+    newsApprovalNote:
+      "هەموو پۆستەکان پێش بڵاوکردنەوە لەلایەن ئادمینەوە پەسەند دەکرێن تاوەکو تەنها هەواڵ و کاری بەسوود بڵاوبکرێتەوە.",
+
+    notificationsEmpty:
+      "هیچ ئاگادارکردنەوەیەکی نوێت نییە.",
+    notificationNow: "ئێستا",
+    notificationWelcomeTitle:
+      "بەخێربێیت بۆ ئەپلیکەیشنی بازیان هەب! 💚",
+    notificationWelcomeBody:
+      "خزمەتگوزاری، بازرگانی و شوێنە گەشتیارییەکانی بازیان لێرە بدۆزەرەوە.",
 
     profileTitle: "هەژمارەکەم",
     profileSubtitle:
@@ -134,8 +154,28 @@ export const TRANSLATIONS = {
 
     tabHome: "الرئيسية",
     tabAbout: "عن بازيان",
+    tabNews: "الأخبار",
     tabFavorites: "المفضلة",
     tabProfile: "حسابي",
+
+    newsTitle: "أخبار بازيان",
+    newsSubtitle:
+      "آخر الأخبار والإعلانات وفرص العمل في المنطقة.",
+    newsAddPost: "نشر منشور",
+    newsComposerPlaceholder: "اكتب شيئًا...",
+    newsAuthRequired:
+      "يجب إنشاء حساب لتتمكن من نشر منشور",
+    newsApprovalTitle: "موافقة الإدارة",
+    newsApprovalNote:
+      "تتم مراجعة جميع المنشورات من قبل الإدارة قبل النشر، لضمان مشاركة الأخبار والوظائف المفيدة فقط.",
+
+    notificationsEmpty:
+      "لا توجد إشعارات جديدة.",
+    notificationNow: "الآن",
+    notificationWelcomeTitle:
+      "أهلاً بك في تطبيق بازيان هَب! 💚",
+    notificationWelcomeBody:
+      "اكتشف خدمات وأعمال وأماكن بازيان السياحية من هنا.",
 
     profileTitle: "حسابي",
     profileSubtitle:
@@ -230,8 +270,28 @@ export const TRANSLATIONS = {
 
     tabHome: "Home",
     tabAbout: "About Bazian",
+    tabNews: "News",
     tabFavorites: "Favorites",
     tabProfile: "Profile",
+
+    newsTitle: "Bazyan News",
+    newsSubtitle:
+      "Latest local news, announcements and job posts.",
+    newsAddPost: "Add Post",
+    newsComposerPlaceholder: "Write something...",
+    newsAuthRequired:
+      "You need to create an account to publish a post",
+    newsApprovalTitle: "Admin reviewed",
+    newsApprovalNote:
+      "Every post is reviewed by an admin before it is published, so only useful news and job opportunities get shared.",
+
+    notificationsEmpty:
+      "You have no new notifications.",
+    notificationNow: "Now",
+    notificationWelcomeTitle:
+      "Welcome to the Bazian Hub app! 💚",
+    notificationWelcomeBody:
+      "Discover Bazian's services, businesses and places right here.",
 
     profileTitle: "My Profile",
     profileSubtitle:

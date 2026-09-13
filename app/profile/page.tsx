@@ -8,17 +8,13 @@ import {
   Clock3,
   FileText,
   Globe,
-  Heart,
   Mail,
   MapPin,
-  Moon,
   Phone,
-  Sun,
   User,
 } from "lucide-react";
 
 import { LANGUAGES, useLanguage } from "@/lib/i18n";
-import { useTheme } from "@/components/ThemeProvider";
 
 import {
   Accordion,
@@ -36,52 +32,56 @@ import {
   WhatsAppIcon,
 } from "@/components/icons/SocialIcons";
 
+/*
+ * Premium social buttons — real brand colors, white glyphs and a
+ * soft brand-tinted glow. Instagram gets its signature gradient,
+ * TikTok its sleek black with a cyan/pink split glow.
+ */
 const SOCIAL_LINKS = [
   {
     id: "facebook",
     href: "#",
     label: "بازیان هەب لە فەیسبووک",
     Icon: FacebookIcon,
-    hoverClass:
-      "hover:border-[#1877F2] hover:bg-[#1877F2] hover:text-white hover:shadow-[#1877F2]/20",
+    brandClass:
+      "bg-[#1877F2] shadow-[0_8px_20px_-6px_rgba(24,119,242,0.85)] hover:shadow-[0_14px_28px_-8px_rgba(24,119,242,0.95)]",
   },
   {
     id: "instagram",
     href: "#",
     label: "بازیان هەب لە ئینستاگرام",
     Icon: InstagramIcon,
-    hoverClass:
-      "hover:border-[#E4405F] hover:bg-[#E4405F] hover:text-white hover:shadow-[#E4405F]/20",
+    brandClass:
+      "bg-[linear-gradient(45deg,#F9CE34_0%,#EE2A7B_45%,#6228D7_100%)] shadow-[0_8px_20px_-6px_rgba(238,42,123,0.85)] hover:shadow-[0_14px_28px_-8px_rgba(238,42,123,0.95)]",
   },
   {
     id: "tiktok",
     href: "#",
     label: "بازیان هەب لە تیکتۆک",
     Icon: TikTokIcon,
-    hoverClass:
-      "hover:border-black hover:bg-black hover:text-white hover:shadow-black/20 dark:hover:bg-black",
+    brandClass:
+      "bg-[#111827] ring-1 ring-white/15 shadow-[0_8px_20px_-6px_rgba(37,244,238,0.65),0_8px_20px_-6px_rgba(254,44,85,0.55)] hover:shadow-[0_14px_28px_-8px_rgba(37,244,238,0.8),0_14px_28px_-8px_rgba(254,44,85,0.7)]",
   },
   {
     id: "whatsapp",
     href: "#",
     label: "بازیان هەب لە واتسەپ",
     Icon: WhatsAppIcon,
-    hoverClass:
-      "hover:border-[#25D366] hover:bg-[#25D366] hover:text-white hover:shadow-[#25D366]/20",
+    brandClass:
+      "bg-[#25D366] shadow-[0_8px_20px_-6px_rgba(37,211,102,0.85)] hover:shadow-[0_14px_28px_-8px_rgba(37,211,102,0.95)]",
   },
   {
     id: "viber",
     href: "#",
     label: "بازیان هەب لە ڤایبەر",
     Icon: ViberIcon,
-    hoverClass:
-      "hover:border-[#7360F2] hover:bg-[#7360F2] hover:text-white hover:shadow-[#7360F2]/20",
+    brandClass:
+      "bg-[#7360F2] shadow-[0_8px_20px_-6px_rgba(115,96,242,0.85)] hover:shadow-[0_14px_28px_-8px_rgba(115,96,242,0.95)]",
   },
 ] as const;
 
 export default function ProfilePage() {
   const { t, language, direction } = useLanguage();
-  const { isDark, toggleTheme } = useTheme();
 
   const isRTL = direction === "rtl";
 
@@ -206,63 +206,6 @@ export default function ProfilePage() {
       ====================================================== */}
 
       <div className="mt-8 space-y-3">
-        <Link
-          href="/favorites"
-          className={rowClass}
-        >
-          <span className={iconWrapClass}>
-            <Heart
-              className="h-[18px] w-[18px]"
-              aria-hidden="true"
-            />
-          </span>
-
-          <span className="flex-1 truncate text-start">
-            {t("tabFavorites")}
-          </span>
-
-          <ChevronIcon
-            aria-hidden="true"
-            className="h-4 w-4 shrink-0 opacity-60"
-          />
-        </Link>
-
-        <button
-          type="button"
-          onClick={toggleTheme}
-          aria-label={
-            isDark
-              ? t("darkModeLight")
-              : t("darkModeDark")
-          }
-          className={rowClass}
-        >
-          <span className={iconWrapClass}>
-            {isDark ? (
-              <Sun
-                className="h-[18px] w-[18px]"
-                aria-hidden="true"
-              />
-            ) : (
-              <Moon
-                className="h-[18px] w-[18px]"
-                aria-hidden="true"
-              />
-            )}
-          </span>
-
-          <span className="flex-1 truncate text-start">
-            {isDark
-              ? t("darkModeLight")
-              : t("darkModeDark")}
-          </span>
-
-          <ChevronIcon
-            aria-hidden="true"
-            className="h-4 w-4 shrink-0 opacity-60"
-          />
-        </button>
-
         <div className={rowClass}>
           <span className={iconWrapClass}>
             <Globe
@@ -382,7 +325,7 @@ export default function ProfilePage() {
                   href,
                   label,
                   Icon,
-                  hoverClass,
+                  brandClass,
                 }) => (
                   <a
                     key={id}
@@ -391,27 +334,42 @@ export default function ProfilePage() {
                     rel="noopener noreferrer"
                     aria-label={label}
                     className={`
-                      flex h-11 w-11
+                      group relative
+                      flex h-12 w-12
                       items-center justify-center
-                      rounded-full
-                      border border-slate-200
-                      bg-slate-50
-                      text-slate-500
-                      shadow-sm
+                      overflow-hidden
+                      rounded-2xl
+                      text-white
+                      outline-none
                       transition-all duration-300
 
                       hover:-translate-y-1
-                      hover:scale-110
-                      hover:shadow-lg
+                      hover:scale-[1.06]
 
-                      dark:border-white/10
-                      dark:bg-white/[0.04]
-                      dark:text-slate-300
+                      focus-visible:ring-2
+                      focus-visible:ring-emerald-500
+                      focus-visible:ring-offset-2
+                      dark:focus-visible:ring-offset-slate-900
 
-                      ${hoverClass}
+                      active:scale-95
+
+                      ${brandClass}
                     `}
                   >
-                    <Icon className="h-5 w-5" />
+                    {/* Glossy top highlight */}
+                    <span
+                      aria-hidden="true"
+                      className="
+                        pointer-events-none
+                        absolute inset-x-0 top-0
+                        h-1/2
+                        bg-gradient-to-b
+                        from-white/25
+                        to-transparent
+                      "
+                    />
+
+                    <Icon className="relative h-[22px] w-[22px] drop-shadow-sm" />
                   </a>
                 )
               )}
