@@ -381,7 +381,7 @@ export function ServicesSection() {
   return (
     <section
       id="services"
-      className="w-full py-16 sm:py-24"
+      className="w-full pb-16 pt-6 sm:pb-24 sm:pt-10"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
@@ -419,21 +419,6 @@ export function ServicesSection() {
           >
             {t("servicesTitle")}
           </h2>
-
-          <p
-            className="
-              mx-auto
-              mt-3
-              max-w-2xl
-              text-sm
-              leading-relaxed
-              text-slate-600
-              dark:text-slate-400
-              sm:text-base
-            "
-          >
-            {t("servicesDescription")}
-          </p>
         </div>
 
         {/* Filters */}

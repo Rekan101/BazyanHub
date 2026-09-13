@@ -14,26 +14,11 @@ import {
   m,
 } from "framer-motion";
 import {
-  Map,
-  Heart,
-  ListChecks,
   ChevronDown,
   ExternalLink,
 } from "lucide-react";
 
-import type { QuickAction } from "@/lib/types";
 import { useLanguage } from "@/lib/i18n";
-
-/* ==========================================================================
-   QUICK ACTION ICONS
-   ========================================================================== */
-
-const QUICK_ACTION_ICON = {
-  map: Map,
-  favorites: Heart,
-  list: ListChecks,
-  outage: ListChecks,
-} as const;
 
 /* ==========================================================================
    STORY TYPES
@@ -68,13 +53,24 @@ type StoryItem = {
    STORY CONFIGURATION
    ========================================================================== */
 
+/*
+ * Mock stories don't have a real backend `createdAt` yet, so
+ * we stamp them as "just created" at module load instead of a
+ * hardcoded past date. A fixed past date silently drifts out
+ * of its expiration window as real time passes — which is
+ * exactly what was hiding 3 of the 6 stories. Once real story
+ * data exists, this constant goes away.
+ */
+const STORIES_CREATED_AT =
+  new Date().toISOString();
+
 const STORY_ITEMS: StoryItem[] = [
   {
     id: "story-1",
     image: "/images/stories/story-1.webp",
     title: "ڕیکلامی تایبەت",
     subtitle: "خزمەتگوزارییە نوێکان لە بازیان",
-    createdAt: "2026-09-02T12:00:00",
+    createdAt: STORIES_CREATED_AT,
     duration: {
       amount: 240,
       unit: "hours",
@@ -88,7 +84,7 @@ const STORY_ITEMS: StoryItem[] = [
     image: "/images/stories/story-2.webp",
     title: "ئۆفەری تایبەت",
     subtitle: "تەنها بۆ ماوەی کەم",
-    createdAt: "2026-09-02T12:00:00",
+    createdAt: STORIES_CREATED_AT,
     duration: {
       amount: 7,
       unit: "days",
@@ -102,7 +98,7 @@ const STORY_ITEMS: StoryItem[] = [
     image: "/images/stories/story-3.webp",
     title: "خزمەتگوزاریی نوێ",
     subtitle: "لە بازیان بیدۆزەرەوە",
-    createdAt: "2026-09-02T12:00:00",
+    createdAt: STORIES_CREATED_AT,
     duration: {
       amount: 30,
       unit: "days",
@@ -116,7 +112,7 @@ const STORY_ITEMS: StoryItem[] = [
     image: "/images/stories/story-4.webp",
     title: "ڕیکلام",
     subtitle: "شوێن و کاروبارەکانی ناوچە",
-    createdAt: "2026-09-02T12:00:00",
+    createdAt: STORIES_CREATED_AT,
     duration: {
       amount: 240,
       unit: "hours",
@@ -130,7 +126,7 @@ const STORY_ITEMS: StoryItem[] = [
     image: "/images/stories/story-5.webp",
     title: "ناونیشانی ڕیکلام",
     subtitle: "وردەکاری",
-    createdAt: "2026-09-02T12:00:00",
+    createdAt: STORIES_CREATED_AT,
     duration: {
       amount: 1,
       unit: "months",
@@ -144,7 +140,7 @@ const STORY_ITEMS: StoryItem[] = [
     image: "/images/stories/story-6.webp",
     title: "ناونیشانی ڕیکلام",
     subtitle: "وردەکاری",
-    createdAt: "2026-09-02T12:00:00",
+    createdAt: STORIES_CREATED_AT,
     duration: {
       amount: 1,
       unit: "months",
@@ -362,32 +358,6 @@ export default function Hero() {
       "#services"
     );
   };
-
-  /* ------------------------------------------------------------------------
-     QUICK ACTIONS
-     ------------------------------------------------------------------------ */
-
-  const translatedActions: QuickAction[] =
-    [
-      {
-        label: t("map"),
-        href:
-          "https://www.google.com/maps/search/?api=1&query=35.5947,45.13686",
-        icon: "map",
-      },
-
-      {
-        label: t("favorites"),
-        href: "/favorites",
-        icon: "favorites",
-      },
-
-      {
-        label: t("servicesList"),
-        href: "#services",
-        icon: "list",
-      },
-    ];
 
   /* ------------------------------------------------------------------------
      RTL
@@ -876,12 +846,14 @@ export default function Hero() {
                 rounded-3xl
                 border border-white/20
                 bg-white/40
-                p-5
+                px-6
+                py-7
                 text-center
                 shadow-lg
                 backdrop-blur-md
                 sm:mt-6
-                sm:p-8
+                sm:px-10
+                sm:py-10
 
                 dark:border-white/10
                 dark:bg-black/40
@@ -931,7 +903,7 @@ export default function Hero() {
                 <m.p
                   className="
                     mx-auto
-                    mt-2
+                    mt-3
                     line-clamp-3
                     max-w-[340px]
                     text-balance
@@ -948,126 +920,6 @@ export default function Hero() {
                 >
                   {t("heroDescription")}
                 </m.p>
-              </m.div>
-
-              {/* QUICK ACTIONS */}
-
-              <m.div
-                initial={{
-                  opacity: 0,
-                  y: 12,
-                }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                }}
-                transition={{
-                  duration: 0.6,
-                  delay: 0.15,
-                  ease: "easeOut",
-                }}
-                className="
-                  mx-auto
-                  mt-4
-                  grid
-                  w-full
-                  max-w-[360px]
-                  grid-cols-3
-                  gap-1.5
-                  sm:mt-7
-                  sm:max-w-2xl
-                  sm:gap-3
-                "
-              >
-                {translatedActions.map(
-                (action) => {
-                  const Icon =
-                    QUICK_ACTION_ICON[
-                      action.icon
-                    ];
-
-                  const isExternal =
-                    action.href.startsWith(
-                      "http"
-                    );
-
-                  return (
-                    <Link
-                      key={action.href}
-                      href={action.href}
-                      onClick={
-                        action.href ===
-                        "#services"
-                          ? handleServicesScroll
-                          : undefined
-                      }
-                      target={
-                        isExternal
-                          ? "_blank"
-                          : undefined
-                      }
-                      rel={
-                        isExternal
-                          ? "noopener noreferrer"
-                          : undefined
-                      }
-                      className="
-                        group
-                        flex
-                        min-w-0
-                        min-h-[40px]
-                        items-center
-                        justify-center
-                        gap-1
-                        rounded-full
-                        border
-                        border-white/25
-                        bg-white/10
-                        px-2
-                        py-2
-                        text-[9px]
-                        font-semibold
-                        text-white
-                        shadow-lg
-                        shadow-black/10
-                        backdrop-blur-md
-                        transition-all
-                        duration-300
-                        hover:-translate-y-0.5
-                        hover:bg-white/20
-                        hover:shadow-xl
-                        focus-visible:outline-none
-                        focus-visible:ring-2
-                        focus-visible:ring-white/80
-                        sm:min-h-[46px]
-                        sm:gap-2
-                        sm:px-4
-                        sm:py-3
-                        sm:text-sm
-                      "
-                    >
-                      <Icon
-                        aria-hidden="true"
-                        className="
-                          h-4
-                          w-4
-                          shrink-0
-                          transition-transform
-                          duration-300
-                          group-hover:scale-110
-                          sm:h-[18px]
-                          sm:w-[18px]
-                        "
-                        strokeWidth={2}
-                      />
-
-                      <span className="truncate">
-                        {action.label}
-                      </span>
-                    </Link>
-                  );
-                }
-              )}
               </m.div>
             </div>
 
