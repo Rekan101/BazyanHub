@@ -35,16 +35,14 @@ import { cn } from "@/lib/utils";
 import {
   categories,
   type ServiceCategory,
-  type ServiceFilter,
   type LanguageCode,
 } from "@/lib/data/categories";
 import { useLanguage } from "@/lib/i18n";
 
-type ServiceFilterKey = "all" | string;
-
-type CategoryWithFilter = ServiceCategory & {
-  filterKey?: ServiceFilterKey;
-};
+type ServiceFilterKey =
+  | "all"
+  | "popular"
+  | "featured";
 
 const FAVORITES_STORAGE_KEY =
   "bazianhub-favorites";
@@ -92,11 +90,22 @@ const CATEGORY_ICONS: Record<
   briefcase: Briefcase,
 };
 
-const SERVICE_FILTERS = [
+/*
+ * Exactly 3 hardcoded filter pills — All / Most Requested /
+ * Special. No dynamically generated per-category filters.
+ */
+const SERVICE_FILTERS: Array<{
+  id: ServiceFilterKey;
+  translations: {
+    ckb: string;
+    ar: string;
+    en: string;
+  };
+}> = [
   {
     id: "all",
     translations: {
-      ckb: "هەموو",
+      ckb: "هەمووی",
       ar: "الكل",
       en: "All",
     },
@@ -107,7 +116,7 @@ const SERVICE_FILTERS = [
     translations: {
       ckb: "پڕداواکاریترین",
       ar: "الأكثر طلبًا",
-      en: "Most Popular",
+      en: "Most Requested",
     },
   },
 
@@ -116,27 +125,9 @@ const SERVICE_FILTERS = [
     translations: {
       ckb: "تایبەت",
       ar: "مميز",
-      en: "Featured",
+      en: "Special",
     },
   },
-
-  ...categories.flatMap((category) =>
-    category.filters.map((filter) => ({
-      id: filter.id,
-
-      translations: {
-        ckb: filter.label,
-        ar: getFilterArabic(
-          filter.id,
-          filter.label
-        ),
-        en: getFilterEnglish(
-          filter.id,
-          filter.label
-        ),
-      },
-    }))
-  ),
 ];
 
 const SERVICE_UI_TEXT: Record<
@@ -177,71 +168,6 @@ const SERVICE_UI_TEXT: Record<
       "Add to favorites",
   },
 };
-
-function getFilterArabic(
-  id: string,
-  fallback: string
-): string {
-  const translations: Record<
-    string,
-    string
-  > = {
-    taxi: "تاكسي",
-    pickup: "بيك أب",
-    excavator: "حفارة",
-    shovel: "شيول",
-    filter: "فلاتر",
-    painter: "دهان",
-    puncture: "بنچر",
-    "car-wash": "غسيل السيارات",
-    "auto-electrician":
-      "كهربائي سيارات",
-    "spare-parts":
-      "قطع غيار السيارات",
-
-    barber: "حلاق",
-    salon: "صالون",
-
-    "full-time": "دوام كامل",
-    "part-time": "دوام جزئي",
-    "daily-work": "عمل يومي",
-    internship: "تدريب",
-  };
-
-  return translations[id] ?? fallback;
-}
-
-function getFilterEnglish(
-  id: string,
-  fallback: string
-): string {
-  const translations: Record<
-    string,
-    string
-  > = {
-    taxi: "Taxi",
-    pickup: "Pickup",
-    excavator: "Excavator",
-    shovel: "Shovel",
-    filter: "Car Filter",
-    painter: "Painter",
-    puncture: "Tire Repair",
-    "car-wash": "Car Wash",
-    "auto-electrician":
-      "Auto Electrician",
-    "spare-parts": "Spare Parts",
-
-    barber: "Barber",
-    salon: "Salon",
-
-    "full-time": "Full-time",
-    "part-time": "Part-time",
-    "daily-work": "Daily Work",
-    internship: "Internship",
-  };
-
-  return translations[id] ?? fallback;
-}
 
 function getLocalizedText(
   language: LanguageCode,
@@ -411,10 +337,6 @@ export function ServicesSection() {
 
   const visibleCategories =
     useMemo(() => {
-      if (activeFilter === "all") {
-        return categories;
-      }
-
       if (
         activeFilter === "popular"
       ) {
@@ -433,18 +355,8 @@ export function ServicesSection() {
         );
       }
 
-      return categories.filter(
-        (
-          category: CategoryWithFilter
-        ) =>
-          category.filters.some(
-            (
-              filter: ServiceFilter
-            ) =>
-              filter.id ===
-              activeFilter
-          )
-      );
+      // "all"
+      return categories;
     }, [activeFilter]);
 
   const toggleFavorite = (
@@ -618,12 +530,9 @@ export function ServicesSection() {
           className="
             mt-10
             grid
-            grid-cols-3
-            gap-2
-            sm:grid-cols-2
+            grid-cols-2
+            gap-3
             sm:gap-4
-            lg:grid-cols-3
-            lg:gap-5
           "
         >
           <AnimatePresence mode="popLayout">
@@ -705,8 +614,8 @@ export function ServicesSection() {
                           flex
                           min-w-0
                           flex-col
-                          p-1.5
-                          pb-1.5
+                          p-3
+                          pb-2.5
                           sm:p-5
                           sm:pb-4
                         "
@@ -718,18 +627,18 @@ export function ServicesSection() {
                             min-w-0
                             items-start
                             justify-between
-                            gap-1
+                            gap-1.5
                           "
                         >
                           <span
                             className="
                               flex
-                              h-7
-                              w-7
+                              h-9
+                              w-9
                               shrink-0
                               items-center
                               justify-center
-                              rounded-lg
+                              rounded-xl
                               bg-primary/10
                               text-primary
                               transition-all
@@ -746,8 +655,8 @@ export function ServicesSection() {
                             {Icon ? (
                               <Icon
                                 className="
-                                  h-3.5
-                                  w-3.5
+                                  h-4
+                                  w-4
                                   sm:h-6
                                   sm:w-6
                                 "
@@ -756,7 +665,7 @@ export function ServicesSection() {
                             ) : (
                               <span
                                 className="
-                                  text-[9px]
+                                  text-xs
                                   sm:text-xs
                                 "
                                 aria-hidden="true"
@@ -771,7 +680,7 @@ export function ServicesSection() {
                               flex
                               min-w-0
                               items-center
-                              gap-0.5
+                              gap-1
                               sm:gap-1.5
                             "
                           >
@@ -786,7 +695,7 @@ export function ServicesSection() {
                                   border
                                   border-amber-500/30
                                   bg-amber-500/10
-                                  p-1
+                                  p-1.5
                                   text-[0px]
                                   font-semibold
                                   text-amber-700
@@ -803,8 +712,8 @@ export function ServicesSection() {
                               >
                                 <Sparkles
                                   className="
-                                    h-2.5
-                                    w-2.5
+                                    h-3
+                                    w-3
                                     sm:h-3
                                     sm:w-3
                                   "
@@ -830,7 +739,7 @@ export function ServicesSection() {
                                   border
                                   border-rose-500/30
                                   bg-rose-500/10
-                                  p-1
+                                  p-1.5
                                   text-[0px]
                                   font-semibold
                                   text-rose-700
@@ -847,8 +756,8 @@ export function ServicesSection() {
                               >
                                 <Flame
                                   className="
-                                    h-2.5
-                                    w-2.5
+                                    h-3
+                                    w-3
                                     sm:h-3
                                     sm:w-3
                                   "
@@ -883,8 +792,8 @@ export function ServicesSection() {
                               className={cn(
                                 `
                                   flex
-                                  h-6
-                                  w-6
+                                  h-8
+                                  w-8
                                   shrink-0
                                   items-center
                                   justify-center
@@ -912,8 +821,8 @@ export function ServicesSection() {
                               <Heart
                                 className={cn(
                                   `
-                                    h-3
-                                    w-3
+                                    h-3.5
+                                    w-3.5
                                     transition-transform
                                     duration-300
                                     sm:h-4
@@ -931,7 +840,7 @@ export function ServicesSection() {
                         {/* Category Information */}
                         <div
                           className="
-                            mt-1.5
+                            mt-2
                             min-w-0
                             sm:mt-4
                           "
@@ -940,9 +849,9 @@ export function ServicesSection() {
                             className="
                               line-clamp-2
                               break-words
-                              text-[10px]
+                              text-sm
                               font-bold
-                              leading-4
+                              leading-5
                               text-slate-900
                               transition-colors
                               group-hover:text-primary
@@ -956,11 +865,11 @@ export function ServicesSection() {
 
                           <p
                             className="
-                              mt-0.5
+                              mt-1
                               line-clamp-2
-                              text-[8px]
+                              text-[11px]
                               font-medium
-                              leading-3
+                              leading-4
                               text-slate-500
                               dark:text-slate-400
                               sm:text-xs
@@ -979,7 +888,7 @@ export function ServicesSection() {
                         className="
                           relative
                           mt-auto
-                          h-20
+                          h-28
                           w-full
                           overflow-hidden
                           border-t
@@ -1021,9 +930,9 @@ export function ServicesSection() {
                         <div
                           className="
                             absolute
-                            bottom-1
-                            left-1.5
-                            right-1.5
+                            bottom-2
+                            left-2.5
+                            right-2.5
                             flex
                             items-center
                             justify-between
@@ -1039,7 +948,7 @@ export function ServicesSection() {
                             className="
                               min-w-0
                               truncate
-                              text-[7px]
+                              text-[10px]
                               font-semibold
                               drop-shadow-sm
                               sm:text-xs
@@ -1057,8 +966,8 @@ export function ServicesSection() {
                           <ArrowIcon
                             className={cn(
                               `
-                                h-2.5
-                                w-2.5
+                                h-3
+                                w-3
                                 shrink-0
                                 text-white
                                 transition-transform
