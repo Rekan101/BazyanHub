@@ -33,6 +33,20 @@ export const TRANSLATIONS = {
     openMenu: "کردنەوەی مینیو",
     closeMenu: "داخستنی مینیو",
 
+    menuTitle: "مینیو",
+    notifications: "ئاگادارکردنەوەکان",
+
+    tabHome: "سەرەکی",
+    tabAbout: "دەربارەی بازیان",
+    tabFavorites: "دڵخوازەکان",
+    tabProfile: "هەژمارەکەم",
+
+    profileTitle: "هەژمارەکەم",
+    profileSubtitle:
+      "ڕێکخستنەکان و زانیاری هەژمارەکەت لێرە پیشان دەدرێن.",
+    profileComingSoon:
+      "بەم زووانە: تۆمارکردن و چوونەژوورەوە بۆ هەژماری بەکارهێنەر.",
+
     heroTitle: "ژیانی ڕۆژانەت ئاسانتر بکە",
     heroDescription:
       "هەرچیت پێویستە لە بازیان لێرە هەیە؛ ڕێنمایی گشتی، ژمارەی بەپەلە و خزمەتگوزارییە ڕۆژانەیییەکان؛ (مارکێت، چێشتخانە، تاکسی، گەیاندن و وەستای تایبەت و زیاتر هتد...) لە یەک پلاتفۆرمدا.",
@@ -115,6 +129,20 @@ export const TRANSLATIONS = {
     openMenu: "فتح القائمة",
     closeMenu: "إغلاق القائمة",
 
+    menuTitle: "القائمة",
+    notifications: "الإشعارات",
+
+    tabHome: "الرئيسية",
+    tabAbout: "عن بازيان",
+    tabFavorites: "المفضلة",
+    tabProfile: "حسابي",
+
+    profileTitle: "حسابي",
+    profileSubtitle:
+      "ستظهر هنا إعدادات ومعلومات حسابك.",
+    profileComingSoon:
+      "قريبًا: التسجيل وتسجيل الدخول إلى حساب المستخدم.",
+
     heroTitle: "اجعل حياتك اليومية أسهل",
     heroDescription:
       "من خدمات النقل وسيارات الأجرة والمطاعم والصيدليات إلى الخدمات الحكومية والمعلومات المحلية، جميع خدمات بازيان في مكان واحد.",
@@ -196,6 +224,20 @@ export const TRANSLATIONS = {
     darkModeDark: "Switch to dark mode",
     openMenu: "Open menu",
     closeMenu: "Close menu",
+
+    menuTitle: "Menu",
+    notifications: "Notifications",
+
+    tabHome: "Home",
+    tabAbout: "About Bazian",
+    tabFavorites: "Favorites",
+    tabProfile: "Profile",
+
+    profileTitle: "My Profile",
+    profileSubtitle:
+      "Your account settings and information will appear here.",
+    profileComingSoon:
+      "Coming soon: sign up and log in to a user account.",
 
     heroTitle: "Make Your Everyday Life Easier",
     heroDescription:

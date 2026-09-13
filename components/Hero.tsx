@@ -152,62 +152,6 @@ const STORY_ITEMS: StoryItem[] = [
     durationSeconds: 3,
     href: "https://example.com",
   },
-
-  {
-    id: "story-7",
-    image: "/images/stories/story-7.webp",
-    title: "ناونیشانی ڕیکلام",
-    subtitle: "وردەکاری",
-    createdAt: "2026-09-02T12:00:00",
-    duration: {
-      amount: 1,
-      unit: "months",
-    },
-    durationSeconds: 3,
-    href: "https://example.com",
-  },
-
-  {
-    id: "story-8",
-    image: "/images/stories/story-8.webp",
-    title: "ناونیشانی ڕیکلام",
-    subtitle: "وردەکاری",
-    createdAt: "2026-09-02T12:00:00",
-    duration: {
-      amount: 1,
-      unit: "months",
-    },
-    durationSeconds: 3,
-    href: "https://example.com",
-  },
-
-  {
-    id: "story-9",
-    image: "/images/stories/story-9.webp",
-    title: "ناونیشانی ڕیکلام",
-    subtitle: "وردەکاری",
-    createdAt: "2026-09-02T12:00:00",
-    duration: {
-      amount: 1,
-      unit: "months",
-    },
-    durationSeconds: 3,
-    href: "https://example.com",
-  },
-
-  {
-    id: "story-10",
-    image: "/images/stories/story-10.webp",
-    title: "ناونیشانی ڕیکلام",
-    subtitle: "وردەکاری",
-    createdAt: "2026-09-02T12:00:00",
-    duration: {
-      amount: 1,
-      unit: "months",
-    },
-    durationSeconds: 3,
-    href: "https://example.com",
-  },
 ];
 
 /* ==========================================================================
@@ -921,106 +865,121 @@ export default function Hero() {
             )}
 
             {/* ==================================================================
-                HEADLINE + DESCRIPTION
+                GLASS PANEL — HEADLINE + DESCRIPTION + QUICK ACTIONS
                 ================================================================== */}
 
-            <m.div
-              initial={{
-                opacity: 0,
-                y: 14,
-              }}
-              animate={{
-                opacity: 1,
-                y: 0,
-              }}
-              transition={{
-                duration: 0.65,
-                delay: 0.05,
-                ease: "easeOut",
-              }}
+            <div
               className="
                 order-3
+                mt-4
                 w-full
+                rounded-3xl
+                border border-white/20
+                bg-white/40
+                p-5
+                text-center
+                shadow-lg
+                backdrop-blur-md
+                sm:mt-6
+                sm:p-8
+
+                dark:border-white/10
+                dark:bg-black/40
               "
             >
-              {/* HEADLINE */}
+              {/* HEADLINE + DESCRIPTION */}
 
-              <m.h1
-                className="
-                  text-balance
-                  bg-[linear-gradient(90deg,rgb(4,120,87),rgb(255,255,255),rgb(180,110,8))]
-                  bg-[length:200%_auto]
-                  bg-clip-text
-                  text-[1.7rem]
-                  font-extrabold
-                  leading-[1.12]
-                  text-transparent
-                  drop-shadow-[0_5px_15px_rgba(0,0,0,0.95)]
-                  sm:text-4xl
-                  sm:leading-tight
-                  lg:text-5xl
-                "
+              <m.div
+                initial={{
+                  opacity: 0,
+                  y: 14,
+                }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                }}
+                transition={{
+                  duration: 0.65,
+                  delay: 0.05,
+                  ease: "easeOut",
+                }}
+                className="w-full"
               >
-                {t("heroTitle")}
-              </m.h1>
+                {/* HEADLINE */}
 
-              {/* DESCRIPTION */}
+                <m.h1
+                  className="
+                    text-balance
+                    bg-[linear-gradient(90deg,rgb(4,120,87),rgb(255,255,255),rgb(180,110,8))]
+                    bg-[length:200%_auto]
+                    bg-clip-text
+                    text-[1.7rem]
+                    font-extrabold
+                    leading-[1.12]
+                    text-transparent
+                    drop-shadow-[0_5px_15px_rgba(0,0,0,0.95)]
+                    sm:text-4xl
+                    sm:leading-tight
+                    lg:text-5xl
+                  "
+                >
+                  {t("heroTitle")}
+                </m.h1>
 
-              <m.p
+                {/* DESCRIPTION */}
+
+                <m.p
+                  className="
+                    mx-auto
+                    mt-2
+                    line-clamp-3
+                    max-w-[340px]
+                    text-balance
+                    text-[11px]
+                    leading-[1.7]
+                    text-white
+                    drop-shadow-[0_3px_10px_rgba(0,0,0,0.95)]
+                    sm:mt-4
+                    sm:line-clamp-none
+                    sm:max-w-2xl
+                    sm:text-base
+                    sm:leading-relaxed
+                  "
+                >
+                  {t("heroDescription")}
+                </m.p>
+              </m.div>
+
+              {/* QUICK ACTIONS */}
+
+              <m.div
+                initial={{
+                  opacity: 0,
+                  y: 12,
+                }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                }}
+                transition={{
+                  duration: 0.6,
+                  delay: 0.15,
+                  ease: "easeOut",
+                }}
                 className="
                   mx-auto
-                  mt-2
-                  line-clamp-3
-                  max-w-[340px]
-                  text-balance
-                  text-[11px]
-                  leading-[1.7]
-                  text-white
-                  drop-shadow-[0_3px_10px_rgba(0,0,0,0.95)]
-                  sm:mt-4
-                  sm:line-clamp-none
+                  mt-4
+                  grid
+                  w-full
+                  max-w-[360px]
+                  grid-cols-3
+                  gap-1.5
+                  sm:mt-7
                   sm:max-w-2xl
-                  sm:text-base
-                  sm:leading-relaxed
+                  sm:gap-3
                 "
               >
-                {t("heroDescription")}
-              </m.p>
-            </m.div>
-
-            {/* ==================================================================
-                QUICK ACTIONS
-                ================================================================== */}
-
-            <m.div
-              initial={{
-                opacity: 0,
-                y: 12,
-              }}
-              animate={{
-                opacity: 1,
-                y: 0,
-              }}
-              transition={{
-                duration: 0.6,
-                delay: 0.15,
-                ease: "easeOut",
-              }}
-              className="
-                order-4
-                mx-auto
-                mt-4
-                grid
-                w-full
-                max-w-[360px]
-                grid-cols-3
-                gap-1.5
-                sm:mt-7
-                sm:max-w-2xl
-                sm:gap-3
-              "
-            >
-              {translatedActions.map(
+                {translatedActions.map(
                 (action) => {
                   const Icon =
                     QUICK_ACTION_ICON[
@@ -1109,7 +1068,8 @@ export default function Hero() {
                   );
                 }
               )}
-            </m.div>
+              </m.div>
+            </div>
 
             {/* ==================================================================
                 MOBILE SCROLL INDICATOR

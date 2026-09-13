@@ -1,49 +1,20 @@
-import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import { ServicesSection } from "@/components/services-section";
-import { AboutSection } from "@/components/about-section";
-import PlacesGrid from "@/components/PlacesGrid";
-import { places } from "@/lib/data/places";
-import { FaqSection } from "@/components/ui/faq-section";
-import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-      <Navbar />
-
-      <main className="flex-1 space-y-16 sm:space-y-24">
-        {/* HERO */}
+    <div className="flex flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+      <div className="space-y-16 sm:space-y-24">
+        {/* HERO + STORIES */}
         <section id="hero" className="scroll-mt-24">
           <Hero />
         </section>
 
         {/* SERVICES */}
-        <section
-          id="services"
-          className="scroll-mt-24 [content-visibility:auto] [contain-intrinsic-size:900px]"
-        >
+        <section id="services" className="scroll-mt-24">
           <ServicesSection />
         </section>
-
-        {/* ABOUT + TOURISM / HISTORICAL PLACES */}
-        <section
-          id="about"
-          className="scroll-mt-24 [content-visibility:auto] [contain-intrinsic-size:900px]"
-        >
-          <AboutSection />
-          <PlacesGrid places={places} />
-        </section>
-
-        {/* FAQ + CONTACT + FOOTER */}
-        <section
-          id="contact"
-          className="scroll-mt-24 [content-visibility:auto] [contain-intrinsic-size:1000px]"
-        >
-          <FaqSection />
-          <Footer />
-        </section>
-      </main>
+      </div>
     </div>
   );
 }
