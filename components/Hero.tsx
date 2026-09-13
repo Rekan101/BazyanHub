@@ -385,9 +385,8 @@ export default function Hero() {
         }
         className="
           relative
-          min-h-[calc(100svh-155px)]
+          min-h-fit
           overflow-hidden
-          sm:min-h-[620px]
         "
       >
         {/* ====================================================================
@@ -450,14 +449,13 @@ export default function Hero() {
             relative
             mx-auto
             flex
-            min-h-[calc(100svh-155px)]
+            min-h-fit
             w-full
             max-w-[1440px]
             items-start
             px-4
             pb-8
             pt-3
-            sm:min-h-0
             sm:px-6
             sm:pb-14
             sm:pt-14
