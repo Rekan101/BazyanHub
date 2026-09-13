@@ -76,7 +76,7 @@ const STORY_ITEMS: StoryItem[] = [
     subtitle: "خزمەتگوزارییە نوێکان لە بازیان",
     createdAt: "2026-09-02T12:00:00",
     duration: {
-      amount: 24,
+      amount: 240,
       unit: "hours",
     },
     durationSeconds: 3,
@@ -118,7 +118,7 @@ const STORY_ITEMS: StoryItem[] = [
     subtitle: "شوێن و کاروبارەکانی ناوچە",
     createdAt: "2026-09-02T12:00:00",
     duration: {
-      amount: 24,
+      amount: 240,
       unit: "hours",
     },
     durationSeconds: 3,

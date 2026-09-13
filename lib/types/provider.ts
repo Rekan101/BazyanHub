@@ -56,6 +56,7 @@ export type Provider = {
 
   verified?: boolean;
   featured?: boolean;
+  special?: boolean;
   active?: boolean;
 
   priceRange?: "$" | "$$" | "$$$" | "$$$$";

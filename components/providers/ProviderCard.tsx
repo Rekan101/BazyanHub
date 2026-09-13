@@ -1,20 +1,13 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import {
-  ArrowLeft,
-  BadgeCheck,
-  Clock3,
-  MapPin,
-  Star,
-} from "lucide-react";
+import { BadgeCheck, Star } from "lucide-react";
 
 import type {
   Provider,
   ProviderCardProps,
 } from "@/lib/types/provider";
-
-import ProviderSocials from "./ProviderSocials";
 
 function getInitials(name: string): string {
   return name
@@ -26,54 +19,163 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
-function getTodayStatus(
-  hours?: Provider["hours"]
+/* ============================================================
+   DYNAMIC OPEN / CLOSED STATUS
+   Compares the visitor's current local time against the
+   provider's `hours` entry for today's Kurdish day name.
+   ============================================================ */
+
+const KURDISH_WEEKDAYS = [
+  "یەکشەممە",
+  "دووشەممە",
+  "سێشەممە",
+  "چوارشەممە",
+  "پێنجشەممە",
+  "هەینی",
+  "شەممە",
+] as const;
+
+function parseTimeToMinutes(
+  value?: string
+): number | null {
+  if (!value) {
+    return null;
+  }
+
+  const match = value
+    .trim()
+    .match(/^(\d{1,2}):(\d{2})$/);
+
+  if (!match) {
+    return null;
+  }
+
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+
+  if (
+    Number.isNaN(hours) ||
+    Number.isNaN(minutes)
+  ) {
+    return null;
+  }
+
+  return hours * 60 + minutes;
+}
+
+function getOpenStatus(
+  hours: Provider["hours"],
+  now: Date
 ): {
-  label: string;
   isOpen: boolean;
+  label: string;
 } {
+  const CLOSED = {
+    isOpen: false,
+    label: "داخراوە",
+  };
+
   if (!hours || hours.length === 0) {
-    return {
-      label: "کاتی کار دیاری نەکراوە",
-      isOpen: false,
-    };
+    return CLOSED;
   }
 
-  const days = [
-    "یەکشەممە",
-    "دووشەممە",
-    "سێشەممە",
-    "چوارشەممە",
-    "پێنجشەممە",
-    "هەینی",
-    "شەممە",
-  ];
+  const todayName =
+    KURDISH_WEEKDAYS[now.getDay()];
 
-  const todayName = days[new Date().getDay()];
+  const today = hours.find(
+    (item) => item.day === todayName
+  );
 
-  const today =
-    hours.find(
-      (item) => item.day === todayName
-    ) ?? hours[0];
-
-  if (today.closed) {
-    return {
-      label: "داخراوە",
-      isOpen: false,
-    };
+  if (!today || today.closed) {
+    return CLOSED;
   }
 
-  if (today.open && today.close) {
-    return {
-      label: `${today.open} - ${today.close}`,
-      isOpen: true,
-    };
+  const openMinutes = parseTimeToMinutes(
+    today.open
+  );
+
+  const closeMinutes = parseTimeToMinutes(
+    today.close
+  );
+
+  if (
+    openMinutes === null ||
+    closeMinutes === null
+  ) {
+    return CLOSED;
   }
+
+  const nowMinutes =
+    now.getHours() * 60 +
+    now.getMinutes();
+
+  /*
+   * Overnight ranges (e.g. 20:00 -> 02:00) wrap past
+   * midnight, so "open" spans across the day boundary.
+   */
+  const isOpenNow =
+    closeMinutes > openMinutes
+      ? nowMinutes >= openMinutes &&
+        nowMinutes < closeMinutes
+      : nowMinutes >= openMinutes ||
+        nowMinutes < closeMinutes;
 
   return {
-    label: "کاتی کار دیاری نەکراوە",
-    isOpen: false,
+    isOpen: isOpenNow,
+    label: isOpenNow
+      ? "کراوەیە"
+      : "داخراوە",
   };
+}
+
+/*
+ * The open/closed check depends on the VISITOR's local
+ * clock and timezone, which almost never matches the
+ * server's at render time. Reading `Date.now()` during
+ * the initial render (including SSR) would make the
+ * server-rendered HTML disagree with the client's first
+ * render and trigger a hydration mismatch.
+ *
+ * So we render a stable, deterministic placeholder for
+ * both the SSR pass and the client's first render, then
+ * only switch to the real, clock-based status inside an
+ * effect — strictly after hydration has committed — and
+ * keep it fresh by re-checking once a minute.
+ */
+function useOpenStatus(
+  hours: Provider["hours"]
+) {
+  const [mounted, setMounted] =
+    useState(false);
+
+  const [now, setNow] = useState(0);
+
+  useEffect(() => {
+    setMounted(true);
+    setNow(Date.now());
+
+    const interval = window.setInterval(
+      () => setNow(Date.now()),
+      60 * 1000
+    );
+
+    return () =>
+      window.clearInterval(interval);
+  }, []);
+
+  return useMemo(() => {
+    if (!mounted) {
+      return {
+        isOpen: false,
+        label: "داخراوە",
+      };
+    }
+
+    return getOpenStatus(
+      hours,
+      new Date(now)
+    );
+  }, [mounted, hours, now]);
 }
 
 function RatingStars({
@@ -88,7 +190,7 @@ function RatingStars({
 
   return (
     <div
-      className="flex items-center gap-1"
+      className="flex items-center gap-0.5"
       dir="ltr"
       aria-label={`Rating ${safeRating} out of 5`}
     >
@@ -101,10 +203,10 @@ function RatingStars({
           return (
             <Star
               key={index}
-              className={`h-3.5 w-3.5 ${
+              className={`h-3 w-3 ${
                 filled
                   ? "fill-yellow-400 text-yellow-400"
-                  : "text-slate-300"
+                  : "text-slate-300 dark:text-slate-700"
               }`}
               strokeWidth={1.6}
               aria-hidden="true"
@@ -121,22 +223,28 @@ export default function ProviderCard({
   onClick,
   className = "",
 }: ProviderCardProps) {
-  const todayStatus =
-    getTodayStatus(provider.hours);
-
   const handleCardClick = () => {
     onClick?.(provider);
   };
 
+  const badgeLabel =
+    provider.subcategory ??
+    provider.category;
+
+  const status = useOpenStatus(
+    provider.hours
+  );
+
   return (
     <article
       className={[
-        "group relative overflow-hidden rounded-3xl",
+        "group relative flex h-full flex-col overflow-hidden rounded-2xl",
         "border border-slate-200/80 bg-white",
         "shadow-sm transition-[transform,box-shadow] duration-300",
         "hover:-translate-y-1",
-        "hover:shadow-xl hover:shadow-slate-200/50",
+        "hover:shadow-lg hover:shadow-slate-200/60",
         "dark:border-slate-800 dark:bg-slate-900",
+        "dark:hover:shadow-black/20",
         className,
       ]
         .filter(Boolean)
@@ -144,430 +252,265 @@ export default function ProviderCard({
       dir="rtl"
     >
       {/* =========================================================
-          COVER
+          FULL-CARD CLICK TARGET
+          Opens the same ProviderModal with all provider data
+          (socials, hours, location, phone) untouched.
       ========================================================== */}
 
       <button
         type="button"
         onClick={handleCardClick}
-        className="relative block h-48 w-full overflow-hidden text-right touch-manipulation"
+        className="flex h-full w-full flex-col text-right touch-manipulation"
         aria-label={`بینینی زانیاری ${provider.name}`}
       >
-        {provider.coverImage ? (
-          <Image
-            src={provider.coverImage}
-            alt={provider.name}
-            fill
-            sizes="
-              (max-width: 768px) 100vw,
-              50vw
-            "
-            className="
-              object-cover
-              transition-transform
-              duration-500
-              group-hover:scale-105
-            "
-          />
-        ) : (
+        {/* =======================================================
+            COVER
+        ======================================================== */}
+
+        <div className="relative aspect-[4/3] w-full shrink-0 overflow-hidden">
+          {provider.coverImage ? (
+            <Image
+              src={provider.coverImage}
+              alt={provider.name}
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="
+                object-cover
+                transition-transform
+                duration-500
+                group-hover:scale-105
+              "
+            />
+          ) : (
+            <div
+              className="
+                absolute
+                inset-0
+                flex
+                items-center
+                justify-center
+                bg-gradient-to-br
+                from-green-600
+                via-green-500
+                to-emerald-400
+              "
+            >
+              <span className="text-xl font-black text-white/90">
+                {getInitials(provider.name)}
+              </span>
+            </div>
+          )}
+
           <div
+            aria-hidden="true"
             className="
               absolute
               inset-0
-              bg-gradient-to-br
-              from-green-600
-              via-green-500
-              to-emerald-400
+              bg-gradient-to-t
+              from-black/20
+              via-transparent
+              to-transparent
             "
           />
-        )}
 
-        <div
-          className="
-            absolute
-            inset-0
-            bg-gradient-to-t
-            from-black/55
-            via-black/5
-            to-transparent
-          "
-        />
+          {/* Most Requested */}
+          {provider.featured && (
+            <span
+              className="
+                absolute
+                end-2
+                top-2
+                max-w-[calc(100%-2.5rem)]
+                truncate
+                rounded-full
+                bg-yellow-400
+                px-2
+                py-0.5
+                text-[9px]
+                font-bold
+                text-yellow-950
+                shadow-md
+              "
+            >
+              پڕداواکاریترین
+            </span>
+          )}
 
-        {/* Most requested */}
-        {provider.featured && (
-          <span
-            className="
-              absolute
-              right-4
-              top-4
-              rounded-full
-              bg-yellow-400
-              px-3
-              py-1
-              text-xs
-              font-bold
-              text-yellow-950
-              shadow-lg
-            "
-          >
-            پڕداواکاریترین
-          </span>
-        )}
+          {/* Verified */}
+          {provider.verified && (
+            <span
+              className="
+                absolute
+                start-2
+                top-2
+                flex
+                items-center
+                gap-0.5
+                rounded-full
+                bg-white/95
+                px-1.5
+                py-0.5
+                text-[10px]
+                font-semibold
+                text-green-700
+                shadow-sm
+                backdrop-blur
+              "
+            >
+              <BadgeCheck
+                className="h-3 w-3"
+                aria-hidden="true"
+              />
+            </span>
+          )}
 
-        {/* Verified */}
-        {provider.verified && (
-          <span
-            className="
-              absolute
-              left-4
-              top-4
-              flex
-              items-center
-              gap-1
-              rounded-full
-              bg-white/95
-              px-2.5
-              py-1
-              text-xs
-              font-semibold
-              text-green-700
-              shadow-md
-              backdrop-blur
-            "
-          >
-            <BadgeCheck
-              className="h-3.5 w-3.5"
-              aria-hidden="true"
-            />
-
-            پشتڕاستکراوە
-          </span>
-        )}
-      </button>
-
-      {/* =========================================================
-          BODY
-      ========================================================== */}
-
-      <div className="relative px-5 pb-5">
-        {/* =======================================================
-            LOGO + STATUS
-        ======================================================== */}
-
-        <div className="-mt-11 mb-4 flex items-end justify-between">
-          <button
-            type="button"
-            onClick={handleCardClick}
-            className="
-              relative
-              flex
-              h-20
-              w-20
-              items-center
-              justify-center
-              overflow-hidden
-              rounded-2xl
-              border-4
-              border-white
-              bg-slate-100
-              shadow-lg
-              dark:border-slate-900
-              dark:bg-slate-800
-              touch-manipulation
-            "
-            aria-label={`بینینی ${provider.name}`}
-          >
-            {provider.logo ? (
+          {/* Logo */}
+          {provider.logo && (
+            <span
+              className="
+                absolute
+                -bottom-4
+                start-3
+                flex
+                h-9
+                w-9
+                shrink-0
+                items-center
+                justify-center
+                overflow-hidden
+                rounded-xl
+                border-2
+                border-white
+                bg-slate-100
+                shadow-md
+                dark:border-slate-900
+                dark:bg-slate-800
+              "
+            >
               <Image
                 src={provider.logo}
-                alt={`${provider.name} logo`}
+                alt=""
                 fill
-                sizes="80px"
+                sizes="36px"
                 className="object-cover"
               />
-            ) : (
+            </span>
+          )}
+        </div>
+
+        {/* =======================================================
+            BODY
+        ======================================================== */}
+
+        <div
+          className={`
+            flex flex-1 flex-col gap-1
+            px-3 pb-3
+            ${
+              provider.logo
+                ? "pt-6"
+                : "pt-3"
+            }
+          `}
+        >
+          <div className="flex flex-wrap items-center gap-1">
+            {badgeLabel && (
               <span
                 className="
-                  text-xl
-                  font-black
-                  text-green-600
+                  w-fit
+                  max-w-full
+                  truncate
+                  rounded-full
+                  bg-green-50
+                  px-2
+                  py-0.5
+                  text-[10px]
+                  font-semibold
+                  text-green-700
+                  dark:bg-green-950/40
+                  dark:text-green-400
                 "
               >
-                {getInitials(
-                  provider.name
-                )}
+                {badgeLabel}
               </span>
             )}
-          </button>
 
-          <div className="pb-1">
+            {/* Open / Closed status */}
             <span
               className={`
                 inline-flex
+                w-fit
                 items-center
                 gap-1
                 rounded-full
-                px-2.5
-                py-1
-                text-[11px]
+                px-2
+                py-0.5
+                text-[10px]
                 font-semibold
                 ${
-                  todayStatus.isOpen
-                    ? "bg-green-50 text-green-700"
-                    : "bg-slate-100 text-slate-500"
+                  status.isOpen
+                    ? "bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-400"
+                    : "bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400"
                 }
               `}
             >
               <span
+                aria-hidden="true"
                 className={`
                   h-1.5
                   w-1.5
                   rounded-full
                   ${
-                    todayStatus.isOpen
+                    status.isOpen
                       ? "bg-green-500"
-                      : "bg-slate-400"
+                      : "bg-rose-500"
                   }
                 `}
               />
 
-              {todayStatus.isOpen
-                ? "کراوەیە"
-                : "داخراوە"}
+              {status.label}
             </span>
           </div>
-        </div>
 
-        {/* =======================================================
-            MAIN CONTENT
-        ======================================================== */}
+          <h3
+            className="
+              line-clamp-1
+              text-sm
+              font-bold
+              text-slate-900
+              dark:text-white
+            "
+          >
+            {provider.name}
+          </h3>
 
-        <button
-          type="button"
-          onClick={handleCardClick}
-          className="
-            block
-            w-full
-            text-right
-            touch-manipulation
-          "
-        >
-          {/* Provider name + Arrow */}
-          <div className="mb-1 flex items-start gap-3">
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <h3
-                  className="
-                    truncate
-                    text-lg
-                    font-bold
-                    text-slate-900
-                    dark:text-white
-                  "
-                >
-                  {provider.name}
-                </h3>
-
-                {/* Arrow icon restored next to the name */}
-                <span
-                  className="
-                    flex
-                    h-7
-                    w-7
-                    shrink-0
-                    items-center
-                    justify-center
-                    rounded-full
-                    bg-slate-100
-                    text-slate-500
-                    transition-[transform,background-color,color]
-                    duration-200
-                    group-hover:-translate-x-0.5
-                    group-hover:bg-green-50
-                    group-hover:text-green-600
-                    dark:bg-slate-800
-                    dark:text-slate-400
-                    dark:group-hover:bg-green-950/40
-                    dark:group-hover:text-green-400
-                  "
-                  aria-hidden="true"
-                >
-                  <ArrowLeft
-                    className="h-4 w-4"
-                    strokeWidth={2}
-                  />
-                </span>
-              </div>
-
-              <p
-                className="
-                  mt-1
-                  text-sm
-                  font-medium
-                  text-green-600
-                "
-              >
-                {provider.subcategory ??
-                  provider.category}
-              </p>
-            </div>
-          </div>
-
-          {provider.description && (
-            <p
-              className="
-                mt-3
-                line-clamp-2
-                text-sm
-                leading-6
-                text-slate-500
-                dark:text-slate-400
-              "
-            >
-              {provider.description}
-            </p>
-          )}
-
-          {/* Rating */}
-          <div className="mt-4 flex items-center gap-2">
+          <div className="mt-auto flex items-center gap-1.5 pt-1">
             <RatingStars
-              rating={
-                provider.rating
-              }
+              rating={provider.rating}
             />
 
             <span
               className="
-                text-sm
+                text-xs
                 font-bold
                 text-slate-800
                 dark:text-slate-200
               "
             >
               {(
-                provider.rating ??
-                0
+                provider.rating ?? 0
               ).toFixed(1)}
             </span>
 
             {provider.reviewCount !==
               undefined && (
-              <span
-                className="
-                  text-xs
-                  text-slate-400
-                "
-              >
-                (
-                {
-                  provider.reviewCount
-                }{" "}
-                هەڵسەنگاندن)
+              <span className="truncate text-[10px] text-slate-400">
+                ({provider.reviewCount})
               </span>
             )}
           </div>
-        </button>
-
-        {/* =======================================================
-            META
-        ======================================================== */}
-
-        <div
-          className="
-            mt-4
-            space-y-2
-            border-t
-            border-slate-100
-            pt-4
-            dark:border-slate-800
-          "
-        >
-          {provider.location
-            ?.address && (
-            <div
-              className="
-                flex
-                items-center
-                gap-2
-                text-xs
-                text-slate-500
-                dark:text-slate-400
-              "
-            >
-              <MapPin
-                className="
-                  h-4
-                  w-4
-                  shrink-0
-                  text-green-600
-                "
-                aria-hidden="true"
-              />
-
-              <span className="line-clamp-1">
-                {
-                  provider
-                    .location
-                    .address
-                }
-              </span>
-            </div>
-          )}
-
-          <div
-            className="
-              flex
-              items-center
-              gap-2
-              text-xs
-              text-slate-500
-              dark:text-slate-400
-            "
-          >
-            <Clock3
-              className="
-                h-4
-                w-4
-                shrink-0
-                text-green-600
-              "
-              aria-hidden="true"
-            />
-
-            <span>
-              {
-                todayStatus.label
-              }
-            </span>
-          </div>
         </div>
-
-        {/* =======================================================
-            SOCIAL MEDIA
-            Labels enabled
-        ======================================================== */}
-
-        <div
-          className="
-            mt-4
-            border-t
-            border-slate-100
-            pt-4
-            dark:border-slate-800
-          "
-        >
-          <ProviderSocials
-            socials={
-              provider.socials
-            }
-            phone={
-              provider.phone
-            }
-            size="sm"
-            showLabels
-          />
-        </div>
-      </div>
+      </button>
     </article>
   );
 }

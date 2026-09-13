@@ -34,7 +34,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${vazirmatn.variable} scroll-smooth`}
     >
-      <body>
+      <body suppressHydrationWarning>
         <ThemeProvider>
           <LanguageProvider>
             {/* =============================================

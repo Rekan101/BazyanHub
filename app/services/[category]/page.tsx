@@ -280,6 +280,13 @@ const UI_TEXT = {
       "هیچ خزمەتگوزارییەک هێشتا زیاد نەکراوە",
     noProvidersDescription:
       "خزمەتگوزاری و کاروبارە نوێکان بە زوویی لێرە زیاد دەکرێن.",
+    filterAll: "هەمووی",
+    filterFeatured: "پڕداواکاریترین",
+    filterSpecial: "تایبەت",
+    noFilterResultsTitle:
+      "هیچ ئەنجامێک نەدۆزرایەوە",
+    noFilterResultsDescription:
+      "لەم پۆلە بۆ ئێستا هیچ خزمەتگوزارییەک نییە، تکایە پۆلێکی تر تاقی بکەرەوە.",
   },
 
   ar: {
@@ -289,6 +296,13 @@ const UI_TEXT = {
       "لم تتم إضافة خدمات بعد",
     noProvidersDescription:
       "ستتم إضافة الخدمات والأعمال الجديدة هنا قريبًا.",
+    filterAll: "الكل",
+    filterFeatured: "الأكثر طلبًا",
+    filterSpecial: "مميز",
+    noFilterResultsTitle:
+      "لا توجد نتائج",
+    noFilterResultsDescription:
+      "لا توجد خدمات ضمن هذا التصنيف حاليًا، جرّب تصنيفًا آخر.",
   },
 
   en: {
@@ -298,11 +312,26 @@ const UI_TEXT = {
       "No services have been added yet",
     noProvidersDescription:
       "New services and businesses will be added here soon.",
+    filterAll: "All",
+    filterFeatured: "Most Requested",
+    filterSpecial: "Special",
+    noFilterResultsTitle:
+      "No results found",
+    noFilterResultsDescription:
+      "No services match this filter yet, try another tab.",
   },
 } satisfies Record<
   LanguageCode,
   Record<string, string>
 >;
+
+/*
+|--------------------------------------------------------------------------
+| Category Filters (hardcoded — no dynamic subcategory filters)
+|--------------------------------------------------------------------------
+*/
+
+type FilterKey = "all" | "featured" | "special";
 
 /*
 |--------------------------------------------------------------------------
@@ -506,6 +535,11 @@ const RESTAURANT_PROVIDERS: Provider[] =
       featured:
         Boolean(
           restaurant.featured
+        ),
+
+      special:
+        Boolean(
+          restaurant.special
         ),
 
       services:
@@ -1070,10 +1104,9 @@ export default function CategoryPage() {
           <div
             className="
               grid
-              grid-cols-1
-              gap-5
-              sm:grid-cols-2
-              lg:grid-cols-3
+              grid-cols-2
+              gap-3
+              sm:gap-4
             "
           >
             {providers.map(

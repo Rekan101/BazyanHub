@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import {
   BadgeCheck,
@@ -70,6 +70,38 @@ export default function ProviderModal({
    * All hooks must run on every render.
    * Do NOT put a conditional return before these hooks.
    */
+
+  /*
+   * Interactive 5-star rating (local UI state only, for now).
+   * TODO: persist this to Supabase once the backend is wired up.
+   */
+  const [selectedRating, setSelectedRating] =
+    useState(0);
+
+  const [hoverRating, setHoverRating] =
+    useState(0);
+
+  const [ratingSubmitted, setRatingSubmitted] =
+    useState(false);
+
+  /*
+   * Reset the local rating UI whenever a different
+   * provider is opened, so it never carries over.
+   */
+  useEffect(() => {
+    setSelectedRating(0);
+    setHoverRating(0);
+    setRatingSubmitted(false);
+  }, [provider?.id]);
+
+  const handleRate = (value: number) => {
+    setSelectedRating(value);
+    setRatingSubmitted(true);
+
+    window.setTimeout(() => {
+      setRatingSubmitted(false);
+    }, 3000);
+  };
 
   useEffect(() => {
     if (!isOpen) {
@@ -855,6 +887,98 @@ export default function ProviderModal({
                 </div>
               </section>
             )}
+
+            {/* ================= RATE THIS PROVIDER ================= */}
+
+            <section
+              className="
+                mb-2
+                rounded-2xl
+                border
+                border-slate-200
+                bg-slate-50
+                px-4
+                py-4
+                dark:border-slate-800
+                dark:bg-slate-900
+              "
+            >
+              <h3
+                className="
+                  text-sm
+                  font-bold
+                  text-slate-900
+                  dark:text-white
+                "
+              >
+                هەڵسەنگاندنی ئەم خزمەتگوزارییە
+              </h3>
+
+              <div
+                className="mt-3 flex items-center gap-1"
+                dir="ltr"
+              >
+                {[1, 2, 3, 4, 5].map((value) => {
+                  const filled =
+                    value <=
+                    (hoverRating ||
+                      selectedRating);
+
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() =>
+                        handleRate(value)
+                      }
+                      onMouseEnter={() =>
+                        setHoverRating(value)
+                      }
+                      onMouseLeave={() =>
+                        setHoverRating(0)
+                      }
+                      aria-label={`هەڵسەنگاندن ${value} لە 5`}
+                      className="
+                        rounded-md
+                        p-1
+                        transition-transform
+                        duration-150
+                        hover:scale-110
+                        focus:outline-none
+                        focus-visible:ring-2
+                        focus-visible:ring-green-500
+                        touch-manipulation
+                      "
+                    >
+                      <Star
+                        className={`h-6 w-6 ${
+                          filled
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "text-slate-300 dark:text-slate-700"
+                        }`}
+                        strokeWidth={1.6}
+                        aria-hidden="true"
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+
+              {ratingSubmitted && (
+                <p
+                  className="
+                    mt-2
+                    text-xs
+                    font-semibold
+                    text-green-600
+                    dark:text-green-400
+                  "
+                >
+                  سوپاس بۆ هەڵسەنگاندنەکەت! (
+                  {selectedRating} لە 5)
+                </p>
+              )}
+            </section>
 
             {/* ================= SOCIAL MEDIA ================= */}
 
