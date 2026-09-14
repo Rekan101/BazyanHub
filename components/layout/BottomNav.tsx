@@ -97,11 +97,11 @@ export default function BottomNav() {
                   active ? "page" : undefined
                 }
                 className={`
-                  flex h-14 min-w-0
+                  flex h-11 min-w-0
                   flex-col
                   items-center justify-center
                   gap-0.5
-                  px-0.5 py-1
+                  px-0.5 py-0.5
                   outline-none
                   transition-colors duration-200
 
@@ -118,7 +118,7 @@ export default function BottomNav() {
               >
                 <span
                   className="
-                    flex h-6 w-10
+                    flex h-5 w-9
                     items-center justify-center
                     rounded-full
                     bg-transparent
@@ -128,7 +128,7 @@ export default function BottomNav() {
                   <Icon
                     aria-hidden="true"
                     className={`
-                      h-5 w-5
+                      h-4 w-4
                       transition-transform duration-300
                       ${
                         active
@@ -149,7 +149,7 @@ export default function BottomNav() {
                 <span
                   className={`
                     max-w-full truncate
-                    text-[10px]
+                    text-[9px]
                     leading-tight
                     tracking-tight
                     ${

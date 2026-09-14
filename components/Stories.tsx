@@ -336,12 +336,18 @@ export default function Stories() {
           w-full
           rounded-[2rem]
           border border-white/20
-          bg-[linear-gradient(135deg,_#cbd5e1_0%,_#9ca3af_50%,_#cbd5e1_100%)]
+          bg-slate-300
           p-4
           shadow-lg shadow-black/10
 
           dark:border-white/10
         "
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15)), url('/images/silver-waves.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
       >
         <AnimatePresence mode="wait">
           <motion.div
