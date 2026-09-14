@@ -7,7 +7,7 @@ export default function LegalPage() {
       <div className="mx-auto max-w-4xl">
         <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
           {/* Header */}
-          <div className="border-b border-slate-200 bg-[#14532D] px-6 py-10 text-white sm:px-10">
+          <div className="border-b border-slate-200 bg-blue-900 dark:bg-blue-950 px-6 py-10 text-white sm:px-10">
             <h1 className="text-2xl font-bold sm:text-3xl">
               مەرجەکانی بەکارهێنان و سیاسەتی تایبەتمەندی
             </h1>
@@ -22,7 +22,7 @@ export default function LegalPage() {
           <div className="space-y-10 px-6 py-10 sm:px-10">
             {/* Terms */}
             <section>
-              <h2 className="text-xl font-bold text-[#14532D] dark:text-green-400">
+              <h2 className="text-xl font-bold text-blue-900 dark:text-blue-400">
                 مەرجەکانی بەکارهێنان
               </h2>
 
@@ -47,7 +47,7 @@ export default function LegalPage() {
 
             {/* Privacy */}
             <section className="border-t border-slate-200 pt-10 dark:border-slate-800">
-              <h2 className="text-xl font-bold text-[#14532D] dark:text-green-400">
+              <h2 className="text-xl font-bold text-blue-900 dark:text-blue-400">
                 سیاسەتی تایبەتمەندی
               </h2>
 
@@ -86,7 +86,7 @@ export default function LegalPage() {
 
               <a
                 href="mailto:info@bazyanhub.com"
-                className="mt-3 inline-block text-sm font-semibold text-[#16A34A] hover:underline"
+                className="mt-3 inline-block text-sm font-semibold text-blue-600 dark:text-blue-500 hover:underline"
               >
                 info@bazyanhub.com
               </a>

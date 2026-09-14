@@ -86,11 +86,11 @@ export default function Footer() {
       <div className="mx-auto max-w-[1440px] px-4 py-12 sm:px-6 lg:px-10">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {/* Contact Card */}
-          <div className="group relative overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-[0_10px_35px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(15,23,42,0.10)] dark:border-white/10 dark:bg-[#111827]">
-            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#16A34A] via-[#22C55E] to-[#15803D]" />
+          <div className="group relative overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-[0_10px_35px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(15,23,42,0.10)] dark:border-slate-800 dark:bg-[#111827]">
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-600 via-blue-500 to-sky-500" />
 
             <div className="flex flex-col items-center text-center">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#16A34A]/10 text-[#16A34A] shadow-sm transition-transform duration-300 group-hover:scale-105">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600/10 dark:bg-blue-500/10 text-blue-600 dark:text-blue-500 shadow-sm transition-transform duration-300 group-hover:scale-105">
                 <Phone className="h-5 w-5" />
               </div>
 
@@ -102,7 +102,7 @@ export default function Footer() {
                 <a
                   href="tel:+9647757997904"
                   dir="ltr"
-                  className="flex items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3 text-sm font-semibold text-[#374151] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#16A34A]/40 hover:bg-[#16A34A]/5 hover:text-[#16A34A] dark:border-white/10 dark:bg-white/[0.03] dark:text-gray-200 dark:hover:border-[#16A34A]/40"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3 text-sm font-semibold text-[#374151] transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-600/40 dark:hover:border-blue-500/40 hover:bg-blue-600/5 dark:hover:bg-blue-500/10 hover:text-blue-600 dark:hover:text-blue-500 dark:border-slate-800 dark:bg-white/[0.03] dark:text-gray-200"
                 >
                   <Phone className="h-4 w-4 shrink-0" />
                   <span>+964 775 799 7904</span>
@@ -111,7 +111,7 @@ export default function Footer() {
                 <a
                   href="mailto:info@bazyanhub.com"
                   dir="ltr"
-                  className="flex items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3 text-sm font-semibold text-[#374151] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#16A34A]/40 hover:bg-[#16A34A]/5 hover:text-[#16A34A] dark:border-white/10 dark:bg-white/[0.03] dark:text-gray-200 dark:hover:border-[#16A34A]/40"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3 text-sm font-semibold text-[#374151] transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-600/40 dark:hover:border-blue-500/40 hover:bg-blue-600/5 dark:hover:bg-blue-500/10 hover:text-blue-600 dark:hover:text-blue-500 dark:border-slate-800 dark:bg-white/[0.03] dark:text-gray-200"
                 >
                   <Mail className="h-4 w-4 shrink-0" />
                   <span>info@bazyanhub.com</span>
@@ -124,7 +124,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="بازیان هەب لە فەیسبووک"
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-500 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:scale-110 hover:border-[#1877F2] hover:bg-[#1877F2] hover:text-white hover:shadow-lg hover:shadow-[#1877F2]/20 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-300"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:scale-110 hover:border-[#1877F2] hover:bg-[#1877F2] hover:text-white hover:shadow-lg hover:shadow-[#1877F2]/20 dark:border-slate-800 dark:bg-white/[0.04] dark:text-slate-300"
                 >
                   <FacebookIcon />
                 </a>
@@ -134,7 +134,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="بازیان هەب لە ئینستاگرام"
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-500 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:scale-110 hover:border-[#E4405F] hover:bg-[#E4405F] hover:text-white hover:shadow-lg hover:shadow-[#E4405F]/20 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-300"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:scale-110 hover:border-[#E4405F] hover:bg-[#E4405F] hover:text-white hover:shadow-lg hover:shadow-[#E4405F]/20 dark:border-slate-800 dark:bg-white/[0.04] dark:text-slate-300"
                 >
                   <InstagramIcon />
                 </a>
@@ -144,7 +144,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="بازیان هەب لە تیکتۆک"
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-500 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:scale-110 hover:border-black hover:bg-black hover:text-white hover:shadow-lg hover:shadow-black/20 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-300 dark:hover:bg-black"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:scale-110 hover:border-black hover:bg-black hover:text-white hover:shadow-lg hover:shadow-black/20 dark:border-slate-800 dark:bg-white/[0.04] dark:text-slate-300 dark:hover:bg-black"
                 >
                   <TikTokIcon />
                 </a>
@@ -154,7 +154,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="بازیان هەب لە واتسەپ"
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-500 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:scale-110 hover:border-[#25D366] hover:bg-[#25D366] hover:text-white hover:shadow-lg hover:shadow-[#25D366]/20 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-300"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:scale-110 hover:border-[#25D366] hover:bg-[#25D366] hover:text-white hover:shadow-lg hover:shadow-[#25D366]/20 dark:border-slate-800 dark:bg-white/[0.04] dark:text-slate-300"
                 >
                   <WhatsAppIcon />
                 </a>
@@ -164,7 +164,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="بازیان هەب لە ڤایبەر"
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-500 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:scale-110 hover:border-[#7360F2] hover:bg-[#7360F2] hover:text-white hover:shadow-lg hover:shadow-[#7360F2]/20 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-300"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:scale-110 hover:border-[#7360F2] hover:bg-[#7360F2] hover:text-white hover:shadow-lg hover:shadow-[#7360F2]/20 dark:border-slate-800 dark:bg-white/[0.04] dark:text-slate-300"
                 >
                   <ViberIcon />
                 </a>
@@ -173,8 +173,8 @@ export default function Footer() {
           </div>
 
           {/* Working Hours */}
-          <div className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-[0_10px_35px_rgba(15,23,42,0.04)] dark:border-white/10 dark:bg-[#111827]">
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#16A34A]/10 text-[#16A34A]">
+          <div className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-[0_10px_35px_rgba(15,23,42,0.04)] dark:border-slate-800 dark:bg-[#111827]">
+            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600/10 dark:bg-blue-500/10 text-blue-600 dark:text-blue-500">
               <Clock3 className="h-5 w-5" />
             </div>
 
@@ -188,8 +188,8 @@ export default function Footer() {
           </div>
 
           {/* Address */}
-          <div className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-[0_10px_35px_rgba(15,23,42,0.04)] dark:border-white/10 dark:bg-[#111827]">
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#16A34A]/10 text-[#16A34A]">
+          <div className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-[0_10px_35px_rgba(15,23,42,0.04)] dark:border-slate-800 dark:bg-[#111827]">
+            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600/10 dark:bg-blue-500/10 text-blue-600 dark:text-blue-500">
               <MapPin className="h-5 w-5" />
             </div>
 
@@ -203,7 +203,7 @@ export default function Footer() {
           </div>
 
           {/* Map */}
-          <div className="overflow-hidden rounded-2xl border border-[#E5E7EB] shadow-[0_10px_35px_rgba(15,23,42,0.04)] dark:border-white/10">
+          <div className="overflow-hidden rounded-2xl border border-[#E5E7EB] shadow-[0_10px_35px_rgba(15,23,42,0.04)] dark:border-slate-800">
             <iframe
               title="نەخشەی شوێنی بازیان"
               src="https://maps.google.com/maps?q=Bazyan,Sulaymaniyah,Iraq&z=11&output=embed"
@@ -216,7 +216,7 @@ export default function Footer() {
       </div>
 
       {/* Dark bottom bar */}
-      <div className="bg-[#14532D] text-white">
+      <div className="bg-blue-900 dark:bg-blue-950 text-white">
         <div className="mx-auto max-w-[1440px] px-4 py-12 sm:px-6 lg:px-10">
           <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
             {/* Brand */}
@@ -338,13 +338,13 @@ export default function Footer() {
                   disabled={
                     !rating && !feedback.trim()
                   }
-                  className="mt-3 w-full rounded-xl bg-white px-4 py-2.5 text-xs font-bold text-[#14532D] transition-all hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="mt-3 w-full rounded-xl bg-white px-4 py-2.5 text-xs font-bold text-blue-900 transition-all hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   ناردنی فییدباک
                 </button>
 
                 {submitted && (
-                  <p className="mt-2 text-xs font-semibold text-green-200">
+                  <p className="mt-2 text-xs font-semibold text-sky-200">
                     سوپاس بۆ فییدباکەکەت 🌿
                   </p>
                 )}

@@ -301,12 +301,12 @@ export default function ProviderSocials({
                   "bg-white dark:bg-slate-900",
                   "transition-all duration-200",
                   "focus:outline-none",
-                  "focus:ring-2 focus:ring-green-500/30",
+                  "focus:ring-2 focus:ring-blue-600/30 dark:focus:ring-blue-500/30",
                   config.hoverBg,
                   config.hoverBorder,
                   isWhatsApp
                     ? [
-                        "shadow-md shadow-green-200/40",
+                        "shadow-md shadow-sky-200/40 dark:shadow-sky-500/20",
                         "hover:scale-110",
                       ].join(" ")
                     : "hover:-translate-y-0.5 hover:scale-105",
@@ -339,7 +339,7 @@ export default function ProviderSocials({
                     "mt-1 max-w-full truncate text-center",
                     isWhatsApp
                       ? "text-[10px] font-bold text-[#25D366] sm:text-[11px]"
-                      : "text-[9px] font-medium text-slate-500 sm:text-[10px]",
+                      : "text-[9px] font-medium text-slate-600 sm:text-[10px]",
                   ].join(" ")}
                 >
                   {config.label}

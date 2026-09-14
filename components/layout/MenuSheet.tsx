@@ -215,7 +215,7 @@ export default function MenuSheet({
               bg-white
               shadow-[0_20px_60px_rgba(15,23,42,0.22)]
 
-              dark:border-white/[0.08]
+              dark:border-slate-800
               dark:bg-slate-950
               dark:shadow-[0_20px_60px_rgba(0,0,0,0.55)]
             "
@@ -232,7 +232,7 @@ export default function MenuSheet({
                 border-b border-slate-200
                 px-4 py-4
 
-                dark:border-white/[0.08]
+                dark:border-slate-800
               "
             >
               <div className="flex min-w-0 items-center gap-3">
@@ -242,8 +242,8 @@ export default function MenuSheet({
                     items-center justify-center
                     overflow-hidden
                     rounded-xl
-                    bg-emerald-50
-                    dark:bg-emerald-400/[0.06]
+                    bg-sky-50
+                    dark:bg-sky-900/30
                   "
                 >
                   <Image
@@ -271,7 +271,7 @@ export default function MenuSheet({
                     className="
                       mt-0.5 truncate
                       text-[11px] font-medium
-                      text-slate-500
+                      text-slate-600
                       dark:text-slate-400
                     "
                   >
@@ -295,19 +295,19 @@ export default function MenuSheet({
                   outline-none
                   transition-all duration-200
 
-                  hover:border-emerald-300
-                  hover:bg-emerald-50/50
-                  hover:text-emerald-600
+                  hover:border-sky-400
+                  hover:bg-sky-50
+                  hover:text-blue-600
 
                   focus-visible:ring-2
-                  focus-visible:ring-emerald-500
+                  focus-visible:ring-blue-600 dark:focus-visible:ring-blue-500
 
-                  dark:border-white/[0.09]
+                  dark:border-slate-800
                   dark:bg-white/[0.04]
                   dark:text-slate-200
-                  dark:hover:border-emerald-400/30
-                  dark:hover:bg-emerald-400/[0.07]
-                  dark:hover:text-emerald-400
+                  dark:hover:border-sky-400/40
+                  dark:hover:bg-sky-900/30
+                  dark:hover:text-blue-500
                 "
               >
                 <X
@@ -332,7 +332,7 @@ export default function MenuSheet({
                   bg-slate-50/80
                   p-2
 
-                  dark:border-white/[0.07]
+                  dark:border-slate-800
                   dark:bg-white/[0.025]
                 "
               >
@@ -363,28 +363,28 @@ export default function MenuSheet({
                         transition-all duration-200
 
                         focus-visible:ring-2
-                        focus-visible:ring-emerald-500
+                        focus-visible:ring-blue-600 dark:focus-visible:ring-blue-500
 
                         ${
                           active
                             ? `
                               bg-white
-                              text-emerald-600
+                              text-blue-600
                               shadow-sm
 
                               dark:bg-white/[0.07]
-                              dark:text-emerald-400
+                              dark:text-blue-500
                             `
                             : `
                               text-slate-700
 
                               hover:bg-white
-                              hover:text-emerald-600
+                              hover:text-blue-600
                               hover:shadow-sm
 
                               dark:text-slate-200
                               dark:hover:bg-white/[0.06]
-                              dark:hover:text-emerald-400
+                              dark:hover:text-blue-500
                             `
                         }
                       `}
@@ -411,14 +411,14 @@ export default function MenuSheet({
                   border-t border-slate-200
                   pt-5
 
-                  dark:border-white/[0.08]
+                  dark:border-slate-800
                 "
               >
                 <p
                   className="
                     mb-3 px-1
                     text-[13px] font-bold
-                    text-slate-500
+                    text-slate-600
                     dark:text-slate-400
                   "
                 >
@@ -451,32 +451,32 @@ export default function MenuSheet({
                           transition-all duration-200
 
                           focus-visible:ring-2
-                          focus-visible:ring-emerald-500
+                          focus-visible:ring-blue-600 dark:focus-visible:ring-blue-500
 
                           ${
                             active
                               ? `
-                                border-emerald-500
-                                bg-emerald-50
-                                text-emerald-600
+                                border-blue-600
+                                bg-sky-50
+                                text-blue-600
 
-                                dark:border-emerald-400
-                                dark:bg-emerald-400/10
-                                dark:text-emerald-400
+                                dark:border-blue-500
+                                dark:bg-sky-900/30
+                                dark:text-blue-500
                               `
                               : `
                                 border-slate-200
                                 bg-white
                                 text-slate-700
 
-                                hover:border-emerald-300
-                                hover:text-emerald-600
+                                hover:border-sky-400
+                                hover:text-blue-600
 
-                                dark:border-white/[0.08]
+                                dark:border-slate-800
                                 dark:bg-white/[0.03]
                                 dark:text-slate-200
-                                dark:hover:border-emerald-400/30
-                                dark:hover:text-emerald-400
+                                dark:hover:border-sky-400/40
+                                dark:hover:text-blue-500
                               `
                           }
                         `}
@@ -520,19 +520,19 @@ export default function MenuSheet({
                   outline-none
                   transition-all duration-200
 
-                  hover:border-emerald-300
-                  hover:bg-emerald-50/50
-                  hover:text-emerald-600
+                  hover:border-sky-400
+                  hover:bg-sky-50
+                  hover:text-blue-600
 
                   focus-visible:ring-2
-                  focus-visible:ring-emerald-500
+                  focus-visible:ring-blue-600 dark:focus-visible:ring-blue-500
 
-                  dark:border-white/[0.08]
+                  dark:border-slate-800
                   dark:bg-white/[0.03]
                   dark:text-slate-200
-                  dark:hover:border-emerald-400/30
-                  dark:hover:bg-emerald-400/[0.06]
-                  dark:hover:text-emerald-400
+                  dark:hover:border-sky-400/40
+                  dark:hover:bg-sky-900/30
+                  dark:hover:text-blue-500
                 "
               >
                 <span>
@@ -577,7 +577,7 @@ export default function MenuSheet({
                 px-4 py-4
                 pb-[calc(1rem_+_env(safe-area-inset-bottom))]
 
-                dark:border-white/[0.08]
+                dark:border-slate-800
                 dark:bg-white/[0.02]
               "
             >
@@ -595,8 +595,8 @@ export default function MenuSheet({
                 className="
                   mt-3 space-y-1
                   text-[11px] font-medium
-                  text-slate-500
-                  dark:text-slate-500
+                  text-slate-600
+                  dark:text-slate-400
                 "
               >
                 <p>{t("address")}</p>
@@ -609,10 +609,10 @@ export default function MenuSheet({
                   border-t border-slate-200
                   pt-3
                   text-[11px]
-                  text-slate-500
+                  text-slate-600
 
-                  dark:border-white/[0.06]
-                  dark:text-slate-500
+                  dark:border-slate-800
+                  dark:text-slate-400
                 "
               >
                 {t("copyright")}

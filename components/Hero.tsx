@@ -434,7 +434,7 @@ export default function Hero() {
             absolute
             inset-0
             bg-gradient-to-l
-            from-[#16A34A]/25
+            from-blue-600/25
             via-transparent
             to-transparent
           "
@@ -582,7 +582,7 @@ export default function Hero() {
                       hover:border-white/40
                       hover:shadow-black/50
                       focus-visible:ring-2
-                      focus-visible:ring-[#34d399]
+                      focus-visible:ring-sky-400
                       focus-visible:ring-offset-2
                       focus-visible:ring-offset-transparent
                       sm:rounded-[1.6rem]
@@ -818,8 +818,8 @@ export default function Hero() {
                                   left-0
                                   right-0
                                   rounded-full
-                                  bg-[#34d399]
-                                  shadow-[0_0_7px_rgba(52,211,153,0.85)]
+                                  bg-sky-400
+                                  shadow-[0_0_7px_rgba(56,189,248,0.85)]
                                 "
                               />
                             )}
@@ -853,7 +853,7 @@ export default function Hero() {
                 sm:px-10
                 sm:py-10
 
-                dark:border-white/10
+                dark:border-slate-800
                 dark:bg-black/40
               "
             >
@@ -880,7 +880,7 @@ export default function Hero() {
                 <m.h1
                   className="
                     text-balance
-                    bg-[linear-gradient(90deg,rgb(4,120,87),rgb(255,255,255),rgb(180,110,8))]
+                    bg-[linear-gradient(90deg,rgb(37,99,235),rgb(255,255,255),rgb(56,189,248))]
                     bg-[length:200%_auto]
                     bg-clip-text
                     text-[1.7rem]

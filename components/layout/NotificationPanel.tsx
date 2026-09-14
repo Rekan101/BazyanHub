@@ -121,7 +121,7 @@ export default function NotificationPanel({
               bg-white
               shadow-[0_24px_60px_rgba(15,23,42,0.22)]
 
-              dark:border-white/[0.08]
+              dark:border-slate-800
               dark:bg-slate-900
               dark:shadow-[0_24px_60px_rgba(0,0,0,0.55)]
             "
@@ -136,15 +136,15 @@ export default function NotificationPanel({
                 flex items-center justify-between
                 gap-3
                 overflow-hidden
-                border-b border-slate-100
+                border-b border-slate-200
                 bg-gradient-to-br
-                from-emerald-50
-                to-teal-50/60
+                from-sky-50
+                to-blue-50/60
                 px-4 py-3.5
 
-                dark:border-white/[0.06]
-                dark:from-emerald-500/[0.12]
-                dark:to-teal-500/[0.06]
+                dark:border-slate-800
+                dark:from-blue-500/[0.12]
+                dark:to-sky-500/[0.06]
               "
             >
               <span
@@ -154,7 +154,7 @@ export default function NotificationPanel({
                   absolute -end-4 -top-6
                   h-20 w-20
                   rounded-full
-                  bg-emerald-400/20
+                  bg-sky-400/20
                   blur-2xl
                 "
               />
@@ -166,10 +166,11 @@ export default function NotificationPanel({
                     flex h-9 w-9 shrink-0
                     items-center justify-center
                     rounded-xl
-                    bg-emerald-500/15
-                    text-emerald-600
+                    bg-sky-500/15
+                    dark:bg-sky-500/20
+                    text-blue-600
 
-                    dark:text-emerald-400
+                    dark:text-blue-500
                   "
                 >
                   <BellRing className="h-[18px] w-[18px]" />
@@ -191,8 +192,9 @@ export default function NotificationPanel({
                   className="
                     shrink-0
                     rounded-full
-                    bg-emerald-500
+                    bg-blue-600
                     px-1.5 py-0.5
+                    dark:bg-blue-500
                     text-[10px] font-bold
                     leading-none
                     text-white
@@ -211,7 +213,7 @@ export default function NotificationPanel({
                   flex h-8 w-8 shrink-0
                   items-center justify-center
                   rounded-lg
-                  text-slate-500
+                  text-slate-600
                   outline-none
                   transition-colors duration-200
 
@@ -219,7 +221,7 @@ export default function NotificationPanel({
                   hover:text-slate-900
 
                   focus-visible:ring-2
-                  focus-visible:ring-emerald-500
+                  focus-visible:ring-blue-600 dark:focus-visible:ring-blue-500
 
                   dark:text-slate-400
                   dark:hover:bg-white/[0.08]
@@ -243,10 +245,10 @@ export default function NotificationPanel({
                   className="
                     flex gap-3
                     rounded-2xl
-                    bg-emerald-50/60
+                    bg-sky-50/60
                     p-3
 
-                    dark:bg-emerald-400/[0.06]
+                    dark:bg-sky-900/30
                   "
                 >
                   <span
@@ -255,9 +257,9 @@ export default function NotificationPanel({
                       flex h-10 w-10 shrink-0
                       items-center justify-center
                       rounded-full
-                      bg-gradient-to-br from-emerald-500 to-teal-600
+                      bg-gradient-to-br from-blue-600 to-sky-500
                       text-white
-                      shadow-[0_8px_18px_-8px_rgba(16,185,129,0.9)]
+                      shadow-[0_8px_18px_-8px_rgba(37,99,235,0.9)]
                     "
                   >
                     <Sparkles className="h-5 w-5" />
@@ -291,9 +293,9 @@ export default function NotificationPanel({
                       className="
                         mt-1.5
                         text-[10.5px] font-semibold
-                        text-emerald-600
+                        text-blue-600
 
-                        dark:text-emerald-400
+                        dark:text-blue-500
                       "
                     >
                       {t("notificationNow")}
@@ -305,7 +307,8 @@ export default function NotificationPanel({
                     className="
                       mt-1.5 h-2 w-2 shrink-0
                       rounded-full
-                      bg-emerald-500
+                      bg-blue-600
+                      dark:bg-blue-500
                     "
                   />
                 </div>

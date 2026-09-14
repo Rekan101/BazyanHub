@@ -29,7 +29,7 @@ export default function CategoryCard({
           duration-300
           hover:-translate-y-1
           hover:shadow-xl
-          dark:border-white/10
+          dark:border-slate-800
           dark:bg-zinc-900
           sm:rounded-3xl
           sm:p-6

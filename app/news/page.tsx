@@ -121,12 +121,14 @@ export default function NewsPage() {
             flex h-12 w-12 shrink-0
             items-center justify-center
             rounded-2xl
-            border border-emerald-500/20
-            bg-emerald-500/10
-            text-emerald-600
+            border border-blue-600/20
+            bg-sky-500/10
+            text-blue-600
             shadow-sm
 
-            dark:text-emerald-400
+            dark:border-blue-500/20
+            dark:bg-sky-500/15
+            dark:text-blue-500
           "
         >
           <Newspaper className="h-6 w-6" />
@@ -148,7 +150,7 @@ export default function NewsPage() {
             className="
               mt-0.5
               text-[12px] leading-relaxed
-              text-slate-500
+              text-slate-600
               dark:text-slate-400
             "
           >
@@ -170,7 +172,7 @@ export default function NewsPage() {
           p-3
           shadow-sm
 
-          dark:border-white/[0.08]
+          dark:border-slate-800
           dark:bg-slate-900
         "
       >
@@ -185,7 +187,7 @@ export default function NewsPage() {
               text-slate-400
 
               dark:bg-white/[0.06]
-              dark:text-slate-500
+              dark:text-slate-400
             "
           >
             <User className="h-5 w-5" />
@@ -202,14 +204,14 @@ export default function NewsPage() {
               px-4
               text-start
               text-[13px] font-medium
-              text-slate-500
+              text-slate-600
               outline-none
               transition-colors duration-200
 
               hover:bg-slate-200/70
 
               focus-visible:ring-2
-              focus-visible:ring-emerald-500
+              focus-visible:ring-blue-600 dark:focus-visible:ring-blue-500
 
               dark:bg-white/[0.06]
               dark:text-slate-400
@@ -225,10 +227,10 @@ export default function NewsPage() {
         <div
           className="
             mt-3 flex items-center gap-2
-            border-t border-slate-100
+            border-t border-slate-200
             pt-3
 
-            dark:border-white/[0.06]
+            dark:border-slate-800
           "
         >
           <button
@@ -238,19 +240,19 @@ export default function NewsPage() {
               flex h-10 flex-1
               items-center justify-center gap-2
               rounded-xl
-              bg-gradient-to-r from-emerald-500 to-emerald-600
+              bg-gradient-to-r from-blue-600 to-sky-500
               px-4
               text-[13px] font-bold
               text-white
-              shadow-[0_8px_20px_-8px_rgba(16,185,129,0.9)]
+              shadow-[0_8px_20px_-8px_rgba(37,99,235,0.9)]
               outline-none
               transition-all duration-200
 
               hover:-translate-y-0.5
-              hover:shadow-[0_12px_24px_-8px_rgba(16,185,129,1)]
+              hover:shadow-[0_12px_24px_-8px_rgba(37,99,235,1)]
 
               focus-visible:ring-2
-              focus-visible:ring-emerald-500
+              focus-visible:ring-blue-600 dark:focus-visible:ring-blue-500
               focus-visible:ring-offset-2
               dark:focus-visible:ring-offset-slate-900
 
@@ -277,21 +279,21 @@ export default function NewsPage() {
               rounded-xl
               border border-slate-200
               bg-white
-              text-slate-500
+              text-slate-600
               outline-none
               transition-all duration-200
 
-              hover:border-emerald-300
-              hover:text-emerald-600
+              hover:border-sky-400
+              hover:text-blue-600
 
               focus-visible:ring-2
-              focus-visible:ring-emerald-500
+              focus-visible:ring-blue-600 dark:focus-visible:ring-blue-500
 
-              dark:border-white/[0.08]
+              dark:border-slate-800
               dark:bg-white/[0.03]
               dark:text-slate-400
-              dark:hover:border-emerald-400/30
-              dark:hover:text-emerald-400
+              dark:hover:border-sky-400/40
+              dark:hover:text-blue-500
             "
           >
             <ImagePlus
@@ -311,17 +313,17 @@ export default function NewsPage() {
           relative mt-4
           overflow-hidden
           rounded-2xl
-          border border-emerald-500/20
+          border border-blue-600/20
           bg-gradient-to-br
-          from-emerald-50
-          via-emerald-50/60
-          to-teal-50
+          from-sky-50
+          via-sky-50/60
+          to-blue-50
           p-4
 
-          dark:border-emerald-400/20
-          dark:from-emerald-500/[0.12]
-          dark:via-emerald-500/[0.06]
-          dark:to-teal-500/[0.08]
+          dark:border-blue-500/20
+          dark:from-blue-500/[0.12]
+          dark:via-blue-500/[0.06]
+          dark:to-sky-500/[0.08]
         "
       >
         <span
@@ -331,7 +333,7 @@ export default function NewsPage() {
             absolute -end-6 -top-6
             h-24 w-24
             rounded-full
-            bg-emerald-400/15
+            bg-sky-400/15
             blur-2xl
           "
         />
@@ -343,10 +345,11 @@ export default function NewsPage() {
               flex h-10 w-10 shrink-0
               items-center justify-center
               rounded-xl
-              bg-emerald-500/15
-              text-emerald-600
+              bg-sky-500/15
+              text-blue-600
 
-              dark:text-emerald-400
+              dark:bg-sky-500/20
+              dark:text-blue-500
             "
           >
             <ShieldCheck className="h-5 w-5" />
@@ -357,9 +360,9 @@ export default function NewsPage() {
               className="
                 flex items-center gap-1.5
                 text-[13px] font-bold
-                text-emerald-800
+                text-blue-800
 
-                dark:text-emerald-300
+                dark:text-sky-300
               "
             >
               <Info
@@ -374,9 +377,9 @@ export default function NewsPage() {
               className="
                 mt-1
                 text-[12px] leading-relaxed
-                text-emerald-900/75
+                text-blue-900/75
 
-                dark:text-emerald-100/70
+                dark:text-sky-100/70
               "
             >
               {t("newsApprovalNote")}
@@ -400,7 +403,7 @@ export default function NewsPage() {
               bg-white
               shadow-sm
 
-              dark:border-white/[0.08]
+              dark:border-slate-800
               dark:bg-slate-900
             "
           >
@@ -413,7 +416,7 @@ export default function NewsPage() {
                   flex h-10 w-10 shrink-0
                   items-center justify-center
                   rounded-full
-                  bg-gradient-to-br from-emerald-500 to-teal-600
+                  bg-gradient-to-br from-blue-600 to-sky-500
                   text-[13px] font-black
                   text-white
                   shadow-sm
@@ -438,7 +441,7 @@ export default function NewsPage() {
 
                   {post.verified && (
                     <BadgeCheck
-                      className="h-4 w-4 shrink-0 text-emerald-500"
+                      className="h-4 w-4 shrink-0 text-blue-600 dark:text-blue-500"
                       aria-hidden="true"
                     />
                   )}
@@ -450,7 +453,7 @@ export default function NewsPage() {
                     text-[11px] font-medium
                     text-slate-400
 
-                    dark:text-slate-500
+                    dark:text-slate-400
                   "
                 >
                   {post.time}
@@ -491,7 +494,7 @@ export default function NewsPage() {
                 flex items-center gap-4
                 px-3.5 py-3
                 text-[12px] font-semibold
-                text-slate-500
+                text-slate-600
 
                 dark:text-slate-400
               "
@@ -559,7 +562,7 @@ export default function NewsPage() {
               className="
                 flex items-center gap-3
                 rounded-2xl
-                border border-emerald-400/30
+                border border-blue-500/30
                 bg-slate-900/95
                 px-4 py-3
                 shadow-[0_18px_45px_rgba(0,0,0,0.35)]
@@ -574,8 +577,8 @@ export default function NewsPage() {
                   flex h-9 w-9 shrink-0
                   items-center justify-center
                   rounded-xl
-                  bg-emerald-500/20
-                  text-emerald-400
+                  bg-sky-500/20
+                  text-blue-500
                 "
               >
                 <Send className="h-[18px] w-[18px]" />

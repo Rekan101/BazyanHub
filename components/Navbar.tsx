@@ -161,7 +161,7 @@ export default function Navbar() {
                   shadow-[0_12px_45px_rgba(15,23,42,0.08)]
                   backdrop-blur-md
 
-                  dark:border-white/[0.08]
+                  dark:border-slate-800
                   dark:bg-slate-900/85
                   dark:shadow-[0_12px_45px_rgba(0,0,0,0.28)]
                 `
@@ -170,7 +170,7 @@ export default function Navbar() {
                   bg-white/95
                   backdrop-blur-sm
 
-                  dark:border-white/[0.08]
+                  dark:border-slate-800
                   dark:bg-slate-950/95
                 `
             }
@@ -203,7 +203,7 @@ export default function Navbar() {
                 rounded-2xl
                 outline-none
                 focus-visible:ring-2
-                focus-visible:ring-emerald-500
+                focus-visible:ring-blue-600 dark:focus-visible:ring-blue-500
                 focus-visible:ring-offset-2
                 dark:focus-visible:ring-offset-slate-950
               "
@@ -219,7 +219,7 @@ export default function Navbar() {
                   transition-all duration-300
 
                   group-hover:scale-[1.035]
-                  group-hover:shadow-[0_10px_30px_rgba(22,163,74,0.12)]
+                  group-hover:shadow-[0_10px_30px_rgba(37,99,235,0.12)]
 
                   sm:h-[62px]
                   sm:w-[62px]
@@ -233,8 +233,8 @@ export default function Navbar() {
                   className="
                     absolute inset-0
                     rounded-2xl
-                    bg-emerald-50/70
-                    dark:bg-emerald-400/[0.06]
+                    bg-sky-50/70
+                    dark:bg-sky-900/30
                   "
                 />
 
@@ -290,7 +290,7 @@ export default function Navbar() {
                     text-[8px]
                     font-medium
                     leading-tight
-                    text-slate-500
+                    text-slate-600
                     dark:text-slate-400
                     lg:text-[11px]
                   "
@@ -319,7 +319,7 @@ export default function Navbar() {
                 backdrop-blur-md
                 lg:flex
 
-                dark:border-white/[0.08]
+                dark:border-slate-800
                 dark:bg-white/[0.035]
               "
             >
@@ -345,29 +345,29 @@ export default function Navbar() {
                       duration-200
 
                       focus-visible:ring-2
-                      focus-visible:ring-emerald-500
+                      focus-visible:ring-blue-600 dark:focus-visible:ring-blue-500
                       focus-visible:ring-offset-1
 
                       ${
                         active
                           ? `
                             bg-white
-                            text-emerald-600
+                            text-blue-600
                             shadow-sm
 
                             dark:bg-white/[0.08]
-                            dark:text-emerald-400
+                            dark:text-blue-500
                           `
                           : `
                             text-slate-600
 
                             hover:bg-white
-                            hover:text-emerald-600
+                            hover:text-blue-600
                             hover:shadow-sm
 
                             dark:text-slate-300
                             dark:hover:bg-white/[0.07]
-                            dark:hover:text-emerald-400
+                            dark:hover:text-blue-500
                           `
                       }
                     `}
@@ -415,20 +415,20 @@ export default function Navbar() {
                     outline-none
                     transition-all duration-200
 
-                    hover:border-emerald-300
-                    hover:bg-emerald-50/50
-                    hover:text-emerald-600
+                    hover:border-sky-400
+                    hover:bg-sky-50
+                    hover:text-blue-600
 
                     focus-visible:ring-2
-                    focus-visible:ring-emerald-500
+                    focus-visible:ring-blue-600 dark:focus-visible:ring-blue-500
                     focus-visible:ring-offset-2
 
-                    dark:border-white/[0.09]
+                    dark:border-slate-800
                     dark:bg-white/[0.04]
                     dark:text-slate-200
-                    dark:hover:border-emerald-400/30
-                    dark:hover:bg-emerald-400/[0.07]
-                    dark:hover:text-emerald-400
+                    dark:hover:border-sky-400/40
+                    dark:hover:bg-sky-900/30
+                    dark:hover:text-blue-500
                     dark:focus-visible:ring-offset-slate-950
                   "
                 >
@@ -469,7 +469,7 @@ export default function Navbar() {
                       shadow-[0_18px_55px_rgba(15,23,42,0.14)]
                       backdrop-blur-md
 
-                      dark:border-white/[0.09]
+                      dark:border-slate-800
                       dark:bg-slate-800/95
                       dark:shadow-[0_18px_55px_rgba(0,0,0,0.3)]
                     "
@@ -503,28 +503,28 @@ export default function Navbar() {
                               duration-150
 
                               focus-visible:ring-2
-                              focus-visible:ring-emerald-500
+                              focus-visible:ring-blue-600 dark:focus-visible:ring-blue-500
 
                               ${
                                 active
                                   ? `
-                                    bg-emerald-50
+                                    bg-sky-50
                                     font-bold
-                                    text-emerald-600
+                                    text-blue-600
 
-                                    dark:bg-emerald-400/10
-                                    dark:text-emerald-400
+                                    dark:bg-sky-900/30
+                                    dark:text-blue-500
                                   `
                                   : `
                                     font-medium
                                     text-slate-700
 
                                     hover:bg-slate-50
-                                    hover:text-emerald-600
+                                    hover:text-blue-600
 
                                     dark:text-slate-200
                                     dark:hover:bg-white/[0.06]
-                                    dark:hover:text-emerald-400
+                                    dark:hover:text-blue-500
                                   `
                               }
                             `}
@@ -570,20 +570,20 @@ export default function Navbar() {
                   outline-none
                   transition-all duration-200
 
-                  hover:border-emerald-300
-                  hover:bg-emerald-50/50
-                  hover:text-emerald-600
+                  hover:border-sky-400
+                  hover:bg-sky-50
+                  hover:text-blue-600
 
                   focus-visible:ring-2
-                  focus-visible:ring-emerald-500
+                  focus-visible:ring-blue-600 dark:focus-visible:ring-blue-500
                   focus-visible:ring-offset-2
 
-                  dark:border-white/[0.09]
+                  dark:border-slate-800
                   dark:bg-white/[0.04]
                   dark:text-slate-200
-                  dark:hover:border-emerald-400/30
-                  dark:hover:bg-emerald-400/[0.07]
-                  dark:hover:text-emerald-400
+                  dark:hover:border-sky-400/40
+                  dark:hover:bg-sky-900/30
+                  dark:hover:text-blue-500
                   dark:focus-visible:ring-offset-slate-950
                 "
               >
@@ -639,20 +639,20 @@ export default function Navbar() {
                   outline-none
                   transition-all duration-200
 
-                  hover:border-emerald-300
-                  hover:bg-emerald-50/50
-                  hover:text-emerald-600
+                  hover:border-sky-400
+                  hover:bg-sky-50
+                  hover:text-blue-600
 
                   focus-visible:ring-2
-                  focus-visible:ring-emerald-500
+                  focus-visible:ring-blue-600 dark:focus-visible:ring-blue-500
                   focus-visible:ring-offset-2
 
-                  dark:border-white/[0.09]
+                  dark:border-slate-800
                   dark:bg-white/[0.04]
                   dark:text-slate-200
-                  dark:hover:border-emerald-400/30
-                  dark:hover:bg-emerald-400/[0.07]
-                  dark:hover:text-emerald-400
+                  dark:hover:border-sky-400/40
+                  dark:hover:bg-sky-900/30
+                  dark:hover:text-blue-500
                   dark:focus-visible:ring-offset-slate-950
 
                   lg:hidden
@@ -695,7 +695,7 @@ export default function Navbar() {
               shadow-[0_20px_60px_rgba(15,23,42,0.12)]
               backdrop-blur-md
 
-              dark:border-white/[0.08]
+              dark:border-slate-800
               dark:bg-slate-950/95
               dark:shadow-[0_20px_60px_rgba(0,0,0,0.35)]
 
@@ -725,7 +725,7 @@ export default function Navbar() {
                   bg-slate-50/80
                   p-2
 
-                  dark:border-white/[0.07]
+                  dark:border-slate-800
                   dark:bg-white/[0.025]
                 "
               >
@@ -761,28 +761,28 @@ export default function Navbar() {
                         duration-200
 
                         focus-visible:ring-2
-                        focus-visible:ring-emerald-500
+                        focus-visible:ring-blue-600 dark:focus-visible:ring-blue-500
 
                         ${
                           active
                             ? `
                               bg-white
-                              text-emerald-600
+                              text-blue-600
                               shadow-sm
 
                               dark:bg-white/[0.07]
-                              dark:text-emerald-400
+                              dark:text-blue-500
                             `
                             : `
                               text-slate-700
 
                               hover:bg-white
-                              hover:text-emerald-600
+                              hover:text-blue-600
                               hover:shadow-sm
 
                               dark:text-slate-200
                               dark:hover:bg-white/[0.06]
-                              dark:hover:text-emerald-400
+                              dark:hover:text-blue-500
                             `
                         }
                       `}
@@ -802,7 +802,7 @@ export default function Navbar() {
                   border-slate-200
                   pt-5
 
-                  dark:border-white/[0.08]
+                  dark:border-slate-800
                 "
               >
                 <p
@@ -811,7 +811,7 @@ export default function Navbar() {
                     px-1
                     text-[13px]
                     font-bold
-                    text-slate-500
+                    text-slate-600
                     dark:text-slate-400
                   "
                 >
@@ -848,32 +848,32 @@ export default function Navbar() {
                           transition-all duration-200
 
                           focus-visible:ring-2
-                          focus-visible:ring-emerald-500
+                          focus-visible:ring-blue-600 dark:focus-visible:ring-blue-500
 
                           ${
                             active
                               ? `
-                                border-emerald-500
-                                bg-emerald-50
-                                text-emerald-600
+                                border-blue-600
+                                bg-sky-50
+                                text-blue-600
 
-                                dark:border-emerald-400
-                                dark:bg-emerald-400/10
-                                dark:text-emerald-400
+                                dark:border-blue-500
+                                dark:bg-sky-900/30
+                                dark:text-blue-500
                               `
                               : `
                                 border-slate-200
                                 bg-white
                                 text-slate-700
 
-                                hover:border-emerald-300
-                                hover:text-emerald-600
+                                hover:border-sky-400
+                                hover:text-blue-600
 
-                                dark:border-white/[0.08]
+                                dark:border-slate-800
                                 dark:bg-white/[0.03]
                                 dark:text-slate-200
-                                dark:hover:border-emerald-400/30
-                                dark:hover:text-emerald-400
+                                dark:hover:border-sky-400/40
+                                dark:hover:text-blue-500
                               `
                           }
                         `}
@@ -917,19 +917,19 @@ export default function Navbar() {
                   outline-none
                   transition-all duration-200
 
-                  hover:border-emerald-300
-                  hover:bg-emerald-50/50
-                  hover:text-emerald-600
+                  hover:border-sky-400
+                  hover:bg-sky-50
+                  hover:text-blue-600
 
                   focus-visible:ring-2
-                  focus-visible:ring-emerald-500
+                  focus-visible:ring-blue-600 dark:focus-visible:ring-blue-500
 
-                  dark:border-white/[0.08]
+                  dark:border-slate-800
                   dark:bg-white/[0.03]
                   dark:text-slate-200
-                  dark:hover:border-emerald-400/30
-                  dark:hover:bg-emerald-400/[0.06]
-                  dark:hover:text-emerald-400
+                  dark:hover:border-sky-400/40
+                  dark:hover:bg-sky-900/30
+                  dark:hover:text-blue-500
                 "
                 aria-label={
                   isDark
@@ -981,7 +981,7 @@ export default function Navbar() {
                   px-4
                   py-4
 
-                  dark:border-white/[0.07]
+                  dark:border-slate-800
                   dark:bg-white/[0.025]
                 "
               >
@@ -992,8 +992,8 @@ export default function Navbar() {
                     shrink-0
                     items-center justify-center
                     rounded-xl
-                    bg-emerald-50
-                    dark:bg-emerald-400/[0.06]
+                    bg-sky-50
+                    dark:bg-sky-900/30
                   "
                 >
                   <Image
@@ -1027,7 +1027,7 @@ export default function Navbar() {
                       truncate
                       text-[11px]
                       font-medium
-                      text-slate-500
+                      text-slate-600
                       dark:text-slate-400
                     "
                   >

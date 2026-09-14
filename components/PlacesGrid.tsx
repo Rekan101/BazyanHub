@@ -214,7 +214,7 @@ export default function PlacesGrid({
               scrollByCard("prev")
             }
             aria-label="پیشاندانی پێشوو"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-[#E5E7EB] text-[#374151] transition-colors hover:border-[#16A34A]/40 hover:text-[#16A34A] dark:border-white/10 dark:text-gray-200"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-[#E5E7EB] text-[#374151] transition-colors hover:border-blue-600/40 dark:hover:border-blue-500/40 hover:text-blue-600 dark:hover:text-blue-500 dark:border-slate-800 dark:text-gray-200"
           >
             <ChevronRight
               className="h-[18px] w-[18px]"
@@ -228,7 +228,7 @@ export default function PlacesGrid({
               scrollByCard("next")
             }
             aria-label="پیشاندانی دواتر"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-[#E5E7EB] text-[#374151] transition-colors hover:border-[#16A34A]/40 hover:text-[#16A34A] dark:border-white/10 dark:text-gray-200"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-[#E5E7EB] text-[#374151] transition-colors hover:border-blue-600/40 dark:hover:border-blue-500/40 hover:text-blue-600 dark:hover:text-blue-500 dark:border-slate-800 dark:text-gray-200"
           >
             <ChevronLeft
               className="h-[18px] w-[18px]"
@@ -272,7 +272,7 @@ export default function PlacesGrid({
                   aria-hidden="true"
                   className={`h-1.5 rounded-full transition-all duration-300 ${
                     index === activeIndex
-                      ? "w-6 bg-[#16A34A]"
+                      ? "w-6 bg-blue-600 dark:bg-blue-500"
                       : "w-1.5 bg-[#E5E7EB]"
                   }`}
                 />

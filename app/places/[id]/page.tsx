@@ -39,7 +39,7 @@ export default async function PlaceDetailsPage({
         <div className="mb-6">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 py-2.5 text-sm font-semibold text-[#374151] shadow-sm transition-colors hover:border-[#16A34A]/40 hover:text-[#16A34A] dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
+            className="inline-flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 py-2.5 text-sm font-semibold text-[#374151] shadow-sm transition-colors hover:border-blue-600/40 dark:hover:border-blue-500/40 hover:text-blue-600 dark:hover:text-blue-500 dark:border-slate-800 dark:bg-white/5 dark:text-gray-200"
           >
             <ArrowRight className="h-4 w-4" />
             گەڕانەوە
@@ -47,7 +47,7 @@ export default async function PlaceDetailsPage({
         </div>
 
         {/* Article */}
-        <article className="overflow-hidden rounded-3xl border border-[#E5E7EB] bg-white shadow-xl shadow-black/[0.04] dark:border-white/10 dark:bg-[#0F172A]">
+        <article className="overflow-hidden rounded-3xl border border-[#E5E7EB] bg-white shadow-xl shadow-black/[0.04] dark:border-slate-800 dark:bg-[#0F172A]">
           {/* Hero Image */}
           <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-100 dark:bg-slate-800 sm:aspect-[16/8]">
             <Image
@@ -62,7 +62,7 @@ export default async function PlaceDetailsPage({
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
 
             <div className="absolute bottom-0 right-0 left-0 p-5 sm:p-8">
-              <div className="mb-3 inline-flex rounded-full bg-white/95 px-3 py-1.5 text-xs font-bold text-[#16A34A] shadow-sm backdrop-blur">
+              <div className="mb-3 inline-flex rounded-full bg-white/95 px-3 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-500 shadow-sm backdrop-blur">
                 {place.category}
               </div>
 
@@ -89,7 +89,7 @@ export default async function PlaceDetailsPage({
             {/* Intro */}
             <section className="flex flex-col gap-4">
               <div className="flex items-center gap-3">
-                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#16A34A]/10 text-[#16A34A]">
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600/10 dark:bg-blue-500/10 text-blue-600 dark:text-blue-500">
                   <BookOpen className="h-5 w-5" />
                 </span>
 
@@ -104,9 +104,9 @@ export default async function PlaceDetailsPage({
             </section>
 
             {/* Quick Information */}
-            <section className="rounded-2xl border border-[#E5E7EB] bg-[#F8FAFC] p-5 dark:border-white/10 dark:bg-white/[0.03]">
+            <section className="rounded-2xl border border-[#E5E7EB] bg-[#F8FAFC] p-5 dark:border-slate-800 dark:bg-white/[0.03]">
               <div className="mb-5 flex items-center gap-3">
-                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#16A34A]/10 text-[#16A34A]">
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600/10 dark:bg-blue-500/10 text-blue-600 dark:text-blue-500">
                   <Info className="h-5 w-5" />
                 </span>
 
@@ -116,7 +116,7 @@ export default async function PlaceDetailsPage({
               </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 dark:border-white/10 dark:bg-white/[0.03]">
+                <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 dark:border-slate-800 dark:bg-white/[0.03]">
                   <p className="text-xs font-semibold text-[#6B7280] dark:text-gray-400">
                     جۆر
                   </p>
@@ -126,7 +126,7 @@ export default async function PlaceDetailsPage({
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 dark:border-white/10 dark:bg-white/[0.03]">
+                <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 dark:border-slate-800 dark:bg-white/[0.03]">
                   <p className="text-xs font-semibold text-[#6B7280] dark:text-gray-400">
                     شوێن
                   </p>
@@ -136,7 +136,7 @@ export default async function PlaceDetailsPage({
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 dark:border-white/10 dark:bg-white/[0.03]">
+                <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 dark:border-slate-800 dark:bg-white/[0.03]">
                   <p className="text-xs font-semibold text-[#6B7280] dark:text-gray-400">
                     هەڵسەنگاندن
                   </p>
@@ -147,7 +147,7 @@ export default async function PlaceDetailsPage({
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 dark:border-white/10 dark:bg-white/[0.03]">
+                <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 dark:border-slate-800 dark:bg-white/[0.03]">
                   <p className="text-xs font-semibold text-[#6B7280] dark:text-gray-400">
                     ژمارەی هەڵسەنگاندنەکان
                   </p>
@@ -162,7 +162,7 @@ export default async function PlaceDetailsPage({
             {/* Narrative */}
             <section className="flex flex-col gap-4">
               <div className="flex items-center gap-3">
-                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#16A34A]/10 text-[#16A34A]">
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600/10 dark:bg-blue-500/10 text-blue-600 dark:text-blue-500">
                   <Clock3 className="h-5 w-5" />
                 </span>
 
@@ -171,7 +171,7 @@ export default async function PlaceDetailsPage({
                 </h2>
               </div>
 
-              <div className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm dark:border-white/10 dark:bg-white/[0.02] sm:p-7">
+              <div className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-white/[0.02] sm:p-7">
                 <p className="text-base leading-8 text-[#4B5563] dark:text-gray-300 sm:text-lg">
                   {place.description}
                 </p>
@@ -193,7 +193,7 @@ export default async function PlaceDetailsPage({
             {/* Image / Gallery */}
             <section className="flex flex-col gap-4">
               <div className="flex items-center gap-3">
-                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#16A34A]/10 text-[#16A34A]">
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600/10 dark:bg-blue-500/10 text-blue-600 dark:text-blue-500">
                   <Info className="h-5 w-5" />
                 </span>
 
@@ -202,7 +202,7 @@ export default async function PlaceDetailsPage({
                 </h2>
               </div>
 
-              <div className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-slate-100 shadow-sm dark:border-white/10 dark:bg-slate-900">
+              <div className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-slate-100 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                 <div className="relative aspect-[16/10] w-full sm:aspect-[16/9]">
                   <Image
                     src={place.image}
@@ -216,7 +216,7 @@ export default async function PlaceDetailsPage({
             </section>
 
             {/* Bottom Summary */}
-            <section className="rounded-2xl border border-[#16A34A]/20 bg-[#16A34A]/5 p-5 dark:bg-[#16A34A]/10 sm:p-7">
+            <section className="rounded-2xl border border-blue-600/20 dark:border-blue-500/20 bg-blue-600/5 dark:bg-blue-500/10 p-5 dark:bg-blue-600/10 dark:bg-blue-500/10 sm:p-7">
               <h2 className="text-xl font-bold">
                 کورتەی زانیاری
               </h2>

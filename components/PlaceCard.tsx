@@ -45,7 +45,7 @@ export default function PlaceCard({
   return (
     <article
       dir="rtl"
-      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-sm shadow-black/[0.03] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/[0.08] dark:border-white/10 dark:bg-[#1F2937]"
+      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-sm shadow-black/[0.03] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/[0.08] dark:border-slate-800 dark:bg-[#1F2937]"
     >
       {/* IMAGE */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
@@ -66,7 +66,7 @@ export default function PlaceCard({
         />
 
         {/* Category */}
-        <span className="absolute right-3 top-3 z-20 rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-[#16A34A] shadow-sm backdrop-blur-sm">
+        <span className="absolute right-3 top-3 z-20 rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-blue-600 dark:text-blue-500 shadow-sm backdrop-blur-sm">
           {place.category}
         </span>
 
@@ -133,7 +133,7 @@ export default function PlaceCard({
         {/* Dynamic Details */}
         <Link
           href={`/places/${place.id}`}
-          className="mt-2 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-[#16A34A] px-4 py-2.5 text-sm font-semibold text-[#16A34A] transition-all duration-200 hover:bg-[#16A34A] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#16A34A]/30"
+          className="mt-2 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-blue-600 dark:border-blue-500 px-4 py-2.5 text-sm font-semibold text-blue-600 dark:text-blue-500 transition-all duration-200 hover:bg-blue-600 dark:hover:bg-blue-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-600/30 dark:focus:ring-blue-500/30"
         >
           بینینی وردەکاری
 

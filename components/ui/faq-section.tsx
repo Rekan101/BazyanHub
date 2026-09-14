@@ -30,7 +30,7 @@ export function FaqSection() {
     >
       <h2
         id="faq-heading"
-        className="text-2xl font-bold text-text sm:text-3xl"
+        className="text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl"
       >
         {t("faqTitle")}
       </h2>

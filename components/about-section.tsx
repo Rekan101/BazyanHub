@@ -65,11 +65,11 @@ export function AboutSection() {
         className="mx-auto flex max-w-7xl flex-col gap-6"
       >
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-text sm:text-3xl">
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
             {t("aboutTitle")}
           </h2>
 
-          <p className="mt-3 max-w-4xl text-sm leading-relaxed text-text/70 sm:text-base">
+          <p className="mt-3 max-w-4xl text-sm leading-relaxed text-slate-600 dark:text-slate-400 sm:text-base">
             {t("aboutDescription")}
           </p>
         </div>
@@ -81,20 +81,20 @@ export function AboutSection() {
             return (
               <li
                 key={feature.id}
-                className="flex flex-col items-start gap-2 rounded-2xl border border-border bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/80 transition-shadow duration-300 hover:shadow-md"
+                className="flex flex-col items-start gap-2 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/80 transition-shadow duration-300 hover:shadow-md"
               >
-                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600/10 dark:bg-blue-500/10 text-blue-600 dark:text-blue-500">
                   <Icon
                     className="h-5 w-5"
                     aria-hidden="true"
                   />
                 </span>
 
-                <span className="text-sm font-semibold text-text dark:text-white">
+                <span className="text-sm font-semibold text-slate-900 dark:text-white dark:text-white">
                   {feature.title}
                 </span>
 
-                <span className="text-xs leading-relaxed text-text/60 dark:text-slate-400">
+                <span className="text-xs leading-relaxed text-slate-600 dark:text-slate-400 dark:text-slate-400">
                   {feature.description}
                 </span>
               </li>

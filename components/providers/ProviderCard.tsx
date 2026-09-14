@@ -290,9 +290,9 @@ export default function ProviderCard({
                 items-center
                 justify-center
                 bg-gradient-to-br
-                from-green-600
-                via-green-500
-                to-emerald-400
+                from-blue-600
+                via-blue-500
+                to-sky-400
               "
             >
               <span className="text-xl font-black text-white/90">
@@ -352,7 +352,7 @@ export default function ProviderCard({
                 py-0.5
                 text-[10px]
                 font-semibold
-                text-green-700
+                text-blue-700
                 shadow-sm
                 backdrop-blur
               "
@@ -421,14 +421,14 @@ export default function ProviderCard({
                   max-w-full
                   truncate
                   rounded-full
-                  bg-green-50
+                  bg-sky-50
                   px-2
                   py-0.5
                   text-[10px]
                   font-semibold
-                  text-green-700
-                  dark:bg-green-950/40
-                  dark:text-green-400
+                  text-blue-700
+                  dark:bg-sky-900/30
+                  dark:text-blue-500
                 "
               >
                 {badgeLabel}

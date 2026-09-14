@@ -107,30 +107,30 @@ export default function ProfilePage() {
     outline-none
     transition-all duration-200
 
-    hover:border-emerald-300
-    hover:bg-emerald-50/50
-    hover:text-emerald-600
+    hover:border-sky-400
+    hover:bg-sky-50
+    hover:text-blue-600
 
     focus-visible:ring-2
-    focus-visible:ring-emerald-500
+    focus-visible:ring-blue-600 dark:focus-visible:ring-blue-500
 
-    dark:border-white/[0.08]
+    dark:border-slate-800
     dark:bg-slate-900
     dark:text-slate-200
-    dark:hover:border-emerald-400/30
-    dark:hover:bg-emerald-400/[0.06]
-    dark:hover:text-emerald-400
+    dark:hover:border-sky-400/40
+    dark:hover:bg-sky-900/30
+    dark:hover:text-blue-500
   `;
 
   const iconWrapClass = `
     flex h-9 w-9 shrink-0
     items-center justify-center
     rounded-xl
-    bg-emerald-50
-    text-emerald-600
+    bg-sky-50
+    text-blue-600
 
-    dark:bg-emerald-400/[0.08]
-    dark:text-emerald-400
+    dark:bg-sky-900/30
+    dark:text-blue-500
   `;
 
   const cardClass = `
@@ -140,14 +140,14 @@ export default function ProfilePage() {
     p-4
     shadow-sm
 
-    dark:border-white/[0.08]
+    dark:border-slate-800
     dark:bg-slate-900
   `;
 
   const sectionLabelClass = `
     mb-3 px-1
     text-[13px] font-bold
-    text-slate-500
+    text-slate-600
     dark:text-slate-400
   `;
 
@@ -167,12 +167,14 @@ export default function ProfilePage() {
             flex h-20 w-20
             items-center justify-center
             rounded-3xl
-            border border-emerald-500/20
-            bg-emerald-500/10
-            text-emerald-600
+            border border-blue-600/20
+            bg-sky-500/10
+            text-blue-600
             shadow-sm
 
-            dark:text-emerald-400
+            dark:border-blue-500/20
+            dark:bg-sky-500/15
+            dark:text-blue-500
           "
         >
           <User className="h-9 w-9" />
@@ -222,7 +224,7 @@ export default function ProfilePage() {
             className="
               shrink-0
               text-[12px] font-medium
-              text-slate-500
+              text-slate-600
               dark:text-slate-400
             "
           >
@@ -347,7 +349,7 @@ export default function ProfilePage() {
                       hover:scale-[1.06]
 
                       focus-visible:ring-2
-                      focus-visible:ring-emerald-500
+                      focus-visible:ring-blue-600 dark:focus-visible:ring-blue-500
                       focus-visible:ring-offset-2
                       dark:focus-visible:ring-offset-slate-900
 
@@ -401,7 +403,7 @@ export default function ProfilePage() {
               className="
                 mt-1
                 text-[13px] leading-relaxed
-                text-slate-500
+                text-slate-600
                 dark:text-slate-400
               "
             >
@@ -434,7 +436,7 @@ export default function ProfilePage() {
               className="
                 mt-1
                 text-[13px] leading-relaxed
-                text-slate-500
+                text-slate-600
                 dark:text-slate-400
               "
             >
@@ -488,7 +490,7 @@ export default function ProfilePage() {
           px-4 py-5
           text-center
           text-[13px] leading-relaxed
-          text-slate-500
+          text-slate-600
 
           dark:border-slate-700
           dark:bg-white/[0.02]

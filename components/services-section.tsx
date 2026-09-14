@@ -396,10 +396,10 @@ export function ServicesSection() {
               justify-center
               rounded-2xl
               border
-              border-primary/20
-              bg-primary/10
+              border-blue-600/20 dark:border-blue-500/20
+              bg-blue-600/10 dark:bg-blue-500/10
               text-xl
-              text-primary
+              text-blue-600 dark:text-blue-500
               shadow-sm
             "
             aria-hidden="true"
@@ -481,23 +481,23 @@ export function ServicesSection() {
                   `,
                   `
                     focus-visible:ring-2
-                    focus-visible:ring-primary/60
+                    focus-visible:ring-blue-600/60 dark:focus-visible:ring-blue-500/60
                     focus-visible:ring-offset-2
                   `,
                   isActive
                     ? `
-                        border-primary
-                        bg-primary
+                        border-blue-600 dark:border-blue-500
+                        bg-blue-600 dark:bg-blue-500
                         text-white
                         shadow-md
-                        shadow-primary/25
+                        shadow-blue-600/25 dark:shadow-blue-500/25
                       `
                     : `
                         border-slate-200
                         bg-white/80
                         text-slate-700
-                        hover:border-primary/40
-                        hover:text-primary
+                        hover:border-blue-600/40 dark:hover:border-blue-500/40
+                        hover:text-blue-600 dark:hover:text-blue-500
                         dark:border-slate-800
                         dark:bg-slate-900/80
                         dark:text-slate-300
@@ -575,20 +575,20 @@ export function ServicesSection() {
                         `,
                         `
                           hover:-translate-y-1
-                          hover:border-primary/50
+                          hover:border-blue-600/50
                           hover:shadow-xl
-                          hover:shadow-primary/10
+                          hover:shadow-blue-600/10
                         `,
                         `
                           dark:border-slate-800/80
                           dark:bg-slate-900
-                          dark:hover:border-primary/50
-                          dark:hover:shadow-primary/20
+                          dark:hover:border-blue-500/50
+                          dark:hover:shadow-blue-500/20
                         `,
                         `
                           focus-visible:outline-none
                           focus-visible:ring-2
-                          focus-visible:ring-primary/60
+                          focus-visible:ring-blue-600/60 dark:focus-visible:ring-blue-500/60
                           focus-visible:ring-offset-2
                         `
                       )}
@@ -624,14 +624,14 @@ export function ServicesSection() {
                               items-center
                               justify-center
                               rounded-xl
-                              bg-primary/10
-                              text-primary
+                              bg-blue-600/10 dark:bg-blue-500/10
+                              text-blue-600 dark:text-blue-500
                               transition-all
                               duration-300
-                              group-hover:bg-primary
+                              group-hover:bg-blue-600 dark:group-hover:bg-blue-500
                               group-hover:text-white
                               group-hover:shadow-md
-                              group-hover:shadow-primary/30
+                              group-hover:shadow-blue-600/30 dark:group-hover:shadow-blue-500/30
                               sm:h-12
                               sm:w-12
                               sm:rounded-2xl
@@ -839,7 +839,7 @@ export function ServicesSection() {
                               leading-5
                               text-slate-900
                               transition-colors
-                              group-hover:text-primary
+                              group-hover:text-blue-600 dark:group-hover:text-blue-500
                               dark:text-slate-100
                               sm:text-lg
                               sm:leading-7
@@ -855,7 +855,7 @@ export function ServicesSection() {
                               text-[11px]
                               font-medium
                               leading-4
-                              text-slate-500
+                              text-slate-600
                               dark:text-slate-400
                               sm:text-xs
                               sm:leading-5
@@ -877,7 +877,7 @@ export function ServicesSection() {
                           w-full
                           overflow-hidden
                           border-t
-                          border-slate-100
+                          border-slate-200
                           dark:border-slate-800/80
                           sm:h-40
                         "

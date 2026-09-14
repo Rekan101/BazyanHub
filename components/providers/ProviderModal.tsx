@@ -346,9 +346,9 @@ export default function ProviderModal({
                 absolute
                 inset-0
                 bg-gradient-to-br
-                from-green-600
-                via-green-500
-                to-emerald-400
+                from-blue-600
+                via-blue-500
+                to-sky-400
               "
             />
           )}
@@ -450,7 +450,8 @@ export default function ProviderModal({
                     className="
                       text-lg
                       font-black
-                      text-green-600
+                      text-blue-600
+                      dark:text-blue-500
                     "
                   >
                     {getInitials(
@@ -468,7 +469,8 @@ export default function ProviderModal({
                     className="
                       text-sm
                       font-semibold
-                      text-green-600
+                      text-blue-600
+                      dark:text-blue-500
                     "
                   >
                     {provider.category}
@@ -559,14 +561,14 @@ export default function ProviderModal({
                         items-center
                         gap-1
                         rounded-full
-                        bg-green-50
+                        bg-sky-50
                         px-2
                         py-1
                         text-[10px]
                         font-bold
-                        text-green-700
-                        dark:bg-green-950/40
-                        dark:text-green-400
+                        text-blue-700
+                        dark:bg-sky-900/30
+                        dark:text-blue-500
                       "
                     >
                       <BadgeCheck
@@ -615,7 +617,7 @@ export default function ProviderModal({
               className="
                 my-5
                 border-t
-                border-slate-100
+                border-slate-200
                 dark:border-slate-800
               "
             />
@@ -668,12 +670,13 @@ export default function ProviderModal({
                   text-left
                   transition-[border-color,background-color,box-shadow]
                   duration-200
-                  hover:border-green-200
-                  hover:bg-green-50
+                  hover:border-sky-400
+                  hover:bg-sky-50
                   hover:shadow-sm
+                  dark:hover:bg-sky-900/30
                   dark:border-slate-800
                   dark:bg-slate-900
-                  dark:hover:border-green-900/50
+                  dark:hover:border-sky-400/40
                   touch-manipulation
                 "
               >
@@ -686,10 +689,10 @@ export default function ProviderModal({
                     items-center
                     justify-center
                     rounded-xl
-                    bg-green-100
-                    text-green-700
-                    dark:bg-green-950/40
-                    dark:text-green-400
+                    bg-sky-100
+                    text-blue-700
+                    dark:bg-sky-900/30
+                    dark:text-blue-500
                   "
                 >
                   <Phone
@@ -754,10 +757,10 @@ export default function ProviderModal({
                     items-center
                     justify-center
                     rounded-xl
-                    bg-green-100
-                    text-green-700
-                    dark:bg-green-950/40
-                    dark:text-green-400
+                    bg-sky-100
+                    text-blue-700
+                    dark:bg-sky-900/30
+                    dark:text-blue-500
                   "
                 >
                   <MapPin
@@ -845,7 +848,7 @@ export default function ProviderModal({
               <section className="mb-5">
                 <div className="mb-3 flex items-center gap-2">
                   <Clock3
-                    className="h-4 w-4 text-green-600"
+                    className="h-4 w-4 text-blue-600 dark:text-blue-500"
                     aria-hidden="true"
                   />
 
@@ -946,7 +949,7 @@ export default function ProviderModal({
                         hover:scale-110
                         focus:outline-none
                         focus-visible:ring-2
-                        focus-visible:ring-green-500
+                        focus-visible:ring-blue-600 dark:focus-visible:ring-blue-500
                         touch-manipulation
                       "
                     >
@@ -970,8 +973,8 @@ export default function ProviderModal({
                     mt-2
                     text-xs
                     font-semibold
-                    text-green-600
-                    dark:text-green-400
+                    text-blue-600
+                    dark:text-blue-500
                   "
                 >
                   سوپاس بۆ هەڵسەنگاندنەکەت! (
@@ -986,7 +989,7 @@ export default function ProviderModal({
               className="
                 mt-6
                 border-t
-                border-slate-100
+                border-slate-200
                 pt-5
                 dark:border-slate-800
               "

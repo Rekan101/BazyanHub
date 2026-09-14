@@ -766,8 +766,8 @@ export default function CategoryPage() {
               items-center
               justify-center
               rounded-2xl
-              bg-primary/10
-              text-primary
+              bg-blue-600/10 dark:bg-blue-500/10
+              text-blue-600 dark:text-blue-500
             "
           >
             <BriefcaseBusiness
@@ -796,7 +796,7 @@ export default function CategoryPage() {
               items-center
               gap-2
               rounded-xl
-              bg-primary
+              bg-blue-600 dark:bg-blue-500
               px-4
               py-2.5
               text-sm
@@ -884,7 +884,7 @@ export default function CategoryPage() {
               gap-2
               text-sm
               font-semibold
-              text-primary
+              text-blue-600 dark:text-blue-500
               transition-opacity
               hover:opacity-80
             "
@@ -914,8 +914,8 @@ export default function CategoryPage() {
                 items-center
                 justify-center
                 rounded-2xl
-                bg-primary/10
-                text-primary
+                bg-blue-600/10 dark:bg-blue-500/10
+                text-blue-600 dark:text-blue-500
                 sm:h-16
                 sm:w-16
               "
@@ -948,7 +948,7 @@ export default function CategoryPage() {
                 className="
                   text-sm
                   font-semibold
-                  text-primary
+                  text-blue-600 dark:text-blue-500
                 "
               >
                 BazianHub
@@ -974,7 +974,7 @@ export default function CategoryPage() {
                   max-w-2xl
                   text-sm
                   leading-6
-                  text-slate-500
+                  text-slate-600
                   dark:text-slate-400
                 "
               >
@@ -1054,7 +1054,7 @@ export default function CategoryPage() {
                 justify-center
                 rounded-2xl
                 bg-slate-100
-                text-primary
+                text-blue-600 dark:text-blue-500
                 dark:bg-slate-800
               "
             >
@@ -1089,7 +1089,7 @@ export default function CategoryPage() {
                 max-w-md
                 text-sm
                 leading-6
-                text-slate-500
+                text-slate-600
                 dark:text-slate-400
               "
             >

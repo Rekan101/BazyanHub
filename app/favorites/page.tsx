@@ -248,8 +248,8 @@ export default function FavoritesPage() {
                   href={`/services/${category.id}`}
                   className={cn(
                     "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-500",
-                    "hover:-translate-y-1.5 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10",
-                    "dark:border-slate-800/80 dark:bg-slate-900 dark:hover:border-primary/50 dark:hover:shadow-primary/20"
+                    "hover:-translate-y-1.5 hover:border-blue-600/50 hover:shadow-xl hover:shadow-blue-600/10",
+                    "dark:border-slate-800/80 dark:bg-slate-900 dark:hover:border-blue-500/50 dark:hover:shadow-blue-500/20"
                   )}
                 >
                   {/* Top */}
@@ -259,8 +259,8 @@ export default function FavoritesPage() {
                       <span
                         className={cn(
                           "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-12 sm:w-12 sm:rounded-2xl",
-                          "bg-primary/10 text-primary transition-all duration-300",
-                          "group-hover:bg-primary group-hover:text-white group-hover:shadow-md group-hover:shadow-primary/30"
+                          "bg-blue-600/10 dark:bg-blue-500/10 text-blue-600 dark:text-blue-500 transition-all duration-300",
+                          "group-hover:bg-blue-600 dark:group-hover:bg-blue-500 group-hover:text-white group-hover:shadow-md group-hover:shadow-blue-600/30 dark:group-hover:shadow-blue-500/30"
                         )}
                       >
                         {Icon ? (
@@ -325,11 +325,11 @@ export default function FavoritesPage() {
                     </div>
 
                     <div className="mt-3 min-w-0 sm:mt-4">
-                      <h2 className="line-clamp-2 break-words text-[15px] font-bold leading-6 text-slate-900 transition-colors group-hover:text-primary dark:text-slate-100 sm:text-lg sm:leading-7">
+                      <h2 className="line-clamp-2 break-words text-[15px] font-bold leading-6 text-slate-900 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-500 dark:text-slate-100 sm:text-lg sm:leading-7">
                         {categoryTitle}
                       </h2>
 
-                      <p className="mt-0.5 text-[10px] font-medium leading-5 text-slate-500 dark:text-slate-400 sm:text-xs">
+                      <p className="mt-0.5 text-[10px] font-medium leading-5 text-slate-600 dark:text-slate-400 sm:text-xs">
                         {category.filters.length > 0
                           ? `${category.filters.length} ${
                               currentLanguage === "ckb"
@@ -348,7 +348,7 @@ export default function FavoritesPage() {
                   </div>
 
                   {/* Image */}
-                  <div className="relative mt-auto h-32 w-full overflow-hidden border-t border-slate-100 dark:border-slate-800/80 sm:h-40">
+                  <div className="relative mt-auto h-32 w-full overflow-hidden border-t border-slate-200 dark:border-slate-800/80 sm:h-40">
                     <Image
                       src={category.imageSrc}
                       alt={categoryTitle}
@@ -399,7 +399,7 @@ export default function FavoritesPage() {
                   : "No favorites yet"}
             </h2>
 
-            <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
+            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
               {currentLanguage === "ckb"
                 ? "لە بەشی خزمەتگوزارییەکان ❤️ لەسەر ئەو بەشە بکە کە دەتەوێت بیخەیتە دڵخوازەکان."
                 : currentLanguage === "ar"
@@ -409,7 +409,7 @@ export default function FavoritesPage() {
 
             <Link
               href="/#services"
-              className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-md shadow-primary/20 transition-all duration-300 hover:bg-primary/90 hover:shadow-lg"
+              className="mt-6 inline-flex items-center gap-2 rounded-full bg-blue-600 dark:bg-blue-500 px-6 py-3 text-sm font-semibold text-white shadow-md shadow-blue-600/20 dark:shadow-blue-500/20 transition-all duration-300 hover:bg-blue-700 dark:hover:bg-blue-600 hover:shadow-lg"
             >
               {currentLanguage === "ckb"
                 ? "بینینی خزمەتگوزارییەکان"

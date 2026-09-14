@@ -81,7 +81,7 @@ export default function BottomNav() {
         shadow-[0_-10px_30px_rgba(15,23,42,0.07)]
         backdrop-blur-md
 
-        dark:border-white/[0.08]
+        dark:border-slate-800
         dark:bg-slate-950/95
         dark:shadow-[0_-10px_30px_rgba(0,0,0,0.4)]
       "
@@ -110,18 +110,18 @@ export default function BottomNav() {
 
                   focus-visible:ring-2
                   focus-visible:ring-inset
-                  focus-visible:ring-emerald-500
+                  focus-visible:ring-blue-600 dark:focus-visible:ring-blue-500
 
                   ${
                     active
-                      ? "text-emerald-600 dark:text-emerald-400"
+                      ? "text-blue-600 dark:text-blue-500"
                       : `
-                        text-slate-500
+                        text-slate-600
 
-                        hover:text-emerald-600
+                        hover:text-blue-600
 
                         dark:text-slate-400
-                        dark:hover:text-emerald-400
+                        dark:hover:text-blue-500
                       `
                   }
                 `}
@@ -136,8 +136,8 @@ export default function BottomNav() {
                     ${
                       active
                         ? `
-                          bg-emerald-50
-                          dark:bg-emerald-400/10
+                          bg-sky-50
+                          dark:bg-sky-900/30
                         `
                         : "bg-transparent"
                     }

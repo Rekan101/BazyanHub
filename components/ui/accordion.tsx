@@ -15,7 +15,7 @@ const AccordionItem = React.forwardRef<
   <AccordionPrimitive.Item
     ref={ref}
     className={cn(
-      "rounded-2xl border border-border bg-white shadow-sm dark:bg-slate-900 transition-shadow duration-300 hover:shadow-md",
+      "rounded-2xl border border-slate-200 dark:border-slate-800 bg-white shadow-sm dark:bg-slate-900 transition-shadow duration-300 hover:shadow-md",
       className
     )}
     {...props}
@@ -31,15 +31,15 @@ const AccordionTrigger = React.forwardRef<
     <AccordionPrimitive.Trigger
       ref={ref}
       className={cn(
-        "group flex flex-1 items-center justify-between gap-4 rounded-2xl px-5 py-4 text-right text-base font-semibold text-text dark:text-slate-100",
-        "outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2",
+        "group flex flex-1 items-center justify-between gap-4 rounded-2xl px-5 py-4 text-right text-base font-semibold text-slate-900 dark:text-white dark:text-slate-100",
+        "outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-600/60 dark:focus-visible:ring-blue-500/60 focus-visible:ring-offset-2",
         className
       )}
       {...props}
     >
       {children}
       <ChevronDown
-        className="h-5 w-5 shrink-0 text-text/50 transition-transform duration-300 group-data-[state=open]:rotate-180 group-data-[state=open]:text-primary dark:text-slate-400"
+        className="h-5 w-5 shrink-0 text-slate-600 dark:text-slate-400 transition-transform duration-300 group-data-[state=open]:rotate-180 group-data-[state=open]:text-blue-600 dark:text-blue-500 dark:text-slate-400"
         aria-hidden="true"
       />
     </AccordionPrimitive.Trigger>
@@ -54,7 +54,7 @@ const AccordionContent = React.forwardRef<
   <AccordionPrimitive.Content
     ref={ref}
     className={cn(
-      "overflow-hidden text-sm text-text/70 dark:text-slate-300 data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
+      "overflow-hidden text-sm text-slate-600 dark:text-slate-400 dark:text-slate-300 data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
     )}
     {...props}
   >
