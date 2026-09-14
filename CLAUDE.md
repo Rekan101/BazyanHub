@@ -62,7 +62,7 @@ Established as a 5-color system, replacing an earlier emerald/green theme. **Eve
 - Background is **`bg-[#003B6D]` in both light and dark mode** — the file contains **zero** `dark:` classes for its own container or tab colors. This is by explicit design, confirmed across multiple sessions: no color change when the theme toggles.
 - Text/icons: `text-white` when active, `text-white/60` (hover → `text-white`) when inactive — same white family in both themes, only opacity differs, so the active tab is still distinguishable.
 - Shape: `rounded-t-[1.5rem]` + `overflow-hidden`, `fixed bottom-0`, respects `env(safe-area-inset-bottom)`.
-- **Current sizing** (last confirmed state): container `h-11` (44px, `py-0.5`), icon wrapper `h-5 w-9`, icon glyph `h-4 w-4`, label `text-[9px]`.
+- **Current sizing** (last confirmed state): container `h-12` (48px, `py-1`), icon wrapper `h-5 w-9`, icon glyph `h-4 w-4`, label `text-[9px]`.
 - **Tabs, in actual on-screen order (5 total, `grid-cols-5`)**:
   1. Home — `/` — `Home` icon
   2. About Bazyan (دەربارەی بازیان) — `/about` — `Landmark` icon
@@ -84,8 +84,17 @@ Established as a 5-color system, replacing an earlier emerald/green theme. **Eve
 - **Data**: `SLIDES` — a local mock array, exactly **6 slides × 3 stories = 18 stories**. Story shape: `{ id, image, providerName, shortInfo, providerId, categoryId }` — deliberately has **no** expiration/scheduling fields (that's the database's job later; a previous version with client-side expiration logic was removed for exactly this reason).
 - Slide titles, in fixed order: `ژیانی ڕۆژانەت ئاسانتر بکە`, `باشترین خزمەتگوزارییەکان لێرەن`, `هەر ئێستا پەیوەندی بکە`, `کات و پارەت بپارێزە`, `وەستای شارەزا بدۆزەرەوە`, `هەموو پێداویستییەکان لە یەک جێگادا`.
 - **Layout**: outer glass box `rounded-[2rem] border border-white/20 dark:border-white/10 p-4 shadow-lg`, containing a `grid grid-cols-3 gap-3` of `aspect-square rounded-[1.5rem]` squircle thumbnails, a rotating title pill below (`bg-white dark:bg-slate-900 rounded-full px-6 py-2`), and slide-position dots.
-- **Container background — current actual state**: `bg-[linear-gradient(135deg,_#cbd5e1_0%,_#9ca3af_50%,_#cbd5e1_100%)]` (a CSS silver gradient), identical in both themes (no `dark:` background override).
-  - `[PLANNED — NOT YET IMPLEMENTED]` Replacing this with a real photographic silver-wave texture image (`public/images/silver-waves.jpg`, referenced as `/images/silver-waves.jpg`) plus a dark overlay stacked into the same `backgroundImage` value was decided but **blocked**: the image file does not exist anywhere in `public/`, and it must be added manually (binary files can't be written by the assistant) before this can be implemented.
+- **Container background**: the real silver-wave photo at `public/images/silver-waves.jpg`, applied via an **inline `style`** (not a Tailwind class), with a flat dark overlay stacked above the image inside the same `backgroundImage` value so the texture reads slightly darker for contrast:
+  ```tsx
+  style={{
+    backgroundImage:
+      "linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15)), url('/images/silver-waves.jpg')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+  }}
+  ```
+  A `bg-slate-300` class stays on the element as a base color so the container degrades to silver rather than transparent while the image loads. Identical in both themes — no `dark:` background override. The overlay-in-the-stack approach is deliberate: it needs no extra DOM node and does **not** dim the thumbnails or title pill rendered on top.
+  - Note: two `bg-gradient-to-t` classes elsewhere in this file are **not** the container background — one is the bottom scrim on each thumbnail, the other the readability overlay in the fullscreen modal. Both are required for text legibility; do not strip them when asked to "remove gradients" from the container.
 - **Auto-loop**: `setInterval` every `SLIDE_INTERVAL_MS = 3000`ms, advances via a functional `setCurrentSlide` updater (keeps the interval stable, never recreated mid-cycle). The effect's cleanup always calls `clearInterval` — both on pause and on unmount, so there is no leak.
 - **Pause/resume**: clicking a story sets `isPaused = true` (which tears the interval down completely, not just skips a tick) and opens the fullscreen modal. Closing (X, backdrop click, or `Escape`) sets `isPaused = false`, which builds a **fresh** interval — the current slide always gets a full 3s, never a partial "resume" of elapsed time.
 - **Fullscreen story modal**: a **centered popup**, not full-bleed — `fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4 md:p-10`, with the actual card at `relative w-full max-w-md h-[85vh] rounded-3xl overflow-hidden`. Uses `z-[100]`, not `z-50` — both `AppHeader` and `BottomNav` are `z-50`, and `BottomNav` is a later DOM sibling, so a `z-50` modal would render underneath the bottom nav.
@@ -128,12 +137,14 @@ Note: the 2-column grid + 3-pill filter pattern above also applies to the **home
 ## 9. News Feed (`app/news/page.tsx`)
 
 - **Composer**: real controlled `<textarea>` (not a fake button), an `ImagePlus` attach button, and a `بڵاوکردنەوە` publish button (`disabled` while the draft is empty).
-  - `[PLANNED — NOT YET IMPLEMENTED]` The attach button is currently a **styled no-op** — there is no `<input type="file">`, no gallery picker, and no image/video preview thumbnail wired up.
+- **Media attachment** (local preview only — nothing is uploaded anywhere): the `ImagePlus` button calls `fileInputRef.current?.click()` on a hidden `<input type="file" accept="image/*,video/*" className="hidden">`; `accept` is what makes mobile offer the gallery/camera. `onChange` stores `{ url: URL.createObjectURL(file), type, name }` and renders a 64px preview in the composer (`<video muted playsInline>` for video, a plain `<img>` for images — blob URLs cannot go through `next/image`).
+  - Two non-obvious requirements, do not remove: blob URLs are revoked in a `useEffect` keyed on `media` (the cleanup closes over the *previous* value, freeing each URL exactly once), and `clearMedia` resets `fileInputRef.current.value = ""` — without that, re-picking the *same* file never fires `onChange`.
 - **Moderation flow**: clicking publish **never appends to the feed array**. It clears the draft and shows a toast: *"پۆستەکەت نێردرا و دوای پەسەندکردنی لەلایەن ئادمینەوە بڵاودەکرێتەوە."* (auto-dismisses after 3.2s). This is the entire "moderation" behavior — there is no admin queue, review UI, or persistence anywhere.
 - **Feed**: exactly 2 hardcoded `MOCK_POSTS`, representing already-approved content. Cards: `bg-slate-50 dark:bg-slate-900` with a `border-slate-200/800` + shadow (needed because the page background is the same `slate-50`).
 - **Engagement**:
   - **Like (ڕیاکت)** — real per-post local toggle (`Record<string, boolean>` keyed by post id). Fills the heart, turns `text-blue-600 dark:text-blue-500`, count is `post.likes + (liked ? 1 : 0)`. No backend — resets on reload.
-  - **Comment (کۆمێنت)** — `[PLANNED — NOT YET IMPLEMENTED]` styled identically to Like but **fully inert** — no inline input, no thread, no state. This was an explicit, confirmed decision, not an oversight.
+  - **Comment (کۆمێنت)** — toggles an inline thread per post. Three `Record<string, …>` maps keyed by post id: `openComments` (open/closed), `commentDrafts` (controlled input value), `comments` (submitted strings). Submit via the send button or the **Enter** key (`onKeyDown` + `preventDefault`); empty/whitespace is rejected and the button is `disabled`. The displayed count is `post.comments + postComments.length`, so it updates live. Local only — resets on reload.
+  - The comment input reuses the `newsComposerPlaceholder` key rather than introducing a dedicated one; add a proper key to all three `TRANSLATIONS` blocks if a distinct placeholder is wanted.
 - There is **no** admin-approval info banner on the page — it was deliberately removed once the toast started carrying that message.
 
 ## 10. Profile Page (`app/profile/page.tsx`)

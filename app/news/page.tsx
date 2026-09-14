@@ -15,6 +15,7 @@ import {
   Newspaper,
   SendHorizontal,
   User,
+  X,
 } from "lucide-react";
 
 import { useLanguage } from "@/lib/i18n";
@@ -83,6 +84,118 @@ export default function NewsPage() {
   );
 
   /* ------------------------------------------------------------------
+     MEDIA ATTACHMENT — local preview only, nothing is uploaded
+     ------------------------------------------------------------------ */
+
+  const fileInputRef =
+    useRef<HTMLInputElement>(null);
+
+  const [media, setMedia] = useState<{
+    url: string;
+    type: "image" | "video";
+    name: string;
+  } | null>(null);
+
+  const openFilePicker = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    setMedia({
+      url: URL.createObjectURL(file),
+      type: file.type.startsWith("video")
+        ? "video"
+        : "image",
+      name: file.name,
+    });
+  };
+
+  const clearMedia = () => {
+    setMedia(null);
+
+    /*
+     * Reset the input so picking the *same* file again still
+     * fires onChange (the browser skips it otherwise).
+     */
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  /*
+   * Revoke the blob URL when it is replaced or the page unmounts —
+   * the cleanup runs with the previous `media`, so each URL is freed
+   * exactly once.
+   */
+  useEffect(() => {
+    if (!media) {
+      return;
+    }
+
+    const { url } = media;
+
+    return () => {
+      URL.revokeObjectURL(url);
+    };
+  }, [media]);
+
+  /* ------------------------------------------------------------------
+     COMMENTS — local only, per post
+     ------------------------------------------------------------------ */
+
+  const [openComments, setOpenComments] =
+    useState<Record<string, boolean>>({});
+
+  const [commentDrafts, setCommentDrafts] =
+    useState<Record<string, string>>({});
+
+  const [comments, setComments] = useState<
+    Record<string, string[]>
+  >({});
+
+  const toggleComments = (
+    postId: string
+  ) => {
+    setOpenComments((previous) => ({
+      ...previous,
+      [postId]: !previous[postId],
+    }));
+  };
+
+  const submitComment = (
+    postId: string
+  ) => {
+    const text = (
+      commentDrafts[postId] ?? ""
+    ).trim();
+
+    if (!text) {
+      return;
+    }
+
+    setComments((previous) => ({
+      ...previous,
+      [postId]: [
+        ...(previous[postId] ?? []),
+        text,
+      ],
+    }));
+
+    setCommentDrafts((previous) => ({
+      ...previous,
+      [postId]: "",
+    }));
+  };
+
+  /* ------------------------------------------------------------------
      SUBMIT — moderation queue, never straight to the feed
      ------------------------------------------------------------------ */
 
@@ -92,6 +205,7 @@ export default function NewsPage() {
     }
 
     setDraft("");
+    clearMedia();
     setToastOpen(true);
 
     if (toastTimer.current !== null) {
@@ -267,6 +381,94 @@ export default function NewsPage() {
           />
         </div>
 
+        {/* MEDIA PREVIEW */}
+
+        {media && (
+          <div
+            className="
+              mt-3 flex items-center gap-3
+              rounded-xl
+              border border-slate-200
+              bg-white
+              p-2
+
+              dark:border-slate-800
+              dark:bg-slate-950
+            "
+          >
+            <div
+              className="
+                relative h-16 w-16 shrink-0
+                overflow-hidden
+                rounded-lg
+                bg-slate-200
+
+                dark:bg-slate-800
+              "
+            >
+              {media.type === "video" ? (
+                <video
+                  src={media.url}
+                  muted
+                  playsInline
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={media.url}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
+              )}
+            </div>
+
+            <p
+              dir="ltr"
+              className="
+                min-w-0 flex-1 truncate
+                text-start
+                text-[12px] font-medium
+                text-slate-600
+
+                dark:text-slate-400
+              "
+            >
+              {media.name}
+            </p>
+
+            <button
+              type="button"
+              onClick={clearMedia}
+              aria-label="داخستن"
+              className="
+                flex h-8 w-8 shrink-0
+                items-center justify-center
+                rounded-lg
+                text-slate-600
+                outline-none
+                transition-colors duration-200
+
+                hover:bg-slate-100
+                hover:text-rose-600
+
+                focus-visible:ring-2
+                focus-visible:ring-blue-600
+                dark:focus-visible:ring-blue-500
+
+                dark:text-slate-400
+                dark:hover:bg-white/[0.06]
+                dark:hover:text-rose-400
+              "
+            >
+              <X
+                className="h-4 w-4"
+                aria-hidden="true"
+              />
+            </button>
+          </div>
+        )}
+
         <div
           className="
             mt-3 flex items-center gap-2
@@ -278,8 +480,17 @@ export default function NewsPage() {
         >
           {/* ATTACH IMAGE / VIDEO */}
 
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*,video/*"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+
           <button
             type="button"
+            onClick={openFilePicker}
             aria-label={t("newsAddPost")}
             className="
               flex h-10 w-10 shrink-0
@@ -370,6 +581,15 @@ export default function NewsPage() {
 
           const likeCount =
             post.likes + (liked ? 1 : 0);
+
+          const postComments =
+            comments[post.id] ?? [];
+
+          const commentCount =
+            post.comments + postComments.length;
+
+          const commentDraft =
+            commentDrafts[post.id] ?? "";
 
           return (
             <article
@@ -520,16 +740,28 @@ export default function NewsPage() {
 
                 <button
                   type="button"
+                  onClick={() =>
+                    toggleComments(post.id)
+                  }
+                  aria-expanded={Boolean(
+                    openComments[post.id]
+                  )}
                   className={`
                     ${actionButtonClass}
-                    text-slate-600
+                    ${
+                      openComments[post.id]
+                        ? "text-blue-600 dark:text-blue-500"
+                        : `
+                          text-slate-600
 
-                    hover:bg-slate-100
-                    hover:text-blue-600
+                          hover:bg-slate-100
+                          hover:text-blue-600
 
-                    dark:text-slate-400
-                    dark:hover:bg-white/[0.06]
-                    dark:hover:text-blue-500
+                          dark:text-slate-400
+                          dark:hover:bg-white/[0.06]
+                          dark:hover:text-blue-500
+                        `
+                    }
                   `}
                 >
                   <MessageCircle
@@ -542,10 +774,163 @@ export default function NewsPage() {
                   </span>
 
                   <span className="text-[12px] font-bold">
-                    {post.comments}
+                    {commentCount}
                   </span>
                 </button>
               </div>
+
+              {/* COMMENT THREAD */}
+
+              {openComments[post.id] && (
+                <div
+                  className="
+                    border-t border-slate-200
+                    p-3
+
+                    dark:border-slate-800
+                  "
+                >
+                  {postComments.length > 0 && (
+                    <ul className="mb-3 space-y-2">
+                      {postComments.map(
+                        (comment, index) => (
+                          <li
+                            key={`${post.id}-comment-${index}`}
+                            className="flex items-start gap-2"
+                          >
+                            <span
+                              aria-hidden="true"
+                              className="
+                                flex h-7 w-7 shrink-0
+                                items-center justify-center
+                                rounded-full
+                                bg-slate-200
+                                text-slate-600
+
+                                dark:bg-white/[0.06]
+                                dark:text-slate-400
+                              "
+                            >
+                              <User className="h-3.5 w-3.5" />
+                            </span>
+
+                            <p
+                              className="
+                                min-w-0 flex-1
+                                rounded-2xl
+                                bg-white
+                                px-3 py-2
+                                text-[12px] leading-relaxed
+                                text-slate-700
+
+                                dark:bg-slate-950
+                                dark:text-slate-300
+                              "
+                            >
+                              {comment}
+                            </p>
+                          </li>
+                        )
+                      )}
+                    </ul>
+                  )}
+
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={commentDraft}
+                      onChange={(event) =>
+                        setCommentDrafts(
+                          (previous) => ({
+                            ...previous,
+                            [post.id]:
+                              event.target
+                                .value,
+                          })
+                        )
+                      }
+                      onKeyDown={(event) => {
+                        if (
+                          event.key === "Enter"
+                        ) {
+                          event.preventDefault();
+                          submitComment(
+                            post.id
+                          );
+                        }
+                      }}
+                      placeholder={t(
+                        "newsComposerPlaceholder"
+                      )}
+                      className="
+                        h-10 min-w-0 flex-1
+                        rounded-full
+                        border border-slate-200
+                        bg-white
+                        px-4
+                        text-[12px]
+                        text-slate-800
+                        outline-none
+                        transition-colors duration-200
+
+                        placeholder:text-slate-400
+
+                        focus:border-blue-600/40
+                        focus-visible:ring-2
+                        focus-visible:ring-blue-600/30
+
+                        dark:border-slate-800
+                        dark:bg-slate-950
+                        dark:text-slate-200
+                        dark:placeholder:text-slate-500
+                        dark:focus:border-blue-500/40
+                        dark:focus-visible:ring-blue-500/30
+                      "
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        submitComment(post.id)
+                      }
+                      disabled={
+                        !commentDraft.trim()
+                      }
+                      aria-label={t(
+                        "newsComment"
+                      )}
+                      className="
+                        flex h-10 w-10 shrink-0
+                        items-center justify-center
+                        rounded-full
+                        bg-blue-600
+                        text-white
+                        outline-none
+                        transition-all duration-200
+
+                        hover:bg-blue-700
+
+                        focus-visible:ring-2
+                        focus-visible:ring-blue-600
+                        focus-visible:ring-offset-2
+                        dark:focus-visible:ring-blue-500
+                        dark:focus-visible:ring-offset-slate-900
+
+                        disabled:cursor-not-allowed
+                        disabled:opacity-40
+
+                        dark:bg-blue-500
+                        dark:hover:bg-blue-600
+                      "
+                    >
+                      <SendHorizontal
+                        className="h-4 w-4"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </div>
+                </div>
+              )}
             </article>
           );
         })}

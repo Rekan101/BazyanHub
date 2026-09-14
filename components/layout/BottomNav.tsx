@@ -97,11 +97,11 @@ export default function BottomNav() {
                   active ? "page" : undefined
                 }
                 className={`
-                  flex h-11 min-w-0
+                  flex h-12 min-w-0
                   flex-col
                   items-center justify-center
                   gap-0.5
-                  px-0.5 py-0.5
+                  px-0.5 py-1
                   outline-none
                   transition-colors duration-200
 
