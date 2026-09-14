@@ -36,13 +36,13 @@ const ACTION_BUTTON_CLASS = `
   focus-visible:ring-blue-600 dark:focus-visible:ring-blue-500
   focus-visible:ring-offset-2
 
-  dark:border-slate-800
-  dark:bg-white/[0.04]
-  dark:text-slate-200
-  dark:hover:border-sky-400/40
-  dark:hover:bg-sky-900/30
-  dark:hover:text-blue-500
-  dark:focus-visible:ring-offset-slate-950
+  dark:border-white/15
+  dark:bg-white/10
+  dark:text-white
+  dark:hover:border-white/30
+  dark:hover:bg-white/20
+  dark:hover:text-white
+  dark:focus-visible:ring-offset-[#003B6D]
 `;
 
 export default function AppHeader() {
@@ -102,18 +102,18 @@ export default function AppHeader() {
           mx-auto w-full max-w-md
 
           border-b border-slate-200/70
-          bg-white/95
+          bg-white/90
           backdrop-blur-md
           transition-shadow duration-300
 
-          dark:border-slate-800
-          dark:bg-slate-950/95
+          dark:border-white/10
+          dark:bg-[#003B6D]
 
           ${
             isScrolled
               ? `
                 shadow-[0_10px_30px_rgba(15,23,42,0.08)]
-                dark:shadow-[0_10px_30px_rgba(0,0,0,0.35)]
+                dark:shadow-[0_10px_30px_rgba(0,0,0,0.45)]
               `
               : "shadow-none"
           }
@@ -165,7 +165,7 @@ export default function AppHeader() {
                   absolute inset-0
                   rounded-2xl
                   bg-sky-50/70
-                  dark:bg-sky-900/30
+                  dark:bg-white/10
                 "
               />
 
@@ -209,7 +209,7 @@ export default function AppHeader() {
                   font-medium
                   leading-tight
                   text-slate-600
-                  dark:text-slate-400
+                  dark:text-slate-300
                 "
               >
                 {t("brandTagline")}
@@ -283,7 +283,7 @@ export default function AppHeader() {
                   bg-blue-600
                   dark:bg-blue-500
                   ring-2 ring-white
-                  dark:ring-slate-950
+                  dark:ring-[#003B6D]
                 "
               />
             </button>

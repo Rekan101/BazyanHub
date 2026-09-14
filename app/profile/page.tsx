@@ -95,12 +95,12 @@ export default function ProfilePage() {
     : ChevronRight;
 
   const rowClass = `
-    flex min-h-[58px] w-full
+    flex min-h-[60px] w-full
     items-center gap-3
-    rounded-2xl
+    rounded-3xl
     border border-slate-200
     bg-white
-    px-4 py-3
+    p-4
     text-[15px] font-semibold
     text-slate-700
     shadow-sm
@@ -122,22 +122,31 @@ export default function ProfilePage() {
     dark:hover:text-blue-500
   `;
 
-  const iconWrapClass = `
-    flex h-9 w-9 shrink-0
+  /*
+   * Plain glyphs, no tinted tile behind them — settings rows read
+   * neutral, contact/accent rows read blue.
+   */
+  const settingsIconClass = `
+    flex h-6 w-6 shrink-0
     items-center justify-center
-    rounded-xl
-    bg-sky-50
+    text-slate-700
+
+    dark:text-slate-300
+  `;
+
+  const accentIconClass = `
+    flex h-6 w-6 shrink-0
+    items-center justify-center
     text-blue-600
 
-    dark:bg-sky-900/30
     dark:text-blue-500
   `;
 
   const cardClass = `
-    rounded-2xl
+    rounded-3xl
     border border-slate-200
     bg-white
-    p-4
+    p-5
     shadow-sm
 
     dark:border-slate-800
@@ -154,7 +163,13 @@ export default function ProfilePage() {
   return (
     <div
       dir={direction}
-      className="px-4 py-8 sm:px-6"
+      className="
+        bg-slate-50
+        px-4 py-8
+        sm:px-6
+
+        dark:bg-slate-950
+      "
     >
       {/* =====================================================
           HEADER
@@ -164,20 +179,18 @@ export default function ProfilePage() {
         <span
           aria-hidden="true"
           className="
-            flex h-20 w-20
+            flex h-24 w-24
             items-center justify-center
-            rounded-3xl
-            border border-blue-600/20
-            bg-sky-500/10
-            text-blue-600
-            shadow-sm
+            rounded-full
+            bg-blue-600
+            text-white
+            shadow-lg shadow-blue-600/25
 
-            dark:border-blue-500/20
-            dark:bg-sky-500/15
-            dark:text-blue-500
+            dark:bg-blue-500
+            dark:shadow-blue-500/25
           "
         >
-          <User className="h-9 w-9" />
+          <User className="h-11 w-11" />
         </span>
 
         <h1
@@ -209,9 +222,9 @@ export default function ProfilePage() {
 
       <div className="mt-8 space-y-3">
         <div className={rowClass}>
-          <span className={iconWrapClass}>
+          <span className={settingsIconClass}>
             <Globe
-              className="h-[18px] w-[18px]"
+              className="h-5 w-5"
               aria-hidden="true"
             />
           </span>
@@ -233,9 +246,9 @@ export default function ProfilePage() {
         </div>
 
         <div className={rowClass}>
-          <span className={iconWrapClass}>
+          <span className={settingsIconClass}>
             <Bell
-              className="h-[18px] w-[18px]"
+              className="h-5 w-5"
               aria-hidden="true"
             />
           </span>
@@ -249,9 +262,9 @@ export default function ProfilePage() {
           href="/legal"
           className={rowClass}
         >
-          <span className={iconWrapClass}>
+          <span className={settingsIconClass}>
             <FileText
-              className="h-[18px] w-[18px]"
+              className="h-5 w-5"
               aria-hidden="true"
             />
           </span>
@@ -282,9 +295,9 @@ export default function ProfilePage() {
             dir="ltr"
             className={rowClass}
           >
-            <span className={iconWrapClass}>
+            <span className={accentIconClass}>
               <Phone
-                className="h-[18px] w-[18px]"
+                className="h-5 w-5"
                 aria-hidden="true"
               />
             </span>
@@ -302,9 +315,9 @@ export default function ProfilePage() {
             dir="ltr"
             className={rowClass}
           >
-            <span className={iconWrapClass}>
+            <span className={accentIconClass}>
               <Mail
-                className="h-[18px] w-[18px]"
+                className="h-5 w-5"
                 aria-hidden="true"
               />
             </span>
@@ -381,9 +394,9 @@ export default function ProfilePage() {
           {/* WORKING HOURS */}
 
           <div className={cardClass}>
-            <span className={iconWrapClass}>
+            <span className={accentIconClass}>
               <Clock3
-                className="h-[18px] w-[18px]"
+                className="h-5 w-5"
                 aria-hidden="true"
               />
             </span>
@@ -414,9 +427,9 @@ export default function ProfilePage() {
           {/* ADDRESS */}
 
           <div className={cardClass}>
-            <span className={iconWrapClass}>
+            <span className={accentIconClass}>
               <MapPin
-                className="h-[18px] w-[18px]"
+                className="h-5 w-5"
                 aria-hidden="true"
               />
             </span>
@@ -464,6 +477,7 @@ export default function ProfilePage() {
             <AccordionItem
               key={item.id}
               value={item.id}
+              className="rounded-3xl"
             >
               <AccordionTrigger>
                 {item.question}
@@ -484,7 +498,7 @@ export default function ProfilePage() {
       <p
         className="
           mt-8
-          rounded-2xl
+          rounded-3xl
           border border-dashed border-slate-300
           bg-white/70
           px-4 py-5

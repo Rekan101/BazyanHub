@@ -81,8 +81,8 @@ export default function BottomNav() {
         shadow-[0_-10px_30px_rgba(15,23,42,0.07)]
         backdrop-blur-md
 
-        dark:border-slate-800
-        dark:bg-slate-950/95
+        dark:border-white/10
+        dark:bg-[#003B6D]
         dark:shadow-[0_-10px_30px_rgba(0,0,0,0.4)]
       "
     >
@@ -114,14 +114,14 @@ export default function BottomNav() {
 
                   ${
                     active
-                      ? "text-blue-600 dark:text-blue-500"
+                      ? "text-blue-600 dark:text-white"
                       : `
                         text-slate-600
 
                         hover:text-blue-600
 
-                        dark:text-slate-400
-                        dark:hover:text-blue-500
+                        dark:text-slate-300
+                        dark:hover:text-white
                       `
                   }
                 `}
@@ -137,7 +137,7 @@ export default function BottomNav() {
                       active
                         ? `
                           bg-sky-50
-                          dark:bg-sky-900/30
+                          dark:bg-white/15
                         `
                         : "bg-transparent"
                     }
