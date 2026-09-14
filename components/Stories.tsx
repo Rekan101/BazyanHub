@@ -336,18 +336,11 @@ export default function Stories() {
           w-full
           rounded-[2rem]
           border border-white/20
-          bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))]
-          from-slate-300
-          via-slate-200
-          to-slate-100/50
+          bg-[linear-gradient(135deg,_#cbd5e1_0%,_#9ca3af_50%,_#cbd5e1_100%)]
           p-4
           shadow-lg shadow-black/10
-          backdrop-blur-md
 
           dark:border-white/10
-          dark:from-slate-700
-          dark:via-slate-600
-          dark:to-slate-500/50
         "
       >
         <AnimatePresence mode="wait">

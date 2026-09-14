@@ -81,11 +81,6 @@ export default function BottomNav() {
         bg-[#003B6D]
         pb-[env(safe-area-inset-bottom)]
         shadow-[0_-10px_30px_rgba(0,0,0,0.4)]
-        backdrop-blur-md
-
-        dark:border-slate-200/70
-        dark:bg-white/95
-        dark:shadow-[0_-10px_30px_rgba(15,23,42,0.07)]
       "
     >
       <ul className="grid grid-cols-5">
@@ -102,48 +97,33 @@ export default function BottomNav() {
                   active ? "page" : undefined
                 }
                 className={`
-                  flex min-h-[64px] min-w-0
+                  flex h-14 min-w-0
                   flex-col
                   items-center justify-center
-                  gap-1
-                  px-0.5 py-2
+                  gap-0.5
+                  px-0.5 py-1
                   outline-none
                   transition-colors duration-200
 
                   focus-visible:ring-2
                   focus-visible:ring-inset
-                  focus-visible:ring-white dark:focus-visible:ring-blue-600
+                  focus-visible:ring-white
 
                   ${
                     active
-                      ? "text-white dark:text-blue-600"
-                      : `
-                        text-slate-300
-
-                        hover:text-white
-
-                        dark:text-slate-600
-                        dark:hover:text-blue-600
-                      `
+                      ? "text-white"
+                      : "text-white/60 hover:text-white"
                   }
                 `}
               >
                 <span
-                  className={`
-                    flex h-7 w-11
+                  className="
+                    flex h-6 w-10
                     items-center justify-center
                     rounded-full
+                    bg-transparent
                     transition-all duration-300
-
-                    ${
-                      active
-                        ? `
-                          bg-transparent
-                          dark:bg-sky-50
-                        `
-                        : "bg-transparent"
-                    }
-                  `}
+                  "
                 >
                   <Icon
                     aria-hidden="true"
@@ -169,7 +149,7 @@ export default function BottomNav() {
                 <span
                   className={`
                     max-w-full truncate
-                    text-[9px]
+                    text-[10px]
                     leading-tight
                     tracking-tight
                     ${
