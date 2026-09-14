@@ -75,6 +75,8 @@ export default function BottomNav() {
         fixed inset-x-0 bottom-0 z-50
         mx-auto w-full max-w-md
 
+        overflow-hidden
+        rounded-t-[1.5rem]
         border-t border-slate-200/70
         bg-white/95
         pb-[env(safe-area-inset-bottom)]

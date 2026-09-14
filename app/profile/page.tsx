@@ -26,16 +26,17 @@ import { FAQ_ITEMS } from "@/lib/data/faqs";
 
 import {
   FacebookIcon,
-  InstagramIcon,
-  TikTokIcon,
   ViberIcon,
   WhatsAppIcon,
 } from "@/components/icons/SocialIcons";
 
+import { useNotifications } from "@/components/layout/NotificationProvider";
+
 /*
- * Premium social buttons — real brand colors, white glyphs and a
- * soft brand-tinted glow. Instagram gets its signature gradient,
- * TikTok its sleek black with a cyan/pink split glow.
+ * Premium social buttons — true brand colors, white glyphs, soft
+ * brand-tinted glows and a glossy top highlight. WhatsApp is the
+ * hero: exactly 1.5x the others (72px vs 48px) and centered under
+ * RTL, which the array order below already produces.
  */
 const SOCIAL_LINKS = [
   {
@@ -43,38 +44,28 @@ const SOCIAL_LINKS = [
     href: "#",
     label: "بازیان هەب لە فەیسبووک",
     Icon: FacebookIcon,
+    sizeClass: "h-12 w-12 rounded-2xl",
+    iconClass: "h-[22px] w-[22px]",
     brandClass:
       "bg-[#1877F2] shadow-[0_8px_20px_-6px_rgba(24,119,242,0.85)] hover:shadow-[0_14px_28px_-8px_rgba(24,119,242,0.95)]",
-  },
-  {
-    id: "instagram",
-    href: "#",
-    label: "بازیان هەب لە ئینستاگرام",
-    Icon: InstagramIcon,
-    brandClass:
-      "bg-[linear-gradient(45deg,#F9CE34_0%,#EE2A7B_45%,#6228D7_100%)] shadow-[0_8px_20px_-6px_rgba(238,42,123,0.85)] hover:shadow-[0_14px_28px_-8px_rgba(238,42,123,0.95)]",
-  },
-  {
-    id: "tiktok",
-    href: "#",
-    label: "بازیان هەب لە تیکتۆک",
-    Icon: TikTokIcon,
-    brandClass:
-      "bg-[#111827] ring-1 ring-white/15 shadow-[0_8px_20px_-6px_rgba(37,244,238,0.65),0_8px_20px_-6px_rgba(254,44,85,0.55)] hover:shadow-[0_14px_28px_-8px_rgba(37,244,238,0.8),0_14px_28px_-8px_rgba(254,44,85,0.7)]",
   },
   {
     id: "whatsapp",
     href: "#",
     label: "بازیان هەب لە واتسەپ",
     Icon: WhatsAppIcon,
+    sizeClass: "h-[4.5rem] w-[4.5rem] rounded-[1.375rem]",
+    iconClass: "h-[33px] w-[33px]",
     brandClass:
-      "bg-[#25D366] shadow-[0_8px_20px_-6px_rgba(37,211,102,0.85)] hover:shadow-[0_14px_28px_-8px_rgba(37,211,102,0.95)]",
+      "bg-[#25D366] shadow-[0_12px_28px_-8px_rgba(37,211,102,0.95)] hover:shadow-[0_18px_36px_-10px_rgba(37,211,102,1)]",
   },
   {
     id: "viber",
     href: "#",
     label: "بازیان هەب لە ڤایبەر",
     Icon: ViberIcon,
+    sizeClass: "h-12 w-12 rounded-2xl",
+    iconClass: "h-[22px] w-[22px]",
     brandClass:
       "bg-[#7360F2] shadow-[0_8px_20px_-6px_rgba(115,96,242,0.85)] hover:shadow-[0_14px_28px_-8px_rgba(115,96,242,0.95)]",
   },
@@ -82,6 +73,9 @@ const SOCIAL_LINKS = [
 
 export default function ProfilePage() {
   const { t, language, direction } = useLanguage();
+
+  const { open: openNotifications } =
+    useNotifications();
 
   const isRTL = direction === "rtl";
 
@@ -245,18 +239,38 @@ export default function ProfilePage() {
           </span>
         </div>
 
-        <div className={rowClass}>
-          <span className={settingsIconClass}>
+        <button
+          type="button"
+          onClick={openNotifications}
+          className={rowClass}
+        >
+          <span
+            className={`relative ${settingsIconClass}`}
+          >
             <Bell
               className="h-5 w-5"
               aria-hidden="true"
+            />
+
+            {/* Unread dot — mirrors the header bell */}
+            <span
+              aria-hidden="true"
+              className="
+                absolute -end-0.5 -top-0.5
+                h-2 w-2
+                rounded-full
+                bg-rose-500
+                ring-2 ring-white
+
+                dark:ring-slate-900
+              "
             />
           </span>
 
           <span className="flex-1 truncate text-start">
             {t("notifications")}
           </span>
-        </div>
+        </button>
 
         <Link
           href="/legal"
@@ -333,13 +347,15 @@ export default function ProfilePage() {
           {/* SOCIALS */}
 
           <div className={cardClass}>
-            <div className="flex flex-wrap items-center justify-center gap-3">
+            <div className="flex items-center justify-center gap-4">
               {SOCIAL_LINKS.map(
                 ({
                   id,
                   href,
                   label,
                   Icon,
+                  sizeClass,
+                  iconClass,
                   brandClass,
                 }) => (
                   <a
@@ -350,13 +366,14 @@ export default function ProfilePage() {
                     aria-label={label}
                     className={`
                       group relative
-                      flex h-12 w-12
+                      flex shrink-0
                       items-center justify-center
                       overflow-hidden
-                      rounded-2xl
                       text-white
                       outline-none
                       transition-all duration-300
+
+                      ${sizeClass}
 
                       hover:-translate-y-1
                       hover:scale-[1.06]
@@ -384,7 +401,9 @@ export default function ProfilePage() {
                       "
                     />
 
-                    <Icon className="relative h-[22px] w-[22px] drop-shadow-sm" />
+                    <Icon
+                      className={`relative drop-shadow-sm ${iconClass}`}
+                    />
                   </a>
                 )
               )}

@@ -336,13 +336,18 @@ export default function Stories() {
           w-full
           rounded-[2rem]
           border border-white/20
-          bg-slate-200/50
+          bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))]
+          from-slate-300
+          via-slate-200
+          to-slate-100/50
           p-4
           shadow-lg shadow-black/10
           backdrop-blur-md
 
           dark:border-white/10
-          dark:bg-slate-800/50
+          dark:from-slate-700
+          dark:via-slate-600
+          dark:to-slate-500/50
         "
       >
         <AnimatePresence mode="wait">
@@ -507,7 +512,10 @@ export default function Stories() {
             transition={{ duration: 0.2 }}
             className="
               fixed inset-0 z-[100]
-              mx-auto w-full max-w-md
+              flex items-center justify-center
+              bg-black/80
+              p-4
+              md:p-10
             "
             role="dialog"
             aria-modal="true"
@@ -521,8 +529,10 @@ export default function Stories() {
               type="button"
               aria-label="داخستن"
               onClick={closeStory}
-              className="absolute inset-0 cursor-default bg-black"
+              className="absolute inset-0 cursor-default"
             />
+
+            {/* CARD */}
 
             <motion.div
               initial={{ scale: 0.96 }}
@@ -532,7 +542,14 @@ export default function Stories() {
                 duration: 0.25,
                 ease: "easeOut",
               }}
-              className="pointer-events-none absolute inset-0"
+              className="
+                relative
+                h-[85vh] w-full max-w-md
+                overflow-hidden
+                rounded-3xl
+                bg-slate-900
+                shadow-2xl shadow-black/60
+              "
             >
               {/* STORY IMAGE */}
 
@@ -559,7 +576,6 @@ export default function Stories() {
                   to-black/40
                 "
               />
-            </motion.div>
 
             {/* CLOSE BUTTON */}
 
@@ -600,7 +616,6 @@ export default function Stories() {
                 absolute inset-x-0 bottom-0 z-10
                 flex items-end justify-between gap-3
                 p-5
-                pb-[calc(1.25rem_+_env(safe-area-inset-bottom))]
               "
             >
               <div className="min-w-0 flex-1 text-start">
@@ -665,6 +680,7 @@ export default function Stories() {
                 />
               </Link>
             </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

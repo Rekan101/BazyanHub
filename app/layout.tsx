@@ -8,6 +8,7 @@ import { vazirmatn } from "@/lib/fonts";
 
 import AppHeader from "@/components/layout/AppHeader";
 import BottomNav from "@/components/layout/BottomNav";
+import { NotificationProvider } from "@/components/layout/NotificationProvider";
 
 export const metadata: Metadata = {
   title: "BazianHub",
@@ -37,6 +38,7 @@ export default function RootLayout({
       <body suppressHydrationWarning>
         <ThemeProvider>
           <LanguageProvider>
+            <NotificationProvider>
             {/* =============================================
                 DESKTOP BACKDROP
             ============================================== */}
@@ -75,6 +77,7 @@ export default function RootLayout({
                 <BottomNav />
               </div>
             </div>
+            </NotificationProvider>
           </LanguageProvider>
         </ThemeProvider>
       </body>

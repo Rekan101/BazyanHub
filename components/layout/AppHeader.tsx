@@ -10,7 +10,7 @@ import { useLanguage } from "@/lib/i18n";
 import { useTheme } from "@/components/ThemeProvider";
 
 import MenuSheet from "@/components/layout/MenuSheet";
-import NotificationPanel from "@/components/layout/NotificationPanel";
+import { useNotifications } from "@/components/layout/NotificationProvider";
 
 /* ---------------------------------------------------------
    Shared styling for the header action buttons.
@@ -42,7 +42,7 @@ const ACTION_BUTTON_CLASS = `
   dark:hover:border-white/30
   dark:hover:bg-white/20
   dark:hover:text-white
-  dark:focus-visible:ring-offset-[#003B6D]
+  dark:focus-visible:ring-offset-[#002240]
 `;
 
 export default function AppHeader() {
@@ -57,10 +57,10 @@ export default function AppHeader() {
   const [isMenuOpen, setIsMenuOpen] =
     useState(false);
 
-  const [
-    isNotificationsOpen,
-    setIsNotificationsOpen,
-  ] = useState(false);
+  const {
+    isOpen: isNotificationsOpen,
+    toggle: toggleNotifications,
+  } = useNotifications();
 
   /* ---------------------------------------------------------
      Scroll state
@@ -91,7 +91,6 @@ export default function AppHeader() {
 
   useEffect(() => {
     setIsMenuOpen(false);
-    setIsNotificationsOpen(false);
   }, [pathname]);
 
   return (
@@ -102,12 +101,12 @@ export default function AppHeader() {
           mx-auto w-full max-w-md
 
           border-b border-slate-200/70
-          bg-white/90
+          bg-[#EBEDF3]/95
           backdrop-blur-md
           transition-shadow duration-300
 
           dark:border-white/10
-          dark:bg-[#003B6D]
+          dark:bg-[#002240]
 
           ${
             isScrolled
@@ -259,11 +258,7 @@ export default function AppHeader() {
 
             <button
               type="button"
-              onClick={() =>
-                setIsNotificationsOpen(
-                  (value) => !value
-                )
-              }
+              onClick={toggleNotifications}
               aria-label={t("notifications")}
               aria-expanded={isNotificationsOpen}
               aria-haspopup="dialog"
@@ -280,10 +275,9 @@ export default function AppHeader() {
                   absolute end-2.5 top-2.5
                   h-2 w-2
                   rounded-full
-                  bg-blue-600
-                  dark:bg-blue-500
+                  bg-rose-500
                   ring-2 ring-white
-                  dark:ring-[#003B6D]
+                  dark:ring-[#002240]
                 "
               />
             </button>
@@ -306,17 +300,6 @@ export default function AppHeader() {
           </div>
         </div>
       </header>
-
-      {/* =====================================================
-          NOTIFICATIONS
-      ====================================================== */}
-
-      <NotificationPanel
-        open={isNotificationsOpen}
-        onClose={() =>
-          setIsNotificationsOpen(false)
-        }
-      />
 
       {/* =====================================================
           MOBILE SHEET
