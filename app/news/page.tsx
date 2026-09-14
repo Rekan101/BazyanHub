@@ -8,14 +8,12 @@ import {
 } from "framer-motion";
 import {
   BadgeCheck,
+  CheckCircle2,
   Heart,
   ImagePlus,
-  Info,
   MessageCircle,
   Newspaper,
-  Send,
-  ShieldCheck,
-  SquarePen,
+  SendHorizontal,
   User,
 } from "lucide-react";
 
@@ -23,7 +21,8 @@ import { useLanguage } from "@/lib/i18n";
 
 /* ==========================================================================
    MOCK FEED
-   Placeholder posts, here only to show the feed design.
+   Already-approved posts. New submissions never land here — they go to
+   the admin queue, which is why the composer only ever shows a toast.
    ========================================================================== */
 
 type FeedPost = {
@@ -71,6 +70,11 @@ const MOCK_POSTS: FeedPost[] = [
 export default function NewsPage() {
   const { t, direction } = useLanguage();
 
+  const [draft, setDraft] = useState("");
+
+  const [likedPosts, setLikedPosts] =
+    useState<Record<string, boolean>>({});
+
   const [toastOpen, setToastOpen] =
     useState(false);
 
@@ -79,10 +83,15 @@ export default function NewsPage() {
   );
 
   /* ------------------------------------------------------------------
-     Toast — shown when a guest tries to post
+     SUBMIT — moderation queue, never straight to the feed
      ------------------------------------------------------------------ */
 
-  const showAuthToast = () => {
+  const handlePublish = () => {
+    if (!draft.trim()) {
+      return;
+    }
+
+    setDraft("");
     setToastOpen(true);
 
     if (toastTimer.current !== null) {
@@ -104,6 +113,34 @@ export default function NewsPage() {
       }
     };
   }, []);
+
+  /* ------------------------------------------------------------------
+     LIKE — local only
+     ------------------------------------------------------------------ */
+
+  const toggleLike = (postId: string) => {
+    setLikedPosts((previous) => ({
+      ...previous,
+      [postId]: !previous[postId],
+    }));
+  };
+
+  const canPublish =
+    draft.trim().length > 0;
+
+  const actionButtonClass = `
+    flex flex-1
+    items-center justify-center gap-2
+    rounded-xl
+    py-2
+    text-[13px] font-semibold
+    outline-none
+    transition-colors duration-200
+
+    focus-visible:ring-2
+    focus-visible:ring-blue-600
+    dark:focus-visible:ring-blue-500
+  `;
 
   return (
     <div
@@ -168,7 +205,7 @@ export default function NewsPage() {
           mt-6
           rounded-2xl
           border border-slate-200
-          bg-white
+          bg-slate-50
           p-3
           shadow-sm
 
@@ -176,15 +213,15 @@ export default function NewsPage() {
           dark:bg-slate-900
         "
       >
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-start gap-2.5">
           <span
             aria-hidden="true"
             className="
               flex h-10 w-10 shrink-0
               items-center justify-center
               rounded-full
-              bg-slate-100
-              text-slate-400
+              bg-slate-200
+              text-slate-500
 
               dark:bg-white/[0.06]
               dark:text-slate-400
@@ -193,35 +230,41 @@ export default function NewsPage() {
             <User className="h-5 w-5" />
           </span>
 
-          <button
-            type="button"
-            onClick={showAuthToast}
+          <textarea
+            value={draft}
+            onChange={(event) =>
+              setDraft(event.target.value)
+            }
+            rows={3}
+            placeholder={t(
+              "newsComposerPlaceholder"
+            )}
             className="
-              flex h-10 min-w-0 flex-1
-              items-center
-              rounded-full
-              bg-slate-100
-              px-4
-              text-start
-              text-[13px] font-medium
-              text-slate-600
+              min-w-0 flex-1
+              resize-none
+              rounded-2xl
+              border border-slate-200
+              bg-white
+              px-4 py-2.5
+              text-[13px] leading-relaxed
+              text-slate-800
               outline-none
               transition-colors duration-200
 
-              hover:bg-slate-200/70
+              placeholder:text-slate-400
 
+              focus:border-blue-600/40
               focus-visible:ring-2
-              focus-visible:ring-blue-600 dark:focus-visible:ring-blue-500
+              focus-visible:ring-blue-600/30
 
-              dark:bg-white/[0.06]
-              dark:text-slate-400
-              dark:hover:bg-white/[0.1]
+              dark:border-slate-800
+              dark:bg-slate-950
+              dark:text-slate-200
+              dark:placeholder:text-slate-500
+              dark:focus:border-blue-500/40
+              dark:focus-visible:ring-blue-500/30
             "
-          >
-            <span className="truncate">
-              {t("newsComposerPlaceholder")}
-            </span>
-          </button>
+          />
         </div>
 
         <div
@@ -233,9 +276,47 @@ export default function NewsPage() {
             dark:border-slate-800
           "
         >
+          {/* ATTACH IMAGE / VIDEO */}
+
           <button
             type="button"
-            onClick={showAuthToast}
+            aria-label={t("newsAddPost")}
+            className="
+              flex h-10 w-10 shrink-0
+              items-center justify-center
+              rounded-xl
+              border border-slate-200
+              bg-white
+              text-slate-600
+              outline-none
+              transition-all duration-200
+
+              hover:border-sky-400
+              hover:text-blue-600
+
+              focus-visible:ring-2
+              focus-visible:ring-blue-600
+              dark:focus-visible:ring-blue-500
+
+              dark:border-slate-800
+              dark:bg-white/[0.03]
+              dark:text-slate-400
+              dark:hover:border-sky-400/40
+              dark:hover:text-blue-500
+            "
+          >
+            <ImagePlus
+              className="h-[18px] w-[18px]"
+              aria-hidden="true"
+            />
+          </button>
+
+          {/* PUBLISH */}
+
+          <button
+            type="button"
+            onClick={handlePublish}
+            disabled={!canPublish}
             className="
               flex h-10 flex-1
               items-center justify-center gap-2
@@ -252,139 +333,28 @@ export default function NewsPage() {
               hover:shadow-[0_12px_24px_-8px_rgba(37,99,235,1)]
 
               focus-visible:ring-2
-              focus-visible:ring-blue-600 dark:focus-visible:ring-blue-500
+              focus-visible:ring-blue-600
               focus-visible:ring-offset-2
+              dark:focus-visible:ring-blue-500
               dark:focus-visible:ring-offset-slate-900
 
               active:translate-y-0
+
+              disabled:cursor-not-allowed
+              disabled:opacity-40
+              disabled:shadow-none
+              disabled:hover:translate-y-0
             "
           >
-            <SquarePen
+            <SendHorizontal
               className="h-4 w-4 shrink-0"
               aria-hidden="true"
             />
 
             <span className="truncate">
-              {t("newsAddPost")}
+              {t("newsPublish")}
             </span>
           </button>
-
-          <button
-            type="button"
-            onClick={showAuthToast}
-            aria-label={t("newsAddPost")}
-            className="
-              flex h-10 w-10 shrink-0
-              items-center justify-center
-              rounded-xl
-              border border-slate-200
-              bg-white
-              text-slate-600
-              outline-none
-              transition-all duration-200
-
-              hover:border-sky-400
-              hover:text-blue-600
-
-              focus-visible:ring-2
-              focus-visible:ring-blue-600 dark:focus-visible:ring-blue-500
-
-              dark:border-slate-800
-              dark:bg-white/[0.03]
-              dark:text-slate-400
-              dark:hover:border-sky-400/40
-              dark:hover:text-blue-500
-            "
-          >
-            <ImagePlus
-              className="h-[18px] w-[18px]"
-              aria-hidden="true"
-            />
-          </button>
-        </div>
-      </div>
-
-      {/* =====================================================
-          ADMIN APPROVAL BANNER
-      ====================================================== */}
-
-      <div
-        className="
-          relative mt-4
-          overflow-hidden
-          rounded-2xl
-          border border-blue-600/20
-          bg-gradient-to-br
-          from-sky-50
-          via-sky-50/60
-          to-blue-50
-          p-4
-
-          dark:border-blue-500/20
-          dark:from-blue-500/[0.12]
-          dark:via-blue-500/[0.06]
-          dark:to-sky-500/[0.08]
-        "
-      >
-        <span
-          aria-hidden="true"
-          className="
-            pointer-events-none
-            absolute -end-6 -top-6
-            h-24 w-24
-            rounded-full
-            bg-sky-400/15
-            blur-2xl
-          "
-        />
-
-        <div className="relative flex gap-3">
-          <span
-            aria-hidden="true"
-            className="
-              flex h-10 w-10 shrink-0
-              items-center justify-center
-              rounded-xl
-              bg-sky-500/15
-              text-blue-600
-
-              dark:bg-sky-500/20
-              dark:text-blue-500
-            "
-          >
-            <ShieldCheck className="h-5 w-5" />
-          </span>
-
-          <div className="min-w-0">
-            <p
-              className="
-                flex items-center gap-1.5
-                text-[13px] font-bold
-                text-blue-800
-
-                dark:text-sky-300
-              "
-            >
-              <Info
-                className="h-3.5 w-3.5 shrink-0"
-                aria-hidden="true"
-              />
-
-              {t("newsApprovalTitle")}
-            </p>
-
-            <p
-              className="
-                mt-1
-                text-[12px] leading-relaxed
-                text-blue-900/75
-
-                dark:text-sky-100/70
-              "
-            >
-              {t("newsApprovalNote")}
-            </p>
-          </div>
         </div>
       </div>
 
@@ -393,134 +363,196 @@ export default function NewsPage() {
       ====================================================== */}
 
       <div className="mt-5 space-y-4">
-        {MOCK_POSTS.map((post) => (
-          <article
-            key={post.id}
-            className="
-              overflow-hidden
-              rounded-2xl
-              border border-slate-200
-              bg-white
-              shadow-sm
+        {MOCK_POSTS.map((post) => {
+          const liked = Boolean(
+            likedPosts[post.id]
+          );
 
-              dark:border-slate-800
-              dark:bg-slate-900
-            "
-          >
-            {/* POST HEADER */}
+          const likeCount =
+            post.likes + (liked ? 1 : 0);
 
-            <div className="flex items-center gap-3 p-3.5">
-              <span
-                aria-hidden="true"
+          return (
+            <article
+              key={post.id}
+              className="
+                overflow-hidden
+                rounded-2xl
+                border border-slate-200
+                bg-slate-50
+                shadow-sm
+
+                dark:border-slate-800
+                dark:bg-slate-900
+              "
+            >
+              {/* POST HEADER */}
+
+              <div className="flex items-center gap-3 p-3.5">
+                <span
+                  aria-hidden="true"
+                  className="
+                    flex h-10 w-10 shrink-0
+                    items-center justify-center
+                    rounded-full
+                    bg-gradient-to-br from-blue-600 to-sky-500
+                    text-[13px] font-black
+                    text-white
+                    shadow-sm
+                  "
+                >
+                  {post.authorInitials}
+                </span>
+
+                <div className="min-w-0 flex-1">
+                  <p
+                    className="
+                      flex items-center gap-1
+                      text-[14px] font-bold
+                      text-slate-900
+
+                      dark:text-white
+                    "
+                  >
+                    <span className="truncate">
+                      {post.author}
+                    </span>
+
+                    {post.verified && (
+                      <BadgeCheck
+                        className="h-4 w-4 shrink-0 text-blue-600 dark:text-blue-500"
+                        aria-hidden="true"
+                      />
+                    )}
+                  </p>
+
+                  <p
+                    className="
+                      mt-0.5
+                      text-[11px] font-medium
+                      text-slate-400
+
+                      dark:text-slate-400
+                    "
+                  >
+                    {post.time}
+                  </p>
+                </div>
+              </div>
+
+              {/* POST BODY */}
+
+              <p
                 className="
-                  flex h-10 w-10 shrink-0
-                  items-center justify-center
-                  rounded-full
-                  bg-gradient-to-br from-blue-600 to-sky-500
-                  text-[13px] font-black
-                  text-white
-                  shadow-sm
+                  px-3.5 pb-3
+                  text-[13px] leading-relaxed
+                  text-slate-700
+
+                  dark:text-slate-300
                 "
               >
-                {post.authorInitials}
-              </span>
+                {post.body}
+              </p>
 
-              <div className="min-w-0 flex-1">
-                <p
-                  className="
-                    flex items-center gap-1
-                    text-[14px] font-bold
-                    text-slate-900
+              {/* POST IMAGE */}
 
-                    dark:text-white
-                  "
+              <div className="relative aspect-[4/3] w-full">
+                <Image
+                  src={post.image}
+                  alt=""
+                  fill
+                  sizes="(max-width: 640px) 100vw, 448px"
+                  className="object-cover"
+                />
+              </div>
+
+              {/* ENGAGEMENT */}
+
+              <div
+                className="
+                  flex items-center gap-2
+                  border-t border-slate-200
+                  p-2
+
+                  dark:border-slate-800
+                "
+              >
+                <button
+                  type="button"
+                  onClick={() =>
+                    toggleLike(post.id)
+                  }
+                  aria-pressed={liked}
+                  className={`
+                    ${actionButtonClass}
+                    ${
+                      liked
+                        ? "text-blue-600 dark:text-blue-500"
+                        : `
+                          text-slate-600
+
+                          hover:bg-slate-100
+                          hover:text-blue-600
+
+                          dark:text-slate-400
+                          dark:hover:bg-white/[0.06]
+                          dark:hover:text-blue-500
+                        `
+                    }
+                  `}
                 >
+                  <Heart
+                    className={`h-4 w-4 shrink-0 ${
+                      liked
+                        ? "fill-current"
+                        : ""
+                    }`}
+                    aria-hidden="true"
+                  />
+
                   <span className="truncate">
-                    {post.author}
+                    {t("newsLike")}
                   </span>
 
-                  {post.verified && (
-                    <BadgeCheck
-                      className="h-4 w-4 shrink-0 text-blue-600 dark:text-blue-500"
-                      aria-hidden="true"
-                    />
-                  )}
-                </p>
+                  <span className="text-[12px] font-bold">
+                    {likeCount}
+                  </span>
+                </button>
 
-                <p
-                  className="
-                    mt-0.5
-                    text-[11px] font-medium
-                    text-slate-400
+                <button
+                  type="button"
+                  className={`
+                    ${actionButtonClass}
+                    text-slate-600
+
+                    hover:bg-slate-100
+                    hover:text-blue-600
 
                     dark:text-slate-400
-                  "
+                    dark:hover:bg-white/[0.06]
+                    dark:hover:text-blue-500
+                  `}
                 >
-                  {post.time}
-                </p>
+                  <MessageCircle
+                    className="h-4 w-4 shrink-0"
+                    aria-hidden="true"
+                  />
+
+                  <span className="truncate">
+                    {t("newsComment")}
+                  </span>
+
+                  <span className="text-[12px] font-bold">
+                    {post.comments}
+                  </span>
+                </button>
               </div>
-            </div>
-
-            {/* POST BODY */}
-
-            <p
-              className="
-                px-3.5 pb-3
-                text-[13px] leading-relaxed
-                text-slate-700
-
-                dark:text-slate-300
-              "
-            >
-              {post.body}
-            </p>
-
-            {/* POST IMAGE */}
-
-            <div className="relative aspect-[4/3] w-full">
-              <Image
-                src={post.image}
-                alt=""
-                fill
-                sizes="(max-width: 640px) 100vw, 448px"
-                className="object-cover"
-              />
-            </div>
-
-            {/* POST STATS */}
-
-            <div
-              className="
-                flex items-center gap-4
-                px-3.5 py-3
-                text-[12px] font-semibold
-                text-slate-600
-
-                dark:text-slate-400
-              "
-            >
-              <span className="flex items-center gap-1.5">
-                <Heart
-                  className="h-4 w-4 text-rose-500"
-                  aria-hidden="true"
-                />
-                {post.likes}
-              </span>
-
-              <span className="flex items-center gap-1.5">
-                <MessageCircle
-                  className="h-4 w-4"
-                  aria-hidden="true"
-                />
-                {post.comments}
-              </span>
-            </div>
-          </article>
-        ))}
+            </article>
+          );
+        })}
       </div>
 
       {/* =====================================================
-          TOAST — account required
+          TOAST — submitted for admin approval
       ====================================================== */}
 
       <AnimatePresence>
@@ -562,7 +594,7 @@ export default function NewsPage() {
               className="
                 flex items-center gap-3
                 rounded-2xl
-                border border-blue-500/30
+                border border-blue-400/30
                 bg-slate-900/95
                 px-4 py-3
                 shadow-[0_18px_45px_rgba(0,0,0,0.35)]
@@ -577,15 +609,15 @@ export default function NewsPage() {
                   flex h-9 w-9 shrink-0
                   items-center justify-center
                   rounded-xl
-                  bg-sky-500/20
-                  text-blue-500
+                  bg-blue-500/20
+                  text-blue-400
                 "
               >
-                <Send className="h-[18px] w-[18px]" />
+                <CheckCircle2 className="h-[18px] w-[18px]" />
               </span>
 
               <p className="min-w-0 text-[12.5px] font-semibold leading-relaxed text-white">
-                {t("newsAuthRequired")}
+                {t("newsPostSubmitted")}
               </p>
             </div>
           </motion.div>

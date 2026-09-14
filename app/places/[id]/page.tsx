@@ -38,7 +38,7 @@ export default async function PlaceDetailsPage({
         {/* Back */}
         <div className="mb-6">
           <Link
-            href="/"
+            href="/about"
             className="inline-flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 py-2.5 text-sm font-semibold text-[#374151] shadow-sm transition-colors hover:border-blue-600/40 dark:hover:border-blue-500/40 hover:text-blue-600 dark:hover:text-blue-500 dark:border-slate-800 dark:bg-white/5 dark:text-gray-200"
           >
             <ArrowRight className="h-4 w-4" />

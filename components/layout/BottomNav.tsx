@@ -77,15 +77,15 @@ export default function BottomNav() {
 
         overflow-hidden
         rounded-t-[1.5rem]
-        border-t border-slate-200/70
-        bg-white/95
+        border-t border-white/10
+        bg-[#003B6D]
         pb-[env(safe-area-inset-bottom)]
-        shadow-[0_-10px_30px_rgba(15,23,42,0.07)]
+        shadow-[0_-10px_30px_rgba(0,0,0,0.4)]
         backdrop-blur-md
 
-        dark:border-white/10
-        dark:bg-[#003B6D]
-        dark:shadow-[0_-10px_30px_rgba(0,0,0,0.4)]
+        dark:border-slate-200/70
+        dark:bg-white/95
+        dark:shadow-[0_-10px_30px_rgba(15,23,42,0.07)]
       "
     >
       <ul className="grid grid-cols-5">
@@ -112,18 +112,18 @@ export default function BottomNav() {
 
                   focus-visible:ring-2
                   focus-visible:ring-inset
-                  focus-visible:ring-blue-600 dark:focus-visible:ring-blue-500
+                  focus-visible:ring-white dark:focus-visible:ring-blue-600
 
                   ${
                     active
-                      ? "text-blue-600 dark:text-white"
+                      ? "text-white dark:text-blue-600"
                       : `
-                        text-slate-600
+                        text-slate-300
 
-                        hover:text-blue-600
+                        hover:text-white
 
-                        dark:text-slate-300
-                        dark:hover:text-white
+                        dark:text-slate-600
+                        dark:hover:text-blue-600
                       `
                   }
                 `}
@@ -138,8 +138,8 @@ export default function BottomNav() {
                     ${
                       active
                         ? `
-                          bg-sky-50
-                          dark:bg-white/15
+                          bg-transparent
+                          dark:bg-sky-50
                         `
                         : "bg-transparent"
                     }

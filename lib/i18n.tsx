@@ -52,6 +52,11 @@ export const TRANSLATIONS = {
     newsApprovalTitle: "پەسەندکردنی ئادمین",
     newsApprovalNote:
       "هەموو پۆستەکان پێش بڵاوکردنەوە لەلایەن ئادمینەوە پەسەند دەکرێن تاوەکو تەنها هەواڵ و کاری بەسوود بڵاوبکرێتەوە.",
+    newsPublish: "بڵاوکردنەوە",
+    newsPostSubmitted:
+      "پۆستەکەت نێردرا و دوای پەسەندکردنی لەلایەن ئادمینەوە بڵاودەکرێتەوە.",
+    newsLike: "ڕیاکت",
+    newsComment: "کۆمێنت",
 
     notificationsEmpty:
       "هیچ ئاگادارکردنەوەیەکی نوێت نییە.",
@@ -168,6 +173,11 @@ export const TRANSLATIONS = {
     newsApprovalTitle: "موافقة الإدارة",
     newsApprovalNote:
       "تتم مراجعة جميع المنشورات من قبل الإدارة قبل النشر، لضمان مشاركة الأخبار والوظائف المفيدة فقط.",
+    newsPublish: "نشر",
+    newsPostSubmitted:
+      "تم إرسال منشورك وسيتم نشره بعد موافقة الإدارة.",
+    newsLike: "إعجاب",
+    newsComment: "تعليق",
 
     notificationsEmpty:
       "لا توجد إشعارات جديدة.",
@@ -284,6 +294,11 @@ export const TRANSLATIONS = {
     newsApprovalTitle: "Admin reviewed",
     newsApprovalNote:
       "Every post is reviewed by an admin before it is published, so only useful news and job opportunities get shared.",
+    newsPublish: "Publish",
+    newsPostSubmitted:
+      "Your post was submitted and will be published once an admin approves it.",
+    newsLike: "Like",
+    newsComment: "Comment",
 
     notificationsEmpty:
       "You have no new notifications.",
