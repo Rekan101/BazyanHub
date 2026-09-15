@@ -330,19 +330,16 @@ export default function FavoritesPage() {
                       </h2>
 
                       <p className="mt-0.5 text-[10px] font-medium leading-5 text-slate-600 dark:text-slate-400 sm:text-xs">
-                        {category.filters.length > 0
-                          ? `${category.filters.length} ${
-                              currentLanguage === "ckb"
-                                ? "جۆر / خزمەتگوزاری"
-                                : currentLanguage === "ar"
-                                  ? "نوع / خدمة"
-                                  : "types / services"
-                            }`
-                          : currentLanguage === "ckb"
-                            ? "لیستی خزمەتگوزارییەکان"
-                            : currentLanguage === "ar"
-                              ? "قائمة الخدمات"
-                              : "Services List"}
+                        {/*
+                          Uniform subtitle, matching the home grid in
+                          components/services-section.tsx — no fabricated
+                          service counts until a real data source exists.
+                        */}
+                        {currentLanguage === "ckb"
+                          ? "لیستی خزمەتگوزارییەکان"
+                          : currentLanguage === "ar"
+                            ? "قائمة الخدمات"
+                            : "Services List"}
                       </p>
                     </div>
                   </div>

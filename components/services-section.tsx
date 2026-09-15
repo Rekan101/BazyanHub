@@ -133,7 +133,6 @@ const SERVICE_FILTERS: Array<{
 const SERVICE_UI_TEXT: Record<
   string,
   {
-    categoryTypes: string;
     servicesList: string;
     featured: string;
     popular: string;
@@ -141,7 +140,6 @@ const SERVICE_UI_TEXT: Record<
   }
 > = {
   ckb: {
-    categoryTypes: "جۆر / خزمەتگوزاری",
     servicesList:
       "لیستی خزمەتگوزارییەکان",
     featured: "تایبەت",
@@ -151,7 +149,6 @@ const SERVICE_UI_TEXT: Record<
   },
 
   ar: {
-    categoryTypes: "نوع / خدمة",
     servicesList: "قائمة الخدمات",
     featured: "مميز",
     popular: "الأكثر طلبًا",
@@ -160,7 +157,6 @@ const SERVICE_UI_TEXT: Record<
   },
 
   en: {
-    categoryTypes: "types / services",
     servicesList: "Services List",
     featured: "Featured",
     popular: "Popular",
@@ -861,9 +857,17 @@ export function ServicesSection() {
                               sm:leading-5
                             "
                           >
-                            {category.filters.length > 0
-                              ? `${category.filters.length} ${ui.categoryTypes}`
-                              : ui.servicesList}
+                            {/*
+                              Uniform subtitle for every category. Real
+                              per-category service counts need a backend
+                              that does not exist yet (see CLAUDE.md §8),
+                              and `category.filters.length` is a count of
+                              filter chips, not of services — rendering it
+                              here told the user a number that was simply
+                              not true. Swap in a real count only once a
+                              data source can supply one.
+                            */}
+                            {ui.servicesList}
                           </p>
                         </div>
                       </div>
