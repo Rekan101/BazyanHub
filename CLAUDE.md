@@ -14,7 +14,7 @@
 - **Styling**: Tailwind CSS 3.4 (utility classes only — `tailwind.config.ts` defines no custom color tokens beyond the default palette; do not use `bg-primary`, `text-text`, `border-border`, etc. — they resolve to nothing).
 - **Icons**: `lucide-react`. Social brand icons are hand-rolled inline SVGs in `components/icons/SocialIcons.tsx`.
 - **Animation**: `framer-motion` (`motion` + `AnimatePresence` directly in most files; `LazyMotion`/`m` only in `components/Hero.tsx`).
-- **Data layer**: Local TypeScript mock data under `lib/data/`. **No Supabase or any backend/database integration exists in this repo today** — see §8.
+- **Data layer**: Supabase (Postgres + Auth) via `lib/supabase/`, with the local TypeScript mock data under `lib/data/` retained as a **fallback** whenever the database is unconfigured, unreachable, or empty — see §8.
 - **Localization**: Kurdish Sorani (`ckb`) is the default and primary language, RTL. Arabic (`ar`, RTL) and English (`en`, LTR) are also supported. See §7.
 
 ## 2. App Shell Architecture
@@ -112,10 +112,23 @@ Established as a 5-color system, replacing an earlier emerald/green theme. **Eve
 | `/favorites` | `app/favorites/page.tsx` | Category favorites, `localStorage`-backed. |
 | `/profile` | `app/profile/page.tsx` | See §10. |
 | `/legal` | `app/legal/page.tsx` | Terms & privacy, static content. |
-| `/services/[category]` | `app/services/[category]/page.tsx` | Category listing. 2-column grid (`grid-cols-2 gap-3 sm:gap-4`). 3 hardcoded filter pills: هەمووی (All) / پڕداواکاریترین (Most Requested) / تایبەت (Special) — **not** dynamically generated from category filter data. |
-| `/services/[category]/[providerId]` | `app/services/[category]/[providerId]/page.tsx` | Server component, Next 16 async `params`. Looks up via `getProviderById` (`lib/data/providers.ts`). If not found, renders a friendly "not available yet" placeholder with a back link — **not** `notFound()`, because most mock `providerId`s in `Stories.tsx` don't resolve to real seeded data yet (only `lib/data/services/restaurants.ts` has a real entry: `restaurant-bazian-cafe`). |
+| `/services/[category]` | `app/services/[category]/page.tsx` (server) + `CategoryPageClient.tsx` (client) | Category listing. **Split into a server component that fetches and a client child that owns the modal + filter state.** 2-column grid (`grid-cols-2 gap-3 sm:gap-4`). Filter pills: 3 fixed (هەمووی / پڕداواکاریترین / تایبەت → all / `featured` / `special`) **plus** one per row in the `filters` table for that category. See the correction note below. |
+| `/services/[category]/[providerId]` | `app/services/[category]/[providerId]/page.tsx` | Server component, Next 16 async `params`. Looks up via `await getProviderById` (`lib/data/providers.ts` — **now async**). If not found, renders a friendly "not available yet" placeholder with a back link — **not** `notFound()`, because most mock `providerId`s in `Stories.tsx` don't resolve to real seeded data yet (only `lib/data/services/restaurants.ts` has a real entry: `restaurant-bazian-cafe`). |
 
-Note: the 2-column grid + 3-pill filter pattern above also applies to the **home page's `ServicesSection`** (`components/services-section.tsx`), which is a separate component from the category listing page and has its own copy of the same 3-pill pattern.
+> **Correction to an earlier version of this file.** This section previously claimed the category
+> listing page rendered "3 hardcoded filter pills." **It did not.** `UI_TEXT.filterAll` /
+> `filterFeatured` / `filterSpecial` and `type FilterKey` were declared but never used — no pill UI
+> was ever rendered. That page also carried its *own duplicate* 10-category array (with different
+> Kurdish names than `lib/data/categories.ts`), a hand-rolled `restaurants → Provider` adapter that
+> bypassed the `lib/data/providers.ts` seam, and dead code filtering for a nonexistent
+> `"bazian-transport-test"` provider. All four are now gone, and the pills genuinely render.
+>
+> Because the duplicate array's names were divergent, unifying changed some visible header text —
+> e.g. restaurants now reads `خواردنگە` (canonical) rather than `چێشتخانە و خواردن`.
+
+Note: the home page's `ServicesSection` (`components/services-section.tsx`) is a **separate**
+component with its own independent copy of the 3-pill pattern. It is client-side and still filters
+the local `categories` array; it was not part of the Supabase rewiring.
 
 ## 7. Internationalization (`lib/i18n.tsx`)
 
@@ -124,15 +137,95 @@ Note: the 2-column grid + 3-pill filter pattern above also applies to the **home
 - Default language `ckb`, persisted to `localStorage` (`bazian-language`), with a browser-language fallback for first-time visitors (`ar`/`en` prefixes only; everything else defaults to `ckb`).
 - Mock/demo data strings (FAQ items, story provider names, news post bodies) are **Kurdish-only by established convention** — not run through `t()`. This is intentional, not an oversight.
 
-## 8. Data Layer & Supabase — **NOT YET INTEGRATED**
+## 8. Data Layer & Supabase — **INTEGRATED (providers & categories only)**
 
-- `[PLANNED — NOT YET IMPLEMENTED]` There is **no `lib/supabase/` directory, no `client.ts`, no `api.ts`, no `supabase-schema.sql`, no `supabase-seed.sql`, and no `@supabase/*` package dependency** anywhere in this repository as of this writing. Any reference to Supabase in code comments (e.g. in `Stories.tsx`, `ProviderCard.tsx`) is forward-looking documentation of intent, not a working integration.
-- Current data lives entirely in `lib/data/`:
-  - `categories.ts` — 10 service categories (vehicles, restaurants, shopping, health, mobile, beauty, real-estate, institutes, workers, jobs), each with localized titles and an optional `filters` list.
-  - `services/*.ts` — one file per category, typed as `Provider[]` (`lib/types/provider.ts`). **Only `restaurants.ts` has real seeded data** (a single provider, `restaurant-bazian-cafe`); the other nine files are empty arrays.
-  - `providers.ts` — the intended integration seam: `getProviderById`, `getProvidersByCategory`, `getAllProviders`, backed by a small in-memory registry keyed by category slug. This is the **one place** to swap in a real database call later.
-  - `places.ts`, `faqs.ts` — static mock content for the tourism grid and FAQ accordion.
-- **Do not fabricate Supabase file paths or schema in code or docs** until they actually exist. When Supabase integration begins, update this section to describe the real files.
+### Files
+
+- `supabase-schema.sql` — full DDL: `profiles`, `categories`, `filters`, `providers`, `provider_hours`, `story_slides`, `stories`, `notifications`, plus RLS policies, an `is_admin()` `SECURITY DEFINER` helper, and a `handle_new_user()` trigger on `auth.users`.
+- `supabase-seed.sql` — optional. Inserts the 10 categories, the 12 filter chips, Bazyan Cafe + its 7 hours rows, and the 6 story slide headlines. Run **after** the schema.
+- `lib/supabase/types.ts` — hand-written `Database` types. **Keep in sync with the SQL by hand**, or regenerate with `npx supabase gen types typescript`.
+- `lib/supabase/client.ts` — `"use client"`. Browser client + all auth helpers (§8.1). Exports `isSupabaseConfigured()`.
+- `lib/supabase/server.ts` — `server-only`. Server client via `@supabase/ssr` + `cookies()`.
+- `lib/supabase/mappers.ts` — DB row → app model. This is what makes the golden-rule card work (§8.3).
+- `lib/supabase/queries.ts` — `server-only`. All read queries.
+- `.env.example` — documents both env vars plus every Supabase **dashboard** step the four auth methods need.
+
+### The fallback contract — do not break this
+
+`lib/data/providers.ts` and `lib/data/categories.server.ts` are the only seams. Both are
+**Supabase-first, mock-second**:
+
+- A query helper returning `null` means *"no answer"* — unconfigured, or the query errored.
+- Returning `[]` means *"the database answered and is genuinely empty."*
+- **Both** fall back to the mock data, so a brand-new empty database never renders a blank app.
+
+To make the database strictly authoritative later, drop the `length === 0` half of each condition.
+**The app must always build and run with no `.env.local`** — `next build` on a machine with no
+credentials is the regression test for this, and it must stay green.
+
+### ⚠️ Server-only module boundary
+
+`lib/data/categories.ts` is imported by **client** components (home grid, favorites). It must stay
+pure data + types. The Supabase-backed lookups live in a **separate** file,
+`lib/data/categories.server.ts`, marked `import "server-only"`.
+
+A dynamic `await import()` is **not** enough to keep a server module out of the client bundle — the
+bundler still traces the edge and the build fails with a `next/headers` error. This was hit and
+fixed during the integration; do not "simplify" it back into one file.
+
+### Still mock-backed (schema + query helpers exist, components not yet wired)
+
+- `components/Stories.tsx` — local `SLIDES` constant. `fetchStorySlides()` + `mapStorySlideRow()` are ready.
+- `components/layout/NotificationPanel.tsx` — still a static shell with one hardcoded `<li>`. `fetchNotifications()` is ready.
+- Favorites — still `localStorage` (`bazianhub-favorites`, `Record<string, boolean>` keyed by category id). Needs auth UI first.
+- News feed — no `posts`/`post_likes`/`post_comments` tables were created; explicitly out of scope.
+- `lib/data/services/*.ts` — **only `restaurants.ts` has real data** (`restaurant-bazian-cafe`); the other nine are empty and serve as the fallback for their categories.
+- `places.ts`, `faqs.ts` — static mock content, untouched.
+
+### 8.1 Auth — four methods, helpers only
+
+`lib/supabase/client.ts` exposes typed helpers for all four. **There is no `/login` or `/signup`
+route and no `AuthProvider` yet** — this is the data surface a future auth-UI pass consumes.
+
+1. **Email + password** — `signUpWithEmail` / `signInWithEmail`.
+2. **Username + password** — Supabase Auth has no native username login. A username maps
+   deterministically to a **synthetic address**, `<username>@users.bazyanhub.app`, at both signup
+   and signin. No lookup happens, so there is no username→email enumeration endpoint.
+   **Trade-off:** those addresses cannot receive mail, so email password reset does not work until
+   the user attaches a real address via `linkEmailToAccount()`. `sendPasswordReset()` detects a
+   synthetic address and returns a clear error rather than silently doing nothing.
+   Requires **"Confirm email" turned OFF** in the dashboard.
+3. **Facebook OAuth** — `signInWithFacebook()`. Needs a Facebook App ID/Secret in the dashboard.
+4. **Phone + password** — `signUpWithPhone` / `signInWithPhone` / `verifyPhoneOtp`. **Inert until an
+   SMS provider (Twilio et al.) is configured in the dashboard.** The code is complete; the
+   credentials are not.
+
+### 8.2 Schema notes worth knowing
+
+- **Filters are optional by design (a hard requirement).** `providers.filter_id` is **nullable** and
+  `ON DELETE SET NULL`. An admin may attach an existing filter, create one first, or leave it null;
+  deleting a filter never cascades into deleting providers.
+- **`provider_hours.day_of_week` is `smallint` 0–6, 0 = Sunday**, matching `Date.getDay()`. The app's
+  open/closed badge matches on **Kurdish weekday strings**; `mapHoursRows()` converts the integer
+  back to the exact string in `KURDISH_WEEKDAYS`. **That array must stay byte-identical between
+  `ProviderCard.tsx` and `mappers.ts`** — a mismatch silently reads as "closed".
+- **Postgres `time` returns `HH:MM:SS`**, but `parseTimeToMinutes()` in `ProviderCard.tsx` only
+  accepts `H:MM`/`HH:MM`. `toHoursMinutes()` in the mapper truncates. Without it *every* provider
+  renders as closed.
+- **`stories.expires_at`** is set by a `BEFORE INSERT OR UPDATE` trigger, not a generated column — a
+  `GENERATED ALWAYS` CASE-over-enum is not provably immutable and Postgres rejects it.
+- **`notifications.is_read` is per-row**, so a broadcast (`user_id IS NULL`) cannot track per-user
+  read state. A `notification_reads(user_id, notification_id)` join table is the documented fix.
+- `filters` uses two **partial** unique indexes, not a plain `UNIQUE (category_id, slug)` — Postgres
+  treats NULLs as distinct, so the plain constraint would not constrain global filters at all.
+
+### 8.3 Golden-rule card compliance
+
+`components/providers/ProviderCard.tsx` is the Bazyan Cafe blueprint and is **not modified** by the
+Supabase work. Standardization happens at the data layer: `mapProviderRow()` emits the exact
+`Provider` shape the card already consumes (`coverImage` falling back to `logo`, rating/reviewCount
+defaulted, hours normalized), so a database-backed provider and a mock provider render through
+identical markup. **Map to `Provider`; never fork the card.**
 
 ## 9. News Feed (`app/news/page.tsx`)
 
@@ -163,4 +256,6 @@ Note: the 2-column grid + 3-pill filter pattern above also applies to the **home
 - **Every color class needs an explicit `dark:` counterpart**, except where an element is deliberately theme-independent (BottomNav, §4) — and that exception must be a conscious, documented choice, not a gap.
 - **RTL is the default assumption.** Use logical properties/utilities (`text-start`, `ps-*`, `end-*`, etc.) over physical ones (`text-right`, `pl-*`, `right-*`) so Arabic/Kurdish (RTL) and English (LTR) both render correctly without per-language overrides.
 - When adding any user-facing string, add it to **all three** `TRANSLATIONS` blocks in `lib/i18n.tsx` (§7) in the same change — a partial add breaks the `TranslationKey` union at compile time.
-- Before claiming a feature is "done" in a commit message, PR, or this file, **verify it against the file**, not against what was requested — requests and final implementations have diverged before (see the `[PLANNED]` markers above).
+- **`lib/data/providers.ts` and `lib/data/categories.server.ts` are async and `server-only`.** Calling them from a client component is a build error, not a runtime one. Client components use the plain `categories` array from `lib/data/categories.ts` instead.
+- **Never let a client-reachable module import `lib/supabase/server.ts` or `lib/supabase/queries.ts`** — directly or transitively. See the boundary note in §8.
+- Before claiming a feature is "done" in a commit message, PR, or this file, **verify it against the file**, not against what was requested — requests and final implementations have diverged before. This file has carried at least one outright false claim (the category page's filter pills, §6), so treat unverified statements here with suspicion and correct them when found.

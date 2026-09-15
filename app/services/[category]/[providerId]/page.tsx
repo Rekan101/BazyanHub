@@ -55,7 +55,7 @@ export default async function ProviderPage({
     await params;
 
   const provider =
-    getProviderById(providerId);
+    await getProviderById(providerId);
 
   /* ====================================================================
      BACK LINK — shared by both states

@@ -1,6 +1,8 @@
 node_modules/
 .next/
 out/
-.env
-.env.local
-.env*.local
+
+# Environment files. The broad pattern matters: the previous rules
+# (.env, .env.local, .env*.local) did NOT cover .env.production.
+.env*
+!.env.example

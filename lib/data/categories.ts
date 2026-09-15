@@ -21,11 +21,28 @@ export type ServiceCategory = {
   // Localized category title
   translations: LocalizedText;
 
+  /*
+   * Longer blurb shown in the category page header. Optional: most
+   * categories share a generic line, supplied as a fallback at render time.
+   */
+  descriptions?: LocalizedText;
+
   icon: string;
   filters: ServiceFilter[];
   imageSrc: string;
   popular?: boolean;
   featured?: boolean;
+};
+
+/*
+ * Generic blurb for categories with nothing more specific to say. Lives here
+ * rather than in the page so that the database and the mock data present the
+ * same shape.
+ */
+export const DEFAULT_CATEGORY_DESCRIPTION: LocalizedText = {
+  ckb: "خزمەتگوزاری و کاروبارەکانی ئەم بەشە بدۆزەرەوە.",
+  ar: "اكتشف الخدمات والأعمال التجارية في هذا القسم.",
+  en: "Discover services and businesses in this category.",
 };
 
 export const categories: ServiceCategory[] = [
@@ -141,6 +158,11 @@ export const categories: ServiceCategory[] = [
       ckb: "خواردنگە",
       ar: "المطاعم",
       en: "Restaurants",
+    },
+    descriptions: {
+      ckb: "چێشتخانە، کافێ و شوێنەکانی خواردن لە بازیان بدۆزەرەوە.",
+      ar: "اكتشف المطاعم والمقاهي وأماكن الطعام في بازیان.",
+      en: "Discover restaurants, cafes and food places in Bazian.",
     },
     icon: "utensils",
     imageSrc: "/images/restaurants.webp",
@@ -274,9 +296,30 @@ export const categories: ServiceCategory[] = [
       ar: "فرص العمل",
       en: "Job Opportunities",
     },
+    descriptions: {
+      ckb: "هەلی کار و دامەزراندنەکانی ئەم بەشە بدۆزەرەوە.",
+      ar: "اكتشف فرص العمل والتوظيف في هذا القسم.",
+      en: "Discover jobs and employment opportunities.",
+    },
     icon: "briefcase",
     imageSrc: "/images/jobs.webp",
     featured: true,
     filters: [],
   },
-]; 
+];
+
+/*
+|--------------------------------------------------------------------------
+| NOTE — keep this module client-safe.
+|--------------------------------------------------------------------------
+|
+| This file is imported by client components (the home services grid, the
+| favorites page). It must therefore contain data and types only: nothing
+| here may reach lib/supabase/server.ts, which uses next/headers and cannot
+| be bundled for the browser.
+|
+| The Supabase-backed lookups live in lib/data/categories.server.ts. A
+| dynamic `await import()` is NOT sufficient to keep them out of the client
+| bundle - the bundler still traces the edge.
+|
+*/
