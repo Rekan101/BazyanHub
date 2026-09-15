@@ -27,7 +27,7 @@ const AUTH_TEXT = {
     loginTitle: "بەخێربێیتەوە",
     loginSubtitle:
       "بچۆ ژوورەوە بۆ گەیشتن بە هەژمارەکەت",
-    signupTitle: "دروستکردنی هەژمار",
+    signupTitle: "خۆتۆمارکردن",
     signupSubtitle:
       "خۆت تۆمار بکە و دەست بکە بە بەکارهێنانی بازیان هەب",
 
@@ -59,16 +59,16 @@ const AUTH_TEXT = {
     hidePassword: "شاردنەوەی وشەی نهێنی",
 
     loginButton: "چوونەژوورەوە",
-    signupButton: "دروستکردنی هەژمار",
+    signupButton: "خۆتۆمارکردن",
     loadingButton: "چاوەڕێ بکە…",
 
     orDivider: "یان",
     facebookButton: "بەردەوامبوون بە فەیسبووک",
 
     noAccount: "هەژمارت نییە؟",
-    goSignup: "هەژمار دروست بکە",
+    goSignup: "خۆتۆمارکردن",
     hasAccount: "پێشتر هەژمارت هەیە؟",
-    goLogin: "بچۆ ژوورەوە",
+    goLogin: "چوونەژوورەوە",
 
     forgotPassword: "وشەی نهێنیت لەبیرچووە؟",
 
@@ -149,7 +149,7 @@ const AUTH_TEXT = {
     facebookButton: "المتابعة عبر فيسبوك",
 
     noAccount: "ليس لديك حساب؟",
-    goSignup: "أنشئ حسابًا",
+    goSignup: "إنشاء حساب",
     hasAccount: "لديك حساب بالفعل؟",
     goLogin: "تسجيل الدخول",
 
@@ -193,7 +193,7 @@ const AUTH_TEXT = {
     loginTitle: "Welcome back",
     loginSubtitle:
       "Sign in to access your account",
-    signupTitle: "Create account",
+    signupTitle: "Sign up",
     signupSubtitle:
       "Sign up and start using BazyanHub",
 
@@ -225,7 +225,7 @@ const AUTH_TEXT = {
     hidePassword: "Hide password",
 
     loginButton: "Sign in",
-    signupButton: "Create account",
+    signupButton: "Sign up",
     loadingButton: "Please wait…",
 
     orDivider: "or",

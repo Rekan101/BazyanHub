@@ -22,8 +22,13 @@
 Defined in `app/layout.tsx`. Provider nesting order (outer → inner):
 
 ```
-ThemeProvider → LanguageProvider → NotificationProvider → (desktop backdrop) → (phone-frame shell)
+ThemeProvider → LanguageProvider → AuthProvider → NotificationProvider → (desktop backdrop) → (phone-frame shell)
 ```
+
+`AuthProvider` sits **outside** `NotificationProvider` deliberately: notifications are user-specific,
+so anything that reads them needs the session resolved above it. All four are client components —
+`app/layout.tsx` itself stays a plain (non-`async`) server component with **no** data fetching, which
+is what preserves static rendering (§8).
 
 - **Desktop backdrop**: `bg-slate-100 dark:bg-slate-900`, full viewport height.
 - **Phone-frame shell**: centered `max-w-md` column — `bg-slate-50 dark:bg-slate-950`, with `md:border-x` + a soft shadow so it reads as a phone frame on wide screens. `AppHeader`, `<main>`, and `BottomNav` all live inside this column and are themselves `max-w-md` + `mx-auto`, so the whole app — including fixed chrome and modals — stays confined to that column even on desktop.
@@ -197,6 +202,12 @@ Therefore:
   still surface without giving up prerendering.
 
 Treat the render-mode column of `next build` output as a regression test.
+
+**Verified, not assumed:** a build was run with a populated `.env.local` (pointing at an unreachable
+host). `/` stayed `○ static · 5m revalidate`, every other static route stayed `○`, and the home page
+still prerendered the mock stories — proving both that credentials do not flip routes to `ƒ` and
+that the fallback holds when the database is unreachable. Re-run that check if you touch the data
+layer: add a dummy `.env.local`, `next build`, confirm the column, delete it.
 
 ### ⚠️ Server-only module boundary
 
@@ -395,22 +406,56 @@ inside the existing `pt-[73px] pb-24` gutters rather than fight them.
   inline instead of using `getSupabaseServerClient()`, because that helper swallows cookie writes —
   correct in a server component, fatal here where persisting the session is the entire job.
 
-### Entry points
+### Session state — `components/auth/AuthProvider.tsx`
 
-Both are wired, via one shared component — `components/auth/AuthEntryLinks.tsx`:
+**Entirely client-side, and that is the point.** Reading the session server-side means `cookies()`,
+and one `cookies()` call in the root layout makes every route dynamic — undoing §8's static
+rendering. `useAuth()` exposes `{ user, profile, isLoading, isAuthenticated, signOut }`.
 
-- **`app/profile/page.tsx`** — the dashed "coming soon" note is **gone**, replaced by a centered
-  `cardClass` card (blue-tinted `LogIn` tile, title, subtitle, button pair).
-- **`components/layout/MenuSheet.tsx`** — a tinted CTA banner at the **top** of the scrollable
-  content, above the page links. Uses the same `from-sky-50 to-blue-50/60` gradient family as the
-  NotificationPanel header so it reads as a call-to-action, not another nav row. Passes `onClose`
-  as `onNavigate`, matching how the sheet's other links already dismiss it.
+- `user` comes from Supabase Auth (source of truth for "signed in"); `profile` is the
+  `public.profiles` row, which is where `username` and `full_name` actually live — Auth has neither.
+- Subscribes to `onAuthStateChange`, so sign-in, sign-out, token refresh and the OAuth redirect all
+  update the UI without a reload. The subscription **is** unsubscribed on cleanup.
+- `isLoading` is seeded from `isSupabaseConfigured()`, not `true`. With no credentials there is
+  nothing to wait for, so consumers skip the skeleton and render signed-out on the first paint.
+  Safe against hydration mismatch — `NEXT_PUBLIC_*` is inlined at build time, identical both sides.
 
-`AuthEntryLinks` is deliberately **one** component used in both places — two hand-tuned copies would
-drift. Primary `/login` is solid `blue-600`; secondary `/signup` is a `border-2 border-blue-600`
-outline. Both `h-12 rounded-2xl`, with the same lift-on-hover as the auth form's submit button.
+### Entry points — `components/auth/AuthStatusPanel.tsx`
 
-> Its strings (`authLoginButton`, `authSignupButton`, `authEntryTitle`, `authEntrySubtitle`) live in
-> **`lib/i18n.tsx`**, not `authText.ts` — these buttons appear on Profile and MenuSheet, which are
-> ordinary app surfaces, so they follow the normal §7 rule. `authText.ts` stays scoped to the two
-> auth pages themselves. The now-unused `profileComingSoon` key was removed from all three blocks.
+One component owns all three states and its own wrapper; the two surfaces differ only by `variant`:
+
+| Surface | Variant | Treatment |
+|---|---|---|
+| `app/profile/page.tsx` (last section) | `card` | Centered white `rounded-3xl` card, matching the page's `cardClass`. Replaced the old dashed "coming soon" note. |
+| `components/layout/MenuSheet.tsx` (top of scroll area, above the nav) | `banner` | Tinted `from-sky-50 to-blue-50/60` gradient, same family as the NotificationPanel header. Passes `onClose` as `onNavigate`. |
+
+- **Loading** → a skeleton, *not* a guess. These pages are statically prerendered, so the server
+  cannot know who is signed in; rendering "signed out" first would flash login buttons at a
+  signed-in user. Verified: with credentials present, `profile.html` prerenders `animate-pulse` and
+  **zero** `href="/login"`.
+- **Signed out** → `AuthEntryLinks` — primary `/login` solid `blue-600`, secondary `/signup`
+  `border-2` outline, both `h-12 rounded-2xl`. Deliberately one shared component so the two
+  surfaces cannot drift.
+- **Signed in** → initials avatar + name + detail line, then sign out. Styling is **subtle
+  destructive**: `border-rose-300 text-rose-600` outline, not a filled red button — signing out is
+  reversible and should not shout the way a delete would.
+
+> **Never render the synthetic email.** Username accounts carry `<username>@users.bazyanhub.app`
+> (§8.1), which reads as a broken address. `getIdentity()` checks `isSyntheticEmail()` and falls
+> back to `@username`. Name resolution order: `profile.full_name` → user metadata → `profile.username`
+> → real-email local part → phone.
+
+> Strings for these surfaces (`authLoginButton`, `authSignupButton`, `authEntryTitle`,
+> `authEntrySubtitle`, `authAccountTitle`, `authSignOutButton`, `authSigningOut`) live in
+> **`lib/i18n.tsx`**, not `authText.ts` — they appear on Profile and MenuSheet, which are ordinary
+> app surfaces, so they follow the normal §7 rule. `authText.ts` stays scoped to the two auth pages.
+> The now-unused `profileComingSoon` key was removed from all three blocks.
+
+### Terminology
+
+Signup was previously worded three different ways in Kurdish (`دروستکردنی هەژمار`,
+`هەژمار دروست بکە`, `خۆتۆمارکردن`). All labels — page title, submit button, footer link, entry
+button, page metadata — are now **`خۆتۆمارکردن`**, and all login labels are **`چوونەژوورەوە`**.
+Equivalents unified in `ar` (`إنشاء حساب` / `تسجيل الدخول`) and `en` (`Sign up` / `Sign in`).
+Remaining occurrences of the old phrasings are prose sentences (e.g. `loginSubtitle`,
+`newsAuthRequired`), not labels — leave those alone.

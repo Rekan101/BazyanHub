@@ -75,6 +75,9 @@ export const TRANSLATIONS = {
       "بچۆ ژوورەوە یان هەژمارێکی نوێ دروست بکە بۆ بەکارهێنانی هەموو تایبەتمەندییەکان.",
     authLoginButton: "چوونەژوورەوە",
     authSignupButton: "خۆتۆمارکردن",
+    authAccountTitle: "هەژمارەکەت",
+    authSignOutButton: "چوونەدەرەوە",
+    authSigningOut: "چاوەڕێ بکە…",
 
     heroTitle: "ژیانی ڕۆژانەت ئاسانتر بکە",
     heroDescription:
@@ -200,6 +203,9 @@ export const TRANSLATIONS = {
       "سجّل الدخول أو أنشئ حسابًا جديدًا للاستفادة من جميع الميزات.",
     authLoginButton: "تسجيل الدخول",
     authSignupButton: "إنشاء حساب",
+    authAccountTitle: "حسابك",
+    authSignOutButton: "تسجيل الخروج",
+    authSigningOut: "يرجى الانتظار…",
 
     heroTitle: "اجعل حياتك اليومية أسهل",
     heroDescription:
@@ -325,6 +331,9 @@ export const TRANSLATIONS = {
       "Sign in or create a new account to unlock all features.",
     authLoginButton: "Sign in",
     authSignupButton: "Sign up",
+    authAccountTitle: "Your account",
+    authSignOutButton: "Sign out",
+    authSigningOut: "Please wait…",
 
     heroTitle: "Make Your Everyday Life Easier",
     heroDescription:

@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import AuthPage from "@/components/auth/AuthPage";
 
 export const metadata: Metadata = {
-  title: "دروستکردنی هەژمار | BazianHub",
+  title: "خۆتۆمارکردن | BazianHub",
   description:
-    "دروستکردنی هەژماری نوێ لە بازیان هەب",
+    "خۆتۆمارکردن و دروستکردنی هەژمارێکی نوێ لە بازیان هەب",
 };
 
 /*

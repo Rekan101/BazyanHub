@@ -9,6 +9,7 @@ import { vazirmatn } from "@/lib/fonts";
 import AppHeader from "@/components/layout/AppHeader";
 import BottomNav from "@/components/layout/BottomNav";
 import { NotificationProvider } from "@/components/layout/NotificationProvider";
+import { AuthProvider } from "@/components/auth/AuthProvider";
 
 export const metadata: Metadata = {
   title: "BazianHub",
@@ -52,6 +53,12 @@ export default function RootLayout({
       <body suppressHydrationWarning>
         <ThemeProvider>
           <LanguageProvider>
+            {/*
+              AuthProvider sits OUTSIDE NotificationProvider: notifications
+              are user-specific, so anything that reads them will eventually
+              need the session already resolved above it.
+            */}
+            <AuthProvider>
             <NotificationProvider>
             {/* =============================================
                 DESKTOP BACKDROP
@@ -92,6 +99,7 @@ export default function RootLayout({
               </div>
             </div>
             </NotificationProvider>
+            </AuthProvider>
           </LanguageProvider>
         </ThemeProvider>
       </body>

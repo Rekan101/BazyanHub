@@ -8,7 +8,6 @@ import {
   Clock3,
   FileText,
   Globe,
-  LogIn,
   Mail,
   MapPin,
   Phone,
@@ -32,7 +31,7 @@ import {
 } from "@/components/icons/SocialIcons";
 
 import { useNotifications } from "@/components/layout/NotificationProvider";
-import AuthEntryLinks from "@/components/auth/AuthEntryLinks";
+import AuthStatusPanel from "@/components/auth/AuthStatusPanel";
 
 /*
  * Premium social buttons — true brand colors, white glyphs, soft
@@ -513,56 +512,18 @@ export default function ProfilePage() {
       </div>
 
       {/* =====================================================
-          AUTH ENTRY — sign in / create account
+          AUTH STATUS — sign in / create account, or the
+          signed-in identity card with a sign-out button.
 
-          Replaces the earlier "coming soon" placeholder now that
-          /login and /signup exist. Centered iOS-style card, same
-          cardClass as Working Hours/Address above.
+          Replaced the earlier "coming soon" placeholder once
+          /login and /signup shipped. The panel owns its own
+          card wrapper, matching cardClass above.
       ====================================================== */}
 
-      <div
-        className={`${cardClass} mt-8 text-center`}
-      >
-        <span
-          aria-hidden="true"
-          className="
-            mx-auto flex h-12 w-12
-            items-center justify-center
-            rounded-2xl
-            bg-blue-600/10
-            text-blue-600
-
-            dark:bg-blue-500/10
-            dark:text-blue-500
-          "
-        >
-          <LogIn className="h-6 w-6" />
-        </span>
-
-        <h3
-          className="
-            mt-3
-            text-[15px] font-bold
-            text-slate-900
-            dark:text-white
-          "
-        >
-          {t("authEntryTitle")}
-        </h3>
-
-        <p
-          className="
-            mt-1
-            text-[13px] leading-relaxed
-            text-slate-600
-            dark:text-slate-400
-          "
-        >
-          {t("authEntrySubtitle")}
-        </p>
-
-        <AuthEntryLinks className="mt-4" />
-      </div>
+      <AuthStatusPanel
+        variant="card"
+        className="mt-8"
+      />
     </div>
   );
 }
