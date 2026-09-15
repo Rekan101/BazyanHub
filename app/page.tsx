@@ -3,6 +3,16 @@ import { ServicesSection } from "@/components/services-section";
 import { getStorySlides } from "@/lib/data/stories.server";
 
 /*
+ * Incremental Static Regeneration: the page is served from a prerendered
+ * copy and rebuilt at most once every 5 minutes.
+ *
+ * This works only because getStorySlides() reads through the COOKIE-FREE
+ * public Supabase client. Any cookies() call in this tree would force
+ * per-request rendering and lose the `○` static marker in `next build`.
+ */
+export const revalidate = 300;
+
+/*
  * Server component. The story slides are fetched here and handed down
  * through Hero to the carousel, so the client never touches Supabase
  * directly. Falls back to the mock slides when the database is

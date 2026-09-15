@@ -23,6 +23,13 @@ import CategoryPageClient from "./CategoryPageClient";
 |
 */
 
+/*
+ * ISR, same rationale as the home page: all reads go through the
+ * cookie-free public client, so these pages can be prerendered per slug and
+ * refreshed periodically instead of rendered on every request.
+ */
+export const revalidate = 300;
+
 interface CategoryPageProps {
   params: Promise<{
     category: string;

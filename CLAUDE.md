@@ -75,12 +75,16 @@ Established as a 5-color system, replacing an earlier emerald/green theme. **Eve
 - `NotificationProvider` wraps the whole app (in `app/layout.tsx`, inside `LanguageProvider`) and owns the single source of truth: `{ isOpen, open, close, toggle }` via `useNotifications()`.
 - It renders **exactly one** `<NotificationPanel>` instance. Both the header bell and the profile Notifications row call `useNotifications()` and trigger the same panel — there is no second panel instance anywhere.
 - Closes automatically on route change (`usePathname` effect).
-- **Supabase-backed, prop-driven.** `app/layout.tsx` is now an **async** server component: it calls `getNotifications()` (`lib/data/notifications.server.ts`) and threads the list through `NotificationProvider` → `NotificationPanel`.
+- **Supabase-backed, fetched in the BROWSER** — the one surface that is not fetched on the server. `NotificationProvider` calls `fetchNotificationsFromBrowser()` (`lib/supabase/queries.client.ts`) and passes the list to `NotificationPanel`.
+  - **Why client-side, not server-side** (this was deliberately reversed after an earlier pass fetched it in the layout): any `cookies()` call in `app/layout.tsx` opts **every route in the app** into dynamic rendering. Fetching here is what keeps `/`, `/about`, `/news`, `/profile`, `/favorites` and `/legal` prerendered (`○` in the build output). **Do not move this back to the server.** There is deliberately **no** `lib/data/notifications.server.ts`.
+  - It also fixes localisation: the user's language lives in `localStorage`, so only the client can pick the right `title_*` / `body_*` column. The fetch re-runs when the language changes.
+  - **Lazy**: loads on the first panel *open*, not on mount. The panel is closed by default, so a mount fetch would cost a request per page load for data most visitors never see. Cached for the session afterwards; `loadedLanguageRef` tracks which language is cached.
+  - A `cancelled` flag guards against a slow response overwriting a newer one (fast language toggling, or close-then-reopen). A `null` result — unconfigured or errored — **keeps whatever is on screen** rather than blanking it.
   - **Fallback is not data.** When the list is empty — no rows, or Supabase unconfigured — the panel renders its built-in welcome item, whose text comes from the i18n keys `notificationWelcomeTitle` / `notificationWelcomeBody` / `notificationNow`. That is byte-for-byte what it displayed before the database existed. `lib/data/notifications.ts` therefore has **no mock array**, unlike the other data modules.
-  - The header badge is `countUnread(...)`, falling back to `1` for the welcome item (matching the previously hardcoded `1`).
+  - The badge is `countUnread(...)`, falling back to `1` for the welcome item (matching the previously hardcoded `1`).
   - Rows may carry an `icon` key; `NotificationPanel` maps a small allow-list (`sparkles`, `megaphone`, `newspaper`, `store`, `bell`) and falls back to `Sparkles`. Rows with a `linkUrl` wrap in a `<Link>` that closes the panel on click.
-  - ⚠️ **Render-mode trade-off**: once Supabase is configured this layout read calls `cookies()`, which opts **every** route into dynamic rendering. With no credentials, `getSupabaseServerClient()` returns before touching `cookies()`, so the static pages stay static — which is why `next build` still shows `○` for `/`, `/about`, `/news`, `/profile`, `/favorites`, `/legal`.
-  - ⚠️ **Language**: the server does not know the user's chosen language (it lives in `localStorage` and is applied by `LanguageProvider` on the client), so `getNotifications()` requests the `ckb` columns. Per-language notification text needs a client-side re-fetch — a deliberate follow-up, not an oversight.
+  - While loading, a 2px indeterminate bar (`@keyframes notif-loading` in `app/globals.css`) sits in the header border's own space — chosen over a spinner or skeleton rows so the list never shifts.
+  - `useNotifications()` now also exposes `{ notifications, unreadCount, isLoading, refresh }` alongside the open/close API, so the header bell could consume the real count later.
 
 ### `components/layout/MenuSheet.tsx`
 - The hamburger-triggered slide-in sheet (page links, language switcher, theme toggle, footer info). Still uses the general slate treatment — **not** updated to navy chrome; if the navy header makes it feel visually disconnected, that is a known, un-actioned observation, not a bug.
@@ -115,7 +119,10 @@ Established as a 5-color system, replacing an earlier emerald/green theme. **Eve
 
 | Route | File | Notes |
 |---|---|---|
-| `/` | `app/page.tsx` | **Async server component.** Fetches story slides via `getStorySlides()` and passes them to Hero (incl. Stories) + `ServicesSection`. No Working Hours/FAQ/description text — trimmed in an earlier pass. |
+| `/` | `app/page.tsx` | **Async server component with ISR** (`export const revalidate = 300`). Fetches story slides via `getStorySlides()` and passes them to Hero (incl. Stories) + `ServicesSection`. Stays `○` static because the fetch uses the cookie-free public client. No Working Hours/FAQ/description text — trimmed in an earlier pass. |
+| `/login` | `app/login/page.tsx` → `components/auth/AuthPage.tsx` | Static server shell (metadata only) wrapping the client auth form. See §12. |
+| `/signup` | `app/signup/page.tsx` → `components/auth/AuthPage.tsx` | Same shell, `mode="signup"`. See §12. |
+| `/auth/callback` | `app/auth/callback/route.ts` | Route handler. Exchanges the OAuth `code` for a session and writes the auth cookies. Always `ƒ` dynamic, which is correct. |
 | `/about` | `app/about/page.tsx` | `AboutSection` + `PlacesGrid` (tourism/history cards) — moved here from the home page. |
 | `/places/[id]` | `app/places/[id]/page.tsx` | Tourism/history detail. Its back button (`گەڕانەوە`) is a **hardcoded** `<Link href="/about">` — not `router.back()` (there is no `useRouter` call anywhere in this codebase). This was fixed after the link had gone stale from pointing at `/`. |
 | `/news` | `app/news/page.tsx` | See §9. |
@@ -155,9 +162,11 @@ the local `categories` array; it was not part of the Supabase rewiring.
 - `supabase-seed.sql` — optional. Inserts the 10 categories, the 12 filter chips, Bazyan Cafe + its 7 hours rows, and the 6 story slide headlines. Run **after** the schema.
 - `lib/supabase/types.ts` — hand-written `Database` types. **Keep in sync with the SQL by hand**, or regenerate with `npx supabase gen types typescript`.
 - `lib/supabase/client.ts` — `"use client"`. Browser client + all auth helpers (§8.1). Exports `isSupabaseConfigured()`.
-- `lib/supabase/server.ts` — `server-only`. Server client via `@supabase/ssr` + `cookies()`.
-- `lib/supabase/mappers.ts` — DB row → app model. This is what makes the golden-rule card work (§8.3).
-- `lib/supabase/queries.ts` — `server-only`. All read queries.
+- **`lib/supabase/public.ts`** — `server-only`. **Cookie-free** client (plain `createClient`, anon key, `persistSession: false`). Used by every public read. **This is what keeps pages statically renderable**, because it never calls `cookies()`.
+- `lib/supabase/server.ts` — `server-only`. Cookie-**based** client via `@supabase/ssr`. Now used by **nothing except conceptually the OAuth callback** (which builds its own inline, because this helper deliberately swallows cookie writes). Reach for it only when a read must see the signed-in user; doing so makes the calling route dynamic.
+- `lib/supabase/mappers.ts` — DB row → app model. Pure functions and type-only imports, so it is **client-safe**. This is what makes the golden-rule card work (§8.3).
+- `lib/supabase/queries.ts` — `server-only`. Public read queries, via the **public** client. Never add a user-specific read here.
+- **`lib/supabase/queries.client.ts`** — `"use client"`. Browser-side reads. Currently just notifications.
 - `.env.example` — documents both env vars plus every Supabase **dashboard** step the four auth methods need.
 
 ### The fallback contract — do not break this
@@ -172,6 +181,21 @@ the local `categories` array; it was not part of the Supabase rewiring.
 To make the database strictly authoritative later, drop the `length === 0` half of each condition.
 **The app must always build and run with no `.env.local`** — `next build` on a machine with no
 credentials is the regression test for this, and it must stay green.
+
+### ⚠️ Static rendering — the `cookies()` rule
+
+`next build` must keep showing `○` for `/`, `/login`, `/signup`, `/about`, `/news`, `/profile`,
+`/favorites` and `/legal`. **One `cookies()` call anywhere in a route's tree turns it `ƒ`**, and one
+in `app/layout.tsx` turns *the entire app* dynamic.
+
+Therefore:
+- Public content (categories, providers, filters, stories) reads through `lib/supabase/public.ts`.
+- User-specific content (notifications) is fetched **in the browser**.
+- `app/layout.tsx` is **not** `async` and performs **no** data fetching. Keep it that way.
+- `/` and `/services/[category]` carry `export const revalidate = 300` (ISR) so database changes
+  still surface without giving up prerendering.
+
+Treat the render-mode column of `next build` output as a regression test.
 
 ### ⚠️ Server-only module boundary
 
@@ -190,11 +214,13 @@ fixed during the integration; do not "simplify" it back into one file.
 | Providers | `lib/data/providers.ts` | category + detail pages |
 | Categories | `lib/data/categories.server.ts` | `CategoryPageClient` |
 | **Stories** | `lib/data/stories.server.ts` | `app/page.tsx` → `Hero` → `Stories` |
-| **Notifications** | `lib/data/notifications.server.ts` | `app/layout.tsx` → `NotificationProvider` → `NotificationPanel` |
+| **Notifications** | *(none — browser-fetched)* `lib/supabase/queries.client.ts` | `NotificationProvider` → `NotificationPanel` |
 
-Every one follows the same three-file shape: a **client-safe** `lib/data/<x>.ts` (types + mock),
+The first three follow the same three-file shape: a **client-safe** `lib/data/<x>.ts` (types + mock),
 a **`server-only`** `lib/data/<x>.server.ts` (Supabase + fallback), and a component that receives
 data as a prop. Do not collapse the pair back into one file — see the boundary warning above.
+
+Notifications deliberately break that pattern because they are user-specific; see §4.3.
 
 ### Still mock-backed
 
@@ -320,3 +346,55 @@ and will need:
 - **`lib/data/providers.ts` and `lib/data/categories.server.ts` are async and `server-only`.** Calling them from a client component is a build error, not a runtime one. Client components use the plain `categories` array from `lib/data/categories.ts` instead.
 - **Never let a client-reachable module import `lib/supabase/server.ts` or `lib/supabase/queries.ts`** — directly or transitively. See the boundary note in §8.
 - Before claiming a feature is "done" in a commit message, PR, or this file, **verify it against the file**, not against what was requested — requests and final implementations have diverged before. This file has carried at least one outright false claim (the category page's filter pills, §6), so treat unverified statements here with suspicion and correct them when found.
+
+## 12. Auth UI (`/login`, `/signup`)
+
+Built on the helpers in §8.1. **`app/profile/page.tsx` was not touched** — its "coming soon" note
+still stands, and nothing links to these routes yet (see the gap noted below).
+
+### Files
+
+| File | Role |
+|---|---|
+| `app/login/page.tsx`, `app/signup/page.tsx` | Static server shells. Metadata only; they render `AuthPage` and nothing else, which is what keeps both routes `○`. |
+| `components/auth/AuthPage.tsx` | `"use client"` boundary. Picks the copy for the mode and composes shell + form. |
+| `components/auth/AuthShell.tsx` | Navy brand panel + the floating card that overlaps it + the login⇄signup footer link. |
+| `components/auth/AuthForm.tsx` | All four methods, validation, OTP step, Facebook button. |
+| `components/auth/authText.ts` | Feature-scoped `ckb`/`ar`/`en` copy. |
+| `app/auth/callback/route.ts` | PKCE code → session exchange. |
+
+### Design
+
+Deliberately reuses the Profile page's vocabulary so the two read as one app: `rounded-3xl`,
+`border-slate-200` / `dark:border-slate-800`, `bg-white` / `dark:bg-slate-900`, soft shadow.
+The brand panel is the same navy as the chrome — `#003B6D` light, `#002240` dark (§3) — and the card
+is pulled up over it with `-mt-10`, matching the provider detail page's identity-card overlap.
+Facebook's button uses its real brand blue `#1877F2`, per the same rule as the profile socials.
+
+These pages render **inside** the root layout, so `AppHeader` and `BottomNav` are present. That is
+intentional (it stays a PWA shell); the shell is sized to `min-h-[calc(100vh-73px-6rem)]` to sit
+inside the existing `pt-[73px] pb-24` gutters rather than fight them.
+
+### Behaviour worth knowing
+
+- **Copy lives in `authText.ts`, not `lib/i18n.tsx`.** This follows the existing local-`UI_TEXT`
+  precedent (`CategoryPageClient`, `services-section`). ~40 strings used by two routes do not belong
+  in the union every component depends on. `satisfies Record<LanguageCode, …>` still makes a missing
+  `ar`/`en` key a compile error.
+- **Password length and confirmation are validated on signup only.** Enforcing them at login would
+  leak the policy and could reject a legitimate older password.
+- **Phone signup can return no session**, meaning Supabase wants SMS confirmation — the card then
+  switches to an OTP step wired to `verifyPhoneOtp()`. Inert until an SMS provider is configured; the
+  form shows a standing note saying exactly that.
+- **`isSupabaseConfigured()` is surfaced, not swallowed.** With no credentials the form shows an
+  amber notice rather than failing silently — which is the repo's current state.
+- **The callback sanitises `next`**: only paths starting with a single `/` are honoured, so
+  `?next=//evil.com` cannot turn the route into an open redirect. It also builds its Supabase client
+  inline instead of using `getSupabaseServerClient()`, because that helper swallows cookie writes —
+  correct in a server component, fatal here where persisting the session is the entire job.
+
+### Known gap
+
+**Nothing navigates to `/login` or `/signup`.** They are reachable only by direct URL, because
+`app/profile/page.tsx` and `components/layout/MenuSheet.tsx` were both out of scope. Adding an entry
+point is a one-line change to whichever of those two is preferred.

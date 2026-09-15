@@ -9,7 +9,6 @@ import { vazirmatn } from "@/lib/fonts";
 import AppHeader from "@/components/layout/AppHeader";
 import BottomNav from "@/components/layout/BottomNav";
 import { NotificationProvider } from "@/components/layout/NotificationProvider";
-import { getNotifications } from "@/lib/data/notifications.server";
 
 export const metadata: Metadata = {
   title: "BazianHub",
@@ -25,22 +24,24 @@ export const viewport: Viewport = {
 };
 
 /*
- * Async so notifications can be fetched for the single app-wide panel.
+ * Deliberately NOT async and deliberately fetch-free.
  *
- * Trade-off worth knowing: once Supabase is configured this read calls
- * cookies(), which opts every route into dynamic rendering. With no
- * credentials present getSupabaseServerClient() returns before touching
- * cookies(), so the static pages stay static. Moving this fetch client-side
- * would restore static rendering at the cost of a first-paint flash on the
- * unread badge.
+ * Any server read here that touches cookies() — notifications being the
+ * obvious candidate — opts every route in the app into dynamic rendering.
+ * Keeping this layout static is what lets /, /about, /news, /profile,
+ * /favorites and /legal stay prerendered (`○` in the build output), which
+ * is the point of a PWA shell.
+ *
+ * Notifications are therefore fetched in the browser by
+ * NotificationProvider. That also fixes the language problem: the user's
+ * chosen language lives in localStorage, so only the client can pick the
+ * right title_/body_ column.
  */
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const notifications = await getNotifications();
-
   return (
     <html
       lang="ckb"
@@ -51,9 +52,7 @@ export default async function RootLayout({
       <body suppressHydrationWarning>
         <ThemeProvider>
           <LanguageProvider>
-            <NotificationProvider
-              notifications={notifications}
-            >
+            <NotificationProvider>
             {/* =============================================
                 DESKTOP BACKDROP
             ============================================== */}

@@ -56,17 +56,21 @@ interface NotificationPanelProps {
   onClose: () => void;
 
   /*
-   * Fetched on the server in app/layout.tsx. An empty list is the normal
-   * state before any rows exist, and makes the panel render its built-in
-   * welcome item — the same thing it showed before the database existed.
+   * Fetched in the browser by NotificationProvider the first time the panel
+   * opens. An empty list is the normal state before any rows exist, and
+   * makes the panel render its built-in welcome item — the same thing it
+   * showed before the database existed.
    */
   notifications?: AppNotification[];
+
+  isLoading?: boolean;
 }
 
 export default function NotificationPanel({
   open,
   onClose,
   notifications = [],
+  isLoading = false,
 }: NotificationPanelProps) {
   const { t, direction } = useLanguage();
 
@@ -295,7 +299,38 @@ export default function NotificationPanel({
                 NOTIFICATION LIST
             =============================================== */}
 
-            <ul className="max-h-[60vh] overflow-y-auto overscroll-contain p-2">
+            {/* ===============================================
+                LOADING BAR
+
+                A 2px indeterminate line rather than a spinner or
+                skeleton rows: it sits in the border's own space, so
+                the list never shifts while data arrives.
+            =============================================== */}
+
+            {isLoading ? (
+              <div
+                aria-hidden="true"
+                className="
+                  h-0.5 w-full overflow-hidden
+                  bg-sky-100
+                  dark:bg-sky-900/40
+                "
+              >
+                <div
+                  className="
+                    h-full w-1/3
+                    animate-[notif-loading_1.1s_ease-in-out_infinite]
+                    bg-blue-600
+                    dark:bg-blue-500
+                  "
+                />
+              </div>
+            ) : null}
+
+            <ul
+              aria-busy={isLoading}
+              className="max-h-[60vh] overflow-y-auto overscroll-contain p-2"
+            >
               {hasRows ? (
                 notifications.map(
                   (notification) => {

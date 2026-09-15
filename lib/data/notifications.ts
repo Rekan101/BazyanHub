@@ -9,7 +9,10 @@
 | NotificationProvider, both client components. Nothing here may reach
 | lib/supabase/server.ts or lib/supabase/queries.ts.
 |
-| The Supabase-backed lookup lives in lib/data/notifications.server.ts.
+| Notifications are the one surface fetched in the BROWSER rather than on
+| the server — see lib/supabase/queries.client.ts. There is deliberately no
+| `notifications.server.ts` counterpart: a server read would call cookies()
+| in the root layout and make every route in the app dynamic.
 |
 | Note there is no mock array here, unlike stories/categories/providers. The
 | panel's fallback is not data: it is the built-in welcome item, whose text

@@ -79,3 +79,18 @@ input[type="search"]::-webkit-search-cancel-button {
     line-height: 1.75;
   }
 }
+/* ==========================================================================
+   NOTIFICATION PANEL — indeterminate loading bar
+   Travels across the full width in both LTR and RTL; the transform is
+   direction-agnostic because the track clips it either way.
+   ========================================================================== */
+
+@keyframes notif-loading {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(400%);
+  }
+}

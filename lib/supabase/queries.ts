@@ -8,20 +8,17 @@ import type {
   ServiceFilter,
 } from "@/lib/data/categories";
 
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabasePublicClient } from "@/lib/supabase/public";
 import {
   mapCategoryRow,
   mapFilterRow,
-  mapNotificationRow,
   mapProviderRow,
   mapStorySlideRow,
   type CategoryRowWithFilters,
 } from "@/lib/supabase/mappers";
 import type { Slide } from "@/lib/data/stories";
-import type { AppNotification } from "@/lib/data/notifications";
 import type {
   FilterRow,
-  NotificationRow,
   ProviderRowWithRelations,
   StorySlideRowWithStories,
 } from "@/lib/supabase/types";
@@ -39,8 +36,14 @@ import type {
 | Callers in lib/data/ use that distinction to decide whether to fall back to
 | mock data.
 |
-| These use the SERVER client, so they only work in server components, route
-| handlers and server actions.
+| These use the COOKIE-FREE public client (lib/supabase/public.ts), not the
+| cookie-based one. Everything read here is public content that already
+| grants `anon` select in RLS, and avoiding cookies() is what keeps the
+| pages that call these functions statically prerenderable / ISR-able.
+| Anything user-specific must NOT be added to this module.
+|
+| Server-side only (the public client module is `server-only`), so: server
+| components, route handlers and server actions.
 |
 */
 
@@ -66,7 +69,7 @@ export async function fetchProvidersByCategory(
   categorySlug: string
 ): Promise<Provider[] | null> {
   const supabase =
-    await getSupabaseServerClient();
+    getSupabasePublicClient();
 
   if (!supabase) {
     return null;
@@ -103,7 +106,7 @@ export async function fetchAllProviders(): Promise<
   Provider[] | null
 > {
   const supabase =
-    await getSupabaseServerClient();
+    getSupabasePublicClient();
 
   if (!supabase) {
     return null;
@@ -131,7 +134,7 @@ export async function fetchProviderById(
   providerId: string
 ): Promise<Provider | null | undefined> {
   const supabase =
-    await getSupabaseServerClient();
+    getSupabasePublicClient();
 
   if (!supabase) {
     return undefined;
@@ -175,7 +178,7 @@ export async function fetchCategories(): Promise<
   ServiceCategory[] | null
 > {
   const supabase =
-    await getSupabaseServerClient();
+    getSupabasePublicClient();
 
   if (!supabase) {
     return null;
@@ -202,7 +205,7 @@ export async function fetchFiltersByCategory(
   categorySlug: string
 ): Promise<ServiceFilter[] | null> {
   const supabase =
-    await getSupabaseServerClient();
+    getSupabasePublicClient();
 
   if (!supabase) {
     return null;
@@ -238,7 +241,7 @@ export async function fetchStorySlides(): Promise<
   Slide[] | null
 > {
   const supabase =
-    await getSupabaseServerClient();
+    getSupabasePublicClient();
 
   if (!supabase) {
     return null;
@@ -284,36 +287,3 @@ export async function fetchStorySlides(): Promise<
   );
 }
 
-/*
- * Notifications for the signed-in user, plus broadcasts (user_id is null).
- * RLS enforces the same rule server-side; the filter here just avoids
- * shipping rows the policy would reject anyway.
- *
- * Consumed by lib/data/notifications.server.ts.
- */
-export async function fetchNotifications(
-  language: "ckb" | "ar" | "en" = "ckb"
-): Promise<AppNotification[] | null> {
-  const supabase =
-    await getSupabaseServerClient();
-
-  if (!supabase) {
-    return null;
-  }
-
-  const { data, error } = await supabase
-    .from("notifications")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(50);
-
-  if (error) {
-    logQueryError("fetchNotifications", error);
-
-    return null;
-  }
-
-  return (data as NotificationRow[]).map((row) =>
-    mapNotificationRow(row, language)
-  );
-}
