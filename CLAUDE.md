@@ -75,13 +75,23 @@ Established as a 5-color system, replacing an earlier emerald/green theme. **Eve
 - `NotificationProvider` wraps the whole app (in `app/layout.tsx`, inside `LanguageProvider`) and owns the single source of truth: `{ isOpen, open, close, toggle }` via `useNotifications()`.
 - It renders **exactly one** `<NotificationPanel>` instance. Both the header bell and the profile Notifications row call `useNotifications()` and trigger the same panel — there is no second panel instance anywhere.
 - Closes automatically on route change (`usePathname` effect).
+- **Supabase-backed, prop-driven.** `app/layout.tsx` is now an **async** server component: it calls `getNotifications()` (`lib/data/notifications.server.ts`) and threads the list through `NotificationProvider` → `NotificationPanel`.
+  - **Fallback is not data.** When the list is empty — no rows, or Supabase unconfigured — the panel renders its built-in welcome item, whose text comes from the i18n keys `notificationWelcomeTitle` / `notificationWelcomeBody` / `notificationNow`. That is byte-for-byte what it displayed before the database existed. `lib/data/notifications.ts` therefore has **no mock array**, unlike the other data modules.
+  - The header badge is `countUnread(...)`, falling back to `1` for the welcome item (matching the previously hardcoded `1`).
+  - Rows may carry an `icon` key; `NotificationPanel` maps a small allow-list (`sparkles`, `megaphone`, `newspaper`, `store`, `bell`) and falls back to `Sparkles`. Rows with a `linkUrl` wrap in a `<Link>` that closes the panel on click.
+  - ⚠️ **Render-mode trade-off**: once Supabase is configured this layout read calls `cookies()`, which opts **every** route into dynamic rendering. With no credentials, `getSupabaseServerClient()` returns before touching `cookies()`, so the static pages stay static — which is why `next build` still shows `○` for `/`, `/about`, `/news`, `/profile`, `/favorites`, `/legal`.
+  - ⚠️ **Language**: the server does not know the user's chosen language (it lives in `localStorage` and is applied by `LanguageProvider` on the client), so `getNotifications()` requests the `ckb` columns. Per-language notification text needs a client-side re-fetch — a deliberate follow-up, not an oversight.
 
 ### `components/layout/MenuSheet.tsx`
 - The hamburger-triggered slide-in sheet (page links, language switcher, theme toggle, footer info). Still uses the general slate treatment — **not** updated to navy chrome; if the navy header makes it feel visually disconnected, that is a known, un-actioned observation, not a bug.
 
 ## 5. Stories Carousel (`components/Stories.tsx`, used inside `components/Hero.tsx`)
 
-- **Data**: `SLIDES` — a local mock array, exactly **6 slides × 3 stories = 18 stories**. Story shape: `{ id, image, providerName, shortInfo, providerId, categoryId }` — deliberately has **no** expiration/scheduling fields (that's the database's job later; a previous version with client-side expiration logic was removed for exactly this reason).
+- **Data**: **Supabase-backed, prop-driven.** `app/page.tsx` (server) calls `getStorySlides()` from `lib/data/stories.server.ts` and passes the result down through `Hero` → `Stories` as a `slides` prop. The `Story`/`Slide` types and the mock `SLIDES` array (**6 slides × 3 stories = 18 stories**) now live in `lib/data/stories.ts` — client-safe, and shared with the server-side mapper. Story shape: `{ id, image, providerName, shortInfo, providerId, categoryId }` — deliberately **no** expiration/scheduling fields, because `stories.duration` + the `set_story_expiry` trigger handle that in Postgres and the query filters expired rows out before they reach the client.
+  - `Stories` and `Hero` both take `slides` as an **optional** prop defaulting to `SLIDES`, so they still render standalone.
+  - A slide with zero live stories is dropped in `getStorySlides()` before the fallback check — otherwise an all-expired slide would render as an empty 3-up grid with just a title.
+  - The carousel indexes with `slides[currentSlide % slides.length]` and the auto-loop is skipped when `slides.length <= 1`. Do not "simplify" these back to direct indexing: `currentSlide` is state, so a shorter array arriving on a later fetch would otherwise index past the end and crash.
+  - The modal CTA renders **only** when both `categoryId` and `providerId` are non-empty. `stories.provider_id` is nullable with `ON DELETE SET NULL`, so a story can outlive its business; without the guard that emits `href="/services//"`.
 - Slide titles, in fixed order: `ژیانی ڕۆژانەت ئاسانتر بکە`, `باشترین خزمەتگوزارییەکان لێرەن`, `هەر ئێستا پەیوەندی بکە`, `کات و پارەت بپارێزە`, `وەستای شارەزا بدۆزەرەوە`, `هەموو پێداویستییەکان لە یەک جێگادا`.
 - **Layout**: outer glass box `rounded-[2rem] border border-white/20 dark:border-white/10 p-4 shadow-lg`, containing a `grid grid-cols-3 gap-3` of `aspect-square rounded-[1.5rem]` squircle thumbnails, a rotating title pill below (`bg-white dark:bg-slate-900 rounded-full px-6 py-2`), and slide-position dots.
 - **Container background**: the real silver-wave photo at `public/images/silver-waves.jpg`, applied via an **inline `style`** (not a Tailwind class), with a flat dark overlay stacked above the image inside the same `backgroundImage` value so the texture reads slightly darker for contrast:
@@ -105,7 +115,7 @@ Established as a 5-color system, replacing an earlier emerald/green theme. **Eve
 
 | Route | File | Notes |
 |---|---|---|
-| `/` | `app/page.tsx` | Hero (incl. Stories) + `ServicesSection`. No Working Hours/FAQ/description text — trimmed in an earlier pass. |
+| `/` | `app/page.tsx` | **Async server component.** Fetches story slides via `getStorySlides()` and passes them to Hero (incl. Stories) + `ServicesSection`. No Working Hours/FAQ/description text — trimmed in an earlier pass. |
 | `/about` | `app/about/page.tsx` | `AboutSection` + `PlacesGrid` (tourism/history cards) — moved here from the home page. |
 | `/places/[id]` | `app/places/[id]/page.tsx` | Tourism/history detail. Its back button (`گەڕانەوە`) is a **hardcoded** `<Link href="/about">` — not `router.back()` (there is no `useRouter` call anywhere in this codebase). This was fixed after the link had gone stale from pointing at `/`. |
 | `/news` | `app/news/page.tsx` | See §9. |
@@ -173,14 +183,30 @@ A dynamic `await import()` is **not** enough to keep a server module out of the 
 bundler still traces the edge and the build fails with a `next/headers` error. This was hit and
 fixed during the integration; do not "simplify" it back into one file.
 
-### Still mock-backed (schema + query helpers exist, components not yet wired)
+### Wired to Supabase (all with mock fallback)
 
-- `components/Stories.tsx` — local `SLIDES` constant. `fetchStorySlides()` + `mapStorySlideRow()` are ready.
-- `components/layout/NotificationPanel.tsx` — still a static shell with one hardcoded `<li>`. `fetchNotifications()` is ready.
+| Surface | Server seam | Client consumer |
+|---|---|---|
+| Providers | `lib/data/providers.ts` | category + detail pages |
+| Categories | `lib/data/categories.server.ts` | `CategoryPageClient` |
+| **Stories** | `lib/data/stories.server.ts` | `app/page.tsx` → `Hero` → `Stories` |
+| **Notifications** | `lib/data/notifications.server.ts` | `app/layout.tsx` → `NotificationProvider` → `NotificationPanel` |
+
+Every one follows the same three-file shape: a **client-safe** `lib/data/<x>.ts` (types + mock),
+a **`server-only`** `lib/data/<x>.server.ts` (Supabase + fallback), and a component that receives
+data as a prop. Do not collapse the pair back into one file — see the boundary warning above.
+
+### Still mock-backed
+
+- **News feed** (`app/news/page.tsx`) — **the schema now exists** (`news_posts`, `news_comments`, `news_likes`, plus the `news_feed` view; see §9), but the page is **not wired to it**. It still renders two hardcoded `MOCK_POSTS` with likes/comments in local React state.
 - Favorites — still `localStorage` (`bazianhub-favorites`, `Record<string, boolean>` keyed by category id). Needs auth UI first.
-- News feed — no `posts`/`post_likes`/`post_comments` tables were created; explicitly out of scope.
 - `lib/data/services/*.ts` — **only `restaurants.ts` has real data** (`restaurant-bazian-cafe`); the other nine are empty and serve as the fallback for their categories.
 - `places.ts`, `faqs.ts` — static mock content, untouched.
+
+> **The SQL has never been executed.** No Postgres, Docker, or Supabase CLI was available in the
+> environment where `supabase-schema.sql` / `supabase-seed.sql` were written. They were verified
+> structurally only (balanced parens, quotes and `$$` bodies). **Expect to fix something the first
+> time you run them**, and re-run the schema before the seed.
 
 ### 8.1 Auth — four methods, helpers only
 
@@ -214,6 +240,23 @@ route and no `AuthProvider` yet** — this is the data surface a future auth-UI 
   renders as closed.
 - **`stories.expires_at`** is set by a `BEFORE INSERT OR UPDATE` trigger, not a generated column — a
   `GENERATED ALWAYS` CASE-over-enum is not provably immutable and Postgres rejects it.
+- **News moderation is enforced by RLS, not application code.** The `news_posts` INSERT policy's
+  `WITH CHECK` pins `status = 'pending'`, so a user cannot self-publish even by calling the REST API
+  directly with a crafted payload. There is deliberately **no owner UPDATE policy**: an UPDATE policy
+  cannot restrict *which columns* change, so granting one would let an author flip their own post to
+  `'approved'`. Authors may DELETE (withdraw) but not edit; only an admin may UPDATE.
+- **`news_post_status` includes `'rejected'`**, one state beyond what was specified. Without it a
+  moderator's only options are approve or delete, and deleting destroys the record of what was
+  submitted. Drop it from the enum if a strict two-state workflow is wanted.
+- **`news_likes` uses a composite primary key `(post_id, user_id)`**, not a surrogate id — that is
+  what enforces one like per user. Liking becomes `on conflict do nothing`; unliking is a plain
+  delete on the key.
+- **`public.news_feed`** is a view over `news_posts` carrying `like_count` / `comment_count`. It is
+  declared `security_invoker = true` so it respects the *querying* user's RLS rather than the view
+  owner's — without that it would leak unapproved posts. Requires Postgres 15+ (Supabase provides it).
+- **`news_comments.text`** is named per spec, which collides with the type name `text`. The CHECK uses
+  `btrim(text)` rather than `trim(text)` — both parse, but `trim` has special grammar
+  (`trim(BOTH FROM x)`) that makes a type-named identifier inside it needlessly ambiguous to read.
 - **`notifications.is_read` is per-row**, so a broadcast (`user_id IS NULL`) cannot track per-user
   read state. A `notification_reads(user_id, notification_id)` join table is the documented fix.
 - `filters` uses two **partial** unique indexes, not a plain `UNIQUE (category_id, slug)` — Postgres
@@ -239,6 +282,24 @@ identical markup. **Map to `Provider`; never fork the card.**
   - **Comment (کۆمێنت)** — toggles an inline thread per post. Three `Record<string, …>` maps keyed by post id: `openComments` (open/closed), `commentDrafts` (controlled input value), `comments` (submitted strings). Submit via the send button or the **Enter** key (`onKeyDown` + `preventDefault`); empty/whitespace is rejected and the button is `disabled`. The displayed count is `post.comments + postComments.length`, so it updates live. Local only — resets on reload.
   - The comment input reuses the `newsComposerPlaceholder` key rather than introducing a dedicated one; add a proper key to all three `TRANSLATIONS` blocks if a distinct placeholder is wanted.
 - There is **no** admin-approval info banner on the page — it was deliberately removed once the toast started carrying that message.
+
+### 9.1 Database schema — exists, but the page does not use it yet
+
+`supabase-schema.sql` §9 defines `news_posts`, `news_comments`, `news_likes` and the `news_feed`
+view, and `supabase-seed.sql` inserts two posts (one `approved`, one `pending`) plus two comments.
+**`app/news/page.tsx` is still entirely mock-backed** — every behaviour described above (2 hardcoded
+posts, local like/comment state, publish-shows-a-toast) is unchanged. Wiring it is a separate pass
+and will need:
+
+- a `lib/data/news.ts` / `lib/data/news.server.ts` pair, following the same split as stories;
+- the composer's publish handler to INSERT (the RLS policy forces `status = 'pending'`, so the
+  existing toast copy stays accurate);
+- media upload to Supabase Storage — right now `URL.createObjectURL` previews are **local only** and
+  nothing is uploaded anywhere;
+- auth, since `news_posts`/`news_comments`/`news_likes` all require `auth.uid()` to write. Until
+  login exists the page cannot do more than read.
+- the seeded rows have `user_id IS NULL` (a fresh project has no `auth.users`), which is why that
+  column is nullable — keep it that way so imported/seeded content stays possible.
 
 ## 10. Profile Page (`app/profile/page.tsx`)
 

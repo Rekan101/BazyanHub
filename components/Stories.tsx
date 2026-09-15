@@ -9,228 +9,47 @@ import {
 } from "framer-motion";
 import { ArrowLeft, X } from "lucide-react";
 
+import {
+  SLIDES,
+  type Slide,
+  type Story,
+} from "@/lib/data/stories";
+
 /* ==========================================================================
-   TYPES — mirrors the eventual Supabase row shape
+   TYPES
+
+   Story/Slide now live in lib/data/stories.ts alongside the mock SLIDES, so
+   that both this client component and the server-side Supabase mapper share
+   one definition. Re-exported here because that is where they used to live.
    ========================================================================== */
 
-export type Story = {
-  id: string;
-  image: string;
-  providerName: string;
-  shortInfo: string;
-  providerId: string;
-  categoryId: string;
-};
-
-export type Slide = {
-  id: string;
-  title: string;
-  stories: Story[];
-};
+export type { Slide, Story };
 
 /* ==========================================================================
-   SLIDES — 6 slides x 3 stories
+   SLIDES
 
-   Mock data only. Expiration/scheduling is the database's job, so no
-   createdAt/duration fields live here. Replacing this constant with a
-   Supabase query is the only change needed to go live.
+   Data arrives as a prop from app/page.tsx, which fetches it on the server
+   via lib/data/stories.server.ts (Supabase first, SLIDES as fallback). The
+   default parameter keeps this component usable on its own.
+
+   Expiration/scheduling is the database's job — the query filters expired
+   rows out before they reach here, so no createdAt/duration fields exist on
+   the client type.
    ========================================================================== */
 
 const SLIDE_INTERVAL_MS = 3000;
-
-const SLIDES: Slide[] = [
-  {
-    id: "slide-1",
-    title: "ژیانی ڕۆژانەت ئاسانتر بکە",
-    stories: [
-      {
-        id: "story-1-1",
-        image: "/images/stories/story-1.webp",
-        providerName: "Bazian Cafe",
-        shortInfo: "کافێیەکی مۆدێرن لە ناوەندی بازیان",
-        providerId: "restaurant-bazian-cafe",
-        categoryId: "restaurants",
-      },
-      {
-        id: "story-1-2",
-        image: "/images/stories/story-2.webp",
-        providerName: "تاکسی بازیان",
-        shortInfo: "گواستنەوەی خێرا بۆ هەموو ناوچەکان",
-        providerId: "vehicle-bazian-taxi",
-        categoryId: "vehicles",
-      },
-      {
-        id: "story-1-3",
-        image: "/images/stories/story-3.webp",
-        providerName: "مارکێتی گەورە",
-        shortInfo: "هەموو پێداویستییەکانی ماڵەوە",
-        providerId: "shopping-bazian-market",
-        categoryId: "shopping",
-      },
-    ],
-  },
-
-  {
-    id: "slide-2",
-    title: "باشترین خزمەتگوزارییەکان لێرەن",
-    stories: [
-      {
-        id: "story-2-1",
-        image: "/images/stories/story-4.webp",
-        providerName: "دەرمانخانەی بازیان",
-        shortInfo: "دەرمان و ڕاوێژی تەندروستی",
-        providerId: "health-bazian-pharmacy",
-        categoryId: "health",
-      },
-      {
-        id: "story-2-2",
-        image: "/images/stories/story-5.webp",
-        providerName: "فرۆشگای مۆبایل",
-        shortInfo: "مۆبایل و ئامێری تەکنەلۆجیا",
-        providerId: "mobile-bazian-store",
-        categoryId: "mobile",
-      },
-      {
-        id: "story-2-3",
-        image: "/images/stories/story-6.webp",
-        providerName: "سالۆنی جوانکاری",
-        shortInfo: "خزمەتگوزاری جوانکاری پیشەیی",
-        providerId: "beauty-bazian-salon",
-        categoryId: "beauty",
-      },
-    ],
-  },
-
-  {
-    id: "slide-3",
-    title: "هەر ئێستا پەیوەندی بکە",
-    stories: [
-      {
-        id: "story-3-1",
-        image: "/images/stories/story-1.webp",
-        providerName: "وەستای کارەبا",
-        shortInfo: "چاککردنەوەی کارەبا بە خێرایی",
-        providerId: "worker-bazian-electrician",
-        categoryId: "workers",
-      },
-      {
-        id: "story-3-2",
-        image: "/images/stories/story-2.webp",
-        providerName: "نوسینگەی خانووبەرە",
-        shortInfo: "کڕین و فرۆشتنی موڵک",
-        providerId: "estate-bazian-office",
-        categoryId: "real-estate",
-      },
-      {
-        id: "story-3-3",
-        image: "/images/stories/story-3.webp",
-        providerName: "پەیمانگای فێرکاری",
-        shortInfo: "کۆرسی زمان و کۆمپیوتەر",
-        providerId: "institute-bazian-center",
-        categoryId: "institutes",
-      },
-    ],
-  },
-
-  {
-    id: "slide-4",
-    title: "کات و پارەت بپارێزە",
-    stories: [
-      {
-        id: "story-4-1",
-        image: "/images/stories/story-4.webp",
-        providerName: "گەیاندنی خێرا",
-        shortInfo: "گەیاندن بۆ هەموو بازیان",
-        providerId: "vehicle-bazian-delivery",
-        categoryId: "vehicles",
-      },
-      {
-        id: "story-4-2",
-        image: "/images/stories/story-5.webp",
-        providerName: "Bazian Cafe",
-        shortInfo: "ئۆفەری تایبەت بۆ ماوەیەکی کەم",
-        providerId: "restaurant-bazian-cafe",
-        categoryId: "restaurants",
-      },
-      {
-        id: "story-4-3",
-        image: "/images/stories/story-6.webp",
-        providerName: "فرۆشگای کەلوپەل",
-        shortInfo: "نرخی گونجاو و جۆری باش",
-        providerId: "shopping-bazian-goods",
-        categoryId: "shopping",
-      },
-    ],
-  },
-
-  {
-    id: "slide-5",
-    title: "وەستای شارەزا بدۆزەرەوە",
-    stories: [
-      {
-        id: "story-5-1",
-        image: "/images/stories/story-1.webp",
-        providerName: "وەستای بۆیە",
-        shortInfo: "بۆیەکردنی ماڵ و نوسینگە",
-        providerId: "worker-bazian-painter",
-        categoryId: "workers",
-      },
-      {
-        id: "story-5-2",
-        image: "/images/stories/story-2.webp",
-        providerName: "کارەباچی سەیارە",
-        shortInfo: "چاککردنەوەی کارەبای ئۆتۆمبێل",
-        providerId: "vehicle-bazian-auto-electric",
-        categoryId: "vehicles",
-      },
-      {
-        id: "story-5-3",
-        image: "/images/stories/story-3.webp",
-        providerName: "وەستای ئاودانان",
-        shortInfo: "چاککردنەوەی بۆری و ئاو",
-        providerId: "worker-bazian-plumber",
-        categoryId: "workers",
-      },
-    ],
-  },
-
-  {
-    id: "slide-6",
-    title: "هەموو پێداویستییەکان لە یەک جێگادا",
-    stories: [
-      {
-        id: "story-6-1",
-        image: "/images/stories/story-4.webp",
-        providerName: "هەلی کاری نوێ",
-        shortInfo: "دامەزراندن لە بازیان",
-        providerId: "job-bazian-openings",
-        categoryId: "jobs",
-      },
-      {
-        id: "story-6-2",
-        image: "/images/stories/story-5.webp",
-        providerName: "سەرتاشخانە",
-        shortInfo: "سەرتاشی پیاوان بە شێوازی نوێ",
-        providerId: "beauty-bazian-barber",
-        categoryId: "beauty",
-      },
-      {
-        id: "story-6-3",
-        image: "/images/stories/story-6.webp",
-        providerName: "چێشتخانەی خێزانی",
-        shortInfo: "خواردنی ڕۆژانەی خۆجێیی",
-        providerId: "restaurant-bazian-family",
-        categoryId: "restaurants",
-      },
-    ],
-  },
-];
 
 /* ==========================================================================
    STORIES
    ========================================================================== */
 
-export default function Stories() {
+type StoriesProps = {
+  slides?: Slide[];
+};
+
+export default function Stories({
+  slides = SLIDES,
+}: StoriesProps) {
   const [currentSlide, setCurrentSlide] =
     useState(0);
 
@@ -251,7 +70,7 @@ export default function Stories() {
      ------------------------------------------------------------------ */
 
   useEffect(() => {
-    if (isPaused) {
+    if (isPaused || slides.length <= 1) {
       return;
     }
 
@@ -259,7 +78,7 @@ export default function Stories() {
       () => {
         setCurrentSlide(
           (previous) =>
-            (previous + 1) % SLIDES.length
+            (previous + 1) % slides.length
         );
       },
       SLIDE_INTERVAL_MS
@@ -268,7 +87,7 @@ export default function Stories() {
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [isPaused]);
+  }, [isPaused, slides.length]);
 
   /* ------------------------------------------------------------------
      MODAL — escape key + body scroll lock
@@ -323,7 +142,18 @@ export default function Stories() {
     setIsPaused(false);
   };
 
-  const slide = SLIDES[currentSlide];
+  /*
+   * Clamp rather than index directly. `currentSlide` is state, so a shorter
+   * `slides` array arriving on a re-render (fewer live slides than the last
+   * fetch) would otherwise leave the index past the end and crash on
+   * `slide.stories`.
+   */
+  const slide =
+    slides[currentSlide % slides.length];
+
+  if (!slide) {
+    return null;
+  }
 
   return (
     <>
@@ -477,14 +307,15 @@ export default function Stories() {
           className="mt-3 flex items-center justify-center gap-1.5"
           aria-hidden="true"
         >
-          {SLIDES.map((item, index) => (
+          {slides.map((item, index) => (
             <span
               key={item.id}
               className={`
                 h-1.5 rounded-full
                 transition-all duration-300
                 ${
-                  index === currentSlide
+                  index ===
+                  currentSlide % slides.length
                     ? "w-5 bg-blue-600 dark:bg-blue-500"
                     : "w-1.5 bg-white/50 dark:bg-white/25"
                 }
@@ -645,6 +476,14 @@ export default function Stories() {
                 </p>
               </div>
 
+              {/*
+                Only linkable when the story actually resolves to a provider.
+                stories.provider_id is nullable and ON DELETE SET NULL, so a
+                story can outlive its business — without this guard that case
+                renders an href of "/services//".
+              */}
+              {selectedStory.categoryId &&
+              selectedStory.providerId ? (
               <Link
                 href={`/services/${selectedStory.categoryId}/${selectedStory.providerId}`}
                 onClick={closeStory}
@@ -678,6 +517,7 @@ export default function Stories() {
                   aria-hidden="true"
                 />
               </Link>
+              ) : null}
             </div>
             </motion.div>
           </motion.div>

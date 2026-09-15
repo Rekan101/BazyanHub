@@ -228,3 +228,67 @@ values
   ('وەستای شارەزا بدۆزەرەوە',              'اعثر على حرفي ماهر',             'Find a skilled professional',        5),
   ('هەموو پێداویستییەکان لە یەک جێگادا',   'كل ما تحتاجه في مكان واحد',      'Everything you need in one place',   6)
 on conflict do nothing;
+
+
+-- ---------------------------------------------------------------------------
+-- News feed
+--
+-- user_id is NULL on every row here: a fresh project has no auth.users, and
+-- news_posts.user_id is nullable precisely so seeded/imported content can
+-- exist without an account. author_name carries the byline instead.
+--
+-- Two posts, matching the states the moderation flow produces:
+--   * post 1 — 'approved', the kind of row the feed renders today
+--   * post 2 — 'pending',  invisible to the public feed until an admin
+--                          approves it. Use it to verify the RLS actually
+--                          hides unapproved content.
+--
+-- Guarded by NOT EXISTS rather than ON CONFLICT: these rows have no natural
+-- unique key, so re-running would otherwise insert duplicates.
+-- ---------------------------------------------------------------------------
+
+insert into public.news_posts
+  (author_name, text_content, media_url, media_type, status, approved_at)
+select
+  v.author_name, v.text_content, v.media_url, v.media_type,
+  v.status::public.news_post_status,
+  case when v.status = 'approved' then now() else null end
+from (values
+  (
+    'ئیدارەی بازیان هەب',
+    'ڕێگای بازیان پاش چاککردنەوە کرایەوە بۆ هاتوچۆ. تکایە ئاگاداری هێمای ڕێگا و خێرایی بن لە کاتی تێپەڕبوون. 🚗',
+    '/images/bazian-pass.webp',
+    'image',
+    'approved'
+  ),
+  (
+    'هەلی کاری بازیان',
+    'چەند هەلێکی کاری نوێ لە بازیان زیادکران: فرۆشیار، وەستای کارەبا و شۆفێری پیکاپ. بۆ زانیاری زیاتر پەیوەندی بە ژمارەی ناو پۆستەکە بکە. 💼',
+    '/images/jobs.webp',
+    'image',
+    'pending'
+  )
+) as v (author_name, text_content, media_url, media_type, status)
+where not exists (
+  select 1 from public.news_posts existing
+  where existing.text_content = v.text_content
+);
+
+
+-- Comments, attached to the approved post only — the RLS insert policy
+-- refuses comments on a post that is not approved, and the seed should not
+-- create rows the app itself could not.
+insert into public.news_comments (post_id, author_name, text)
+select p.id, v.author_name, v.body
+from public.news_posts p
+join (values
+  ('ئاکۆ م.',   'زۆر سوپاس بۆ ئەم زانیارییە، بەسوود بوو. 🙏'),
+  ('شیلان ح.',  'باشە، ئێستا ڕێگاکە چۆنە لە کاتی بەیانیان؟')
+) as v (author_name, body) on true
+where p.status = 'approved'
+  and p.author_name = 'ئیدارەی بازیان هەب'
+  and not exists (
+    select 1 from public.news_comments existing
+    where existing.post_id = p.id
+      and existing.text = v.body
+  );

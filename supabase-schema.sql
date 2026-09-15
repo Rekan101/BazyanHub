@@ -634,3 +634,250 @@ create policy "notifications: admin write"
   on public.notifications for all
   using (public.is_admin())
   with check (public.is_admin());
+
+
+-- ===========================================================================
+-- 9. News feed
+-- ===========================================================================
+--
+-- Backs app/news/page.tsx. That page currently renders two hardcoded posts
+-- and keeps likes/comments in local React state that resets on reload; these
+-- tables are what it will read from once it is wired up.
+--
+-- The moderation guarantee lives in the RLS policy, not in application code:
+-- the INSERT policy's WITH CHECK pins status to 'pending', so a user
+-- physically cannot publish straight to the feed even by calling the REST API
+-- directly with a crafted payload. Only an admin can move a post to
+-- 'approved'.
+-- ---------------------------------------------------------------------------
+
+do $$
+begin
+  if not exists (select 1 from pg_type where typname = 'news_post_status') then
+    -- 'rejected' is an addition beyond the two states originally specified.
+    -- Without it a moderator's only options are "approve" or "delete", and
+    -- deleting destroys the record of what was submitted. Drop it from this
+    -- enum if you genuinely only want a two-state workflow.
+    create type public.news_post_status as enum ('pending', 'approved', 'rejected');
+  end if;
+end
+$$;
+
+create table if not exists public.news_posts (
+  id            uuid primary key default gen_random_uuid(),
+
+  -- ON DELETE SET NULL, not CASCADE: removing an account should not silently
+  -- delete community history. author_name keeps the byline readable after.
+  user_id       uuid references public.profiles (id) on delete set null,
+  author_name   text,
+
+  text_content  text,
+  media_url     text,
+  media_type    text check (media_type in ('image', 'video')),
+
+  status        public.news_post_status not null default 'pending',
+
+  approved_at   timestamptz,
+  approved_by   uuid references public.profiles (id) on delete set null,
+
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now(),
+
+  -- A post with neither text nor media is meaningless. Mirrors the composer,
+  -- whose publish button is disabled while the draft is empty.
+  constraint news_posts_not_empty
+    check (
+      coalesce(trim(text_content), '') <> ''
+      or coalesce(trim(media_url), '') <> ''
+    )
+);
+
+create index if not exists news_posts_feed_idx
+  on public.news_posts (status, created_at desc);
+
+create index if not exists news_posts_author_idx
+  on public.news_posts (user_id, created_at desc);
+
+drop trigger if exists news_posts_touch on public.news_posts;
+create trigger news_posts_touch
+  before update on public.news_posts
+  for each row execute function public.touch_updated_at();
+
+
+create table if not exists public.news_comments (
+  id           uuid primary key default gen_random_uuid(),
+
+  -- CASCADE here is correct: a comment has no meaning without its post.
+  post_id      uuid not null references public.news_posts (id) on delete cascade,
+
+  user_id      uuid references public.profiles (id) on delete set null,
+  author_name  text,
+
+  -- Column is named `text` per spec, which collides with the type name.
+  -- btrim() is used rather than trim() because trim() has special grammar
+  -- (trim(BOTH FROM x)) and a bare type-named identifier inside it is
+  -- needlessly ambiguous to read, even though it parses.
+  text         text not null check (btrim(text) <> ''),
+
+  created_at   timestamptz not null default now()
+);
+
+create index if not exists news_comments_post_idx
+  on public.news_comments (post_id, created_at asc);
+
+
+-- One like per user per post, enforced by the composite primary key rather
+-- than a surrogate id + unique index. A duplicate like is then a no-op via
+-- `on conflict do nothing`, and unliking is a plain delete on the key.
+create table if not exists public.news_likes (
+  post_id     uuid not null references public.news_posts (id) on delete cascade,
+  user_id     uuid not null references public.profiles (id) on delete cascade,
+  created_at  timestamptz not null default now(),
+
+  primary key (post_id, user_id)
+);
+
+create index if not exists news_likes_user_idx
+  on public.news_likes (user_id);
+
+
+-- ---------------------------------------------------------------------------
+-- Feed view with counts.
+--
+-- The UI needs likes and comments totals per post. security_invoker makes the
+-- view respect the querying user's RLS rather than the view owner's, so it
+-- cannot be used to read unapproved posts. Requires Postgres 15+, which
+-- Supabase provides.
+-- ---------------------------------------------------------------------------
+
+create or replace view public.news_feed
+with (security_invoker = true)
+as
+select
+  p.*,
+  coalesce(l.like_count, 0)    as like_count,
+  coalesce(c.comment_count, 0) as comment_count
+from public.news_posts p
+left join (
+  select post_id, count(*) as like_count
+  from public.news_likes
+  group by post_id
+) l on l.post_id = p.id
+left join (
+  select post_id, count(*) as comment_count
+  from public.news_comments
+  group by post_id
+) c on c.post_id = p.id;
+
+
+-- --- news RLS --------------------------------------------------------------
+
+alter table public.news_posts    enable row level security;
+alter table public.news_comments enable row level security;
+alter table public.news_likes    enable row level security;
+
+-- Approved posts are public. Authors additionally see their own pending and
+-- rejected submissions, so the composer can show "awaiting approval".
+drop policy if exists "news_posts: read approved" on public.news_posts;
+create policy "news_posts: read approved"
+  on public.news_posts for select
+  to anon, authenticated
+  using (
+    status = 'approved'
+    or user_id = auth.uid()
+    or public.is_admin()
+  );
+
+-- THE moderation rule. status is pinned to 'pending' on insert, so a user
+-- cannot self-publish regardless of what the client sends.
+drop policy if exists "news_posts: submit pending" on public.news_posts;
+create policy "news_posts: submit pending"
+  on public.news_posts for insert
+  to authenticated
+  with check (
+    user_id = auth.uid()
+    and status = 'pending'
+  );
+
+-- Authors may withdraw their own submission; they may not edit it, because
+-- an UPDATE policy cannot restrict which columns change and would therefore
+-- let an author flip their own status to 'approved'.
+drop policy if exists "news_posts: delete own" on public.news_posts;
+create policy "news_posts: delete own"
+  on public.news_posts for delete
+  to authenticated
+  using (user_id = auth.uid() or public.is_admin());
+
+drop policy if exists "news_posts: admin moderate" on public.news_posts;
+create policy "news_posts: admin moderate"
+  on public.news_posts for update
+  using (public.is_admin())
+  with check (public.is_admin());
+
+
+-- Comments are visible only on posts the reader can already see.
+drop policy if exists "news_comments: read visible" on public.news_comments;
+create policy "news_comments: read visible"
+  on public.news_comments for select
+  to anon, authenticated
+  using (
+    exists (
+      select 1
+      from public.news_posts p
+      where p.id = news_comments.post_id
+        and (
+          p.status = 'approved'
+          or p.user_id = auth.uid()
+          or public.is_admin()
+        )
+    )
+  );
+
+-- Commenting is allowed only on approved posts.
+drop policy if exists "news_comments: write own" on public.news_comments;
+create policy "news_comments: write own"
+  on public.news_comments for insert
+  to authenticated
+  with check (
+    user_id = auth.uid()
+    and exists (
+      select 1
+      from public.news_posts p
+      where p.id = news_comments.post_id
+        and p.status = 'approved'
+    )
+  );
+
+drop policy if exists "news_comments: delete own" on public.news_comments;
+create policy "news_comments: delete own"
+  on public.news_comments for delete
+  to authenticated
+  using (user_id = auth.uid() or public.is_admin());
+
+
+-- Likes are world-readable so the counts render for signed-out visitors.
+drop policy if exists "news_likes: read all" on public.news_likes;
+create policy "news_likes: read all"
+  on public.news_likes for select
+  to anon, authenticated
+  using (true);
+
+drop policy if exists "news_likes: like own" on public.news_likes;
+create policy "news_likes: like own"
+  on public.news_likes for insert
+  to authenticated
+  with check (
+    user_id = auth.uid()
+    and exists (
+      select 1
+      from public.news_posts p
+      where p.id = news_likes.post_id
+        and p.status = 'approved'
+    )
+  );
+
+drop policy if exists "news_likes: unlike own" on public.news_likes;
+create policy "news_likes: unlike own"
+  on public.news_likes for delete
+  to authenticated
+  using (user_id = auth.uid());

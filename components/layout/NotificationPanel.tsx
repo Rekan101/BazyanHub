@@ -1,28 +1,84 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import {
   AnimatePresence,
   motion,
 } from "framer-motion";
 import {
   BellRing,
+  Megaphone,
+  Newspaper,
   Sparkles,
+  Store,
   X,
+  type LucideIcon,
 } from "lucide-react";
 
 import { useLanguage } from "@/lib/i18n";
+import {
+  countUnread,
+  type AppNotification,
+} from "@/lib/data/notifications";
+
+/*
+ * Allow-list for the `icon` column. Anything unrecognised (or null) falls
+ * back to Sparkles, which is the glyph the built-in welcome item has always
+ * used — so an unknown icon degrades to the familiar look rather than a gap.
+ */
+const NOTIFICATION_ICONS: Record<
+  string,
+  LucideIcon
+> = {
+  sparkles: Sparkles,
+  megaphone: Megaphone,
+  newspaper: Newspaper,
+  store: Store,
+  bell: BellRing,
+};
+
+function resolveIcon(
+  icon: string | null
+): LucideIcon {
+  if (!icon) {
+    return Sparkles;
+  }
+
+  return (
+    NOTIFICATION_ICONS[icon.toLowerCase()] ??
+    Sparkles
+  );
+}
 
 interface NotificationPanelProps {
   open: boolean;
   onClose: () => void;
+
+  /*
+   * Fetched on the server in app/layout.tsx. An empty list is the normal
+   * state before any rows exist, and makes the panel render its built-in
+   * welcome item — the same thing it showed before the database existed.
+   */
+  notifications?: AppNotification[];
 }
 
 export default function NotificationPanel({
   open,
   onClose,
+  notifications = [],
 }: NotificationPanelProps) {
   const { t, direction } = useLanguage();
+
+  const hasRows = notifications.length > 0;
+
+  /*
+   * The welcome fallback is always shown as unread, matching the hardcoded
+   * "1" badge this panel carried before it was wired to data.
+   */
+  const unreadCount = hasRows
+    ? countUnread(notifications)
+    : 1;
 
   /* ---------------------------------------------------------
      Close on Escape
@@ -200,7 +256,7 @@ export default function NotificationPanel({
                     text-white
                   "
                 >
-                  1
+                  {unreadCount}
                 </span>
               </div>
 
@@ -240,79 +296,186 @@ export default function NotificationPanel({
             =============================================== */}
 
             <ul className="max-h-[60vh] overflow-y-auto overscroll-contain p-2">
-              <li>
-                <div
-                  className="
-                    flex gap-3
-                    rounded-2xl
-                    bg-sky-50/60
-                    p-3
+              {hasRows ? (
+                notifications.map(
+                  (notification) => {
+                    const Icon = resolveIcon(
+                      notification.icon
+                    );
 
-                    dark:bg-sky-900/30
-                  "
-                >
-                  <span
-                    aria-hidden="true"
+                    /*
+                     * Read rows lose the tinted background and the unread
+                     * dot, but keep the same geometry so the list does not
+                     * jump as items are read.
+                     */
+                    const body = (
+                      <div
+                        className={`
+                          flex gap-3
+                          rounded-2xl
+                          p-3
+                          ${
+                            notification.isRead
+                              ? "bg-transparent"
+                              : "bg-sky-50/60 dark:bg-sky-900/30"
+                          }
+                        `}
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="
+                            flex h-10 w-10 shrink-0
+                            items-center justify-center
+                            rounded-full
+                            bg-gradient-to-br from-blue-600 to-sky-500
+                            text-white
+                            shadow-[0_8px_18px_-8px_rgba(37,99,235,0.9)]
+                          "
+                        >
+                          <Icon className="h-5 w-5" />
+                        </span>
+
+                        <div className="min-w-0 flex-1">
+                          <p
+                            className="
+                              text-[13px] font-bold leading-snug
+                              text-slate-900
+
+                              dark:text-white
+                            "
+                          >
+                            {notification.title}
+                          </p>
+
+                          {notification.body ? (
+                            <p
+                              className="
+                                mt-1
+                                text-[12px] leading-relaxed
+                                text-slate-600
+
+                                dark:text-slate-400
+                              "
+                            >
+                              {notification.body}
+                            </p>
+                          ) : null}
+                        </div>
+
+                        {!notification.isRead ? (
+                          <span
+                            aria-hidden="true"
+                            className="
+                              mt-1.5 h-2 w-2 shrink-0
+                              rounded-full
+                              bg-blue-600
+                              dark:bg-blue-500
+                            "
+                          />
+                        ) : null}
+                      </div>
+                    );
+
+                    return (
+                      <li key={notification.id}>
+                        {notification.linkUrl ? (
+                          <Link
+                            href={
+                              notification.linkUrl
+                            }
+                            onClick={onClose}
+                            className="block outline-none focus-visible:ring-2 focus-visible:ring-blue-600 dark:focus-visible:ring-blue-500 rounded-2xl"
+                          >
+                            {body}
+                          </Link>
+                        ) : (
+                          body
+                        )}
+                      </li>
+                    );
+                  }
+                )
+              ) : (
+                /*
+                 * Fallback when the database has no rows (or is not
+                 * configured). Text comes from the i18n dictionary, not from
+                 * a row — this is exactly what the panel showed before it
+                 * was wired to Supabase.
+                 */
+                <li>
+                  <div
                     className="
-                      flex h-10 w-10 shrink-0
-                      items-center justify-center
-                      rounded-full
-                      bg-gradient-to-br from-blue-600 to-sky-500
-                      text-white
-                      shadow-[0_8px_18px_-8px_rgba(37,99,235,0.9)]
+                      flex gap-3
+                      rounded-2xl
+                      bg-sky-50/60
+                      p-3
+
+                      dark:bg-sky-900/30
                     "
                   >
-                    <Sparkles className="h-5 w-5" />
-                  </span>
-
-                  <div className="min-w-0 flex-1">
-                    <p
+                    <span
+                      aria-hidden="true"
                       className="
-                        text-[13px] font-bold leading-snug
-                        text-slate-900
-
-                        dark:text-white
+                        flex h-10 w-10 shrink-0
+                        items-center justify-center
+                        rounded-full
+                        bg-gradient-to-br from-blue-600 to-sky-500
+                        text-white
+                        shadow-[0_8px_18px_-8px_rgba(37,99,235,0.9)]
                       "
                     >
-                      {t("notificationWelcomeTitle")}
-                    </p>
+                      <Sparkles className="h-5 w-5" />
+                    </span>
 
-                    <p
+                    <div className="min-w-0 flex-1">
+                      <p
+                        className="
+                          text-[13px] font-bold leading-snug
+                          text-slate-900
+
+                          dark:text-white
+                        "
+                      >
+                        {t("notificationWelcomeTitle")}
+                      </p>
+
+                      <p
+                        className="
+                          mt-1
+                          text-[12px] leading-relaxed
+                          text-slate-600
+
+                          dark:text-slate-400
+                        "
+                      >
+                        {t("notificationWelcomeBody")}
+                      </p>
+
+                      <p
+                        className="
+                          mt-1.5
+                          text-[10.5px] font-semibold
+                          text-blue-600
+
+                          dark:text-blue-500
+                        "
+                      >
+                        {t("notificationNow")}
+                      </p>
+                    </div>
+
+                    <span
+                      aria-hidden="true"
                       className="
-                        mt-1
-                        text-[12px] leading-relaxed
-                        text-slate-600
-
-                        dark:text-slate-400
+                        mt-1.5 h-2 w-2 shrink-0
+                        rounded-full
+                        bg-blue-600
+                        dark:bg-blue-500
                       "
-                    >
-                      {t("notificationWelcomeBody")}
-                    </p>
-
-                    <p
-                      className="
-                        mt-1.5
-                        text-[10.5px] font-semibold
-                        text-blue-600
-
-                        dark:text-blue-500
-                      "
-                    >
-                      {t("notificationNow")}
-                    </p>
+                    />
                   </div>
-
-                  <span
-                    aria-hidden="true"
-                    className="
-                      mt-1.5 h-2 w-2 shrink-0
-                      rounded-full
-                      bg-blue-600
-                      dark:bg-blue-500
-                    "
-                  />
-                </div>
-              </li>
+                </li>
+              )}
             </ul>
           </motion.div>
         </div>

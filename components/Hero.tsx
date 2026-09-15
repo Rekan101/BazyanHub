@@ -12,12 +12,24 @@ import { ChevronDown } from "lucide-react";
 
 import { useLanguage } from "@/lib/i18n";
 import Stories from "@/components/Stories";
+import type { Slide } from "@/lib/data/stories";
 
 /* ==========================================================================
    HERO
    ========================================================================== */
 
-export default function Hero() {
+type HeroProps = {
+  /*
+   * Fetched on the server by app/page.tsx and passed straight through to the
+   * carousel. Optional so Hero stays renderable on its own; Stories falls
+   * back to the mock slides when it is absent.
+   */
+  slides?: Slide[];
+};
+
+export default function Hero({
+  slides,
+}: HeroProps) {
   const { language } = useLanguage();
 
   /* ------------------------------------------------------------------------
@@ -212,7 +224,7 @@ export default function Hero() {
               }}
               className="w-full"
             >
-              <Stories />
+              <Stories slides={slides} />
             </m.div>
 
             {/* ==================================================================

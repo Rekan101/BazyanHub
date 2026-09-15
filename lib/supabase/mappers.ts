@@ -9,6 +9,8 @@ import type {
   ServiceCategory,
   ServiceFilter,
 } from "@/lib/data/categories";
+import type { Slide } from "@/lib/data/stories";
+import type { AppNotification } from "@/lib/data/notifications";
 import type {
   CategoryRow,
   FilterRow,
@@ -267,31 +269,16 @@ export function mapCategoryRow(
 | Stories
 |--------------------------------------------------------------------------
 |
-| Mirrors the Story/Slide types in components/Stories.tsx. Those are still
-| fed by local mock data today; these mappers exist so wiring that component
-| up later is a data swap and nothing more.
+| Produces the exact Slide/Story types that components/Stories.tsx already
+| renders (defined in lib/data/stories.ts), so a database-backed slide and a
+| mock slide are indistinguishable to the carousel.
 |
 */
-
-export type MappedStory = {
-  id: string;
-  image: string;
-  providerName: string;
-  shortInfo: string;
-  providerId: string;
-  categoryId: string;
-};
-
-export type MappedSlide = {
-  id: string;
-  title: string;
-  stories: MappedStory[];
-};
 
 export function mapStorySlideRow(
   row: StorySlideRowWithStories,
   categorySlugById: Map<string, string>
-): MappedSlide {
+): Slide {
   const stories = (row.stories ?? [])
     .filter(
       (story) =>
@@ -313,6 +300,12 @@ export function mapStorySlideRow(
 
       shortInfo: story.short_info ?? "",
 
+      /*
+       * Both may be "" when a story has no linked provider - stories.provider_id
+       * is nullable, and ON DELETE SET NULL leaves the story standing after its
+       * business is removed. Stories.tsx checks for that and hides the CTA
+       * rather than emitting a broken /services// link.
+       */
       providerId:
         story.providers?.slug ??
         story.provider_id ??
@@ -339,20 +332,10 @@ export function mapStorySlideRow(
 |--------------------------------------------------------------------------
 */
 
-export type MappedNotification = {
-  id: string;
-  title: string;
-  body: string;
-  icon: string | null;
-  linkUrl: string | null;
-  isRead: boolean;
-  createdAt: string;
-};
-
 export function mapNotificationRow(
   row: NotificationRow,
   language: "ckb" | "ar" | "en"
-): MappedNotification {
+): AppNotification {
   const title =
     language === "ar"
       ? (row.title_ar ?? row.title_ckb)

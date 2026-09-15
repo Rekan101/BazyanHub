@@ -165,6 +165,46 @@ export type NotificationRow = {
   created_at: string;
 };
 
+export type NewsPostStatus =
+  | "pending"
+  | "approved"
+  | "rejected";
+
+export type NewsPostRow = {
+  id: string;
+  user_id: string | null;
+  author_name: string | null;
+  text_content: string | null;
+  media_url: string | null;
+  media_type: "image" | "video" | null;
+  status: NewsPostStatus;
+  approved_at: string | null;
+  approved_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+/* The public.news_feed view: news_posts plus aggregate counts. */
+export type NewsFeedRow = NewsPostRow & {
+  like_count: number;
+  comment_count: number;
+};
+
+export type NewsCommentRow = {
+  id: string;
+  post_id: string;
+  user_id: string | null;
+  author_name: string | null;
+  text: string;
+  created_at: string;
+};
+
+export type NewsLikeRow = {
+  post_id: string;
+  user_id: string;
+  created_at: string;
+};
+
 /*
  * Minimal Database shape for the generic parameter on createClient. Only the
  * Row types are filled in, since this repo reads far more than it writes.
@@ -215,8 +255,30 @@ export type Database = {
         Insert: Partial<NotificationRow> & { title_ckb: string };
         Update: Partial<NotificationRow>;
       };
+      news_posts: {
+        Row: NewsPostRow;
+        Insert: Partial<NewsPostRow>;
+        Update: Partial<NewsPostRow>;
+      };
+      news_comments: {
+        Row: NewsCommentRow;
+        Insert: Partial<NewsCommentRow> & {
+          post_id: string;
+          text: string;
+        };
+        Update: Partial<NewsCommentRow>;
+      };
+      news_likes: {
+        Row: NewsLikeRow;
+        Insert: { post_id: string; user_id: string };
+        Update: Partial<NewsLikeRow>;
+      };
     };
-    Views: Record<string, never>;
+    Views: {
+      news_feed: {
+        Row: NewsFeedRow;
+      };
+    };
     Functions: {
       is_admin: {
         Args: Record<string, never>;
@@ -226,6 +288,7 @@ export type Database = {
     Enums: {
       story_duration: StoryDuration;
       auth_method: AuthMethod;
+      news_post_status: NewsPostStatus;
     };
     CompositeTypes: Record<string, never>;
   };

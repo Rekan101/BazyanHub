@@ -16,9 +16,9 @@ import {
   mapProviderRow,
   mapStorySlideRow,
   type CategoryRowWithFilters,
-  type MappedNotification,
-  type MappedSlide,
 } from "@/lib/supabase/mappers";
+import type { Slide } from "@/lib/data/stories";
+import type { AppNotification } from "@/lib/data/notifications";
 import type {
   FilterRow,
   NotificationRow,
@@ -232,12 +232,10 @@ export async function fetchFiltersByCategory(
 /*
  * Story slides with their live (unexpired) stories.
  *
- * Not consumed yet - components/Stories.tsx still renders its local SLIDES
- * constant. This exists so wiring that component up is a one-line data swap
- * rather than a new query layer.
+ * Consumed by lib/data/stories.server.ts, which applies the mock fallback.
  */
 export async function fetchStorySlides(): Promise<
-  MappedSlide[] | null
+  Slide[] | null
 > {
   const supabase =
     await getSupabaseServerClient();
@@ -291,11 +289,11 @@ export async function fetchStorySlides(): Promise<
  * RLS enforces the same rule server-side; the filter here just avoids
  * shipping rows the policy would reject anyway.
  *
- * Not consumed yet - NotificationPanel.tsx is still a static UI shell.
+ * Consumed by lib/data/notifications.server.ts.
  */
 export async function fetchNotifications(
   language: "ckb" | "ar" | "en" = "ckb"
-): Promise<MappedNotification[] | null> {
+): Promise<AppNotification[] | null> {
   const supabase =
     await getSupabaseServerClient();
 

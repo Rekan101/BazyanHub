@@ -9,6 +9,7 @@ import { vazirmatn } from "@/lib/fonts";
 import AppHeader from "@/components/layout/AppHeader";
 import BottomNav from "@/components/layout/BottomNav";
 import { NotificationProvider } from "@/components/layout/NotificationProvider";
+import { getNotifications } from "@/lib/data/notifications.server";
 
 export const metadata: Metadata = {
   title: "BazianHub",
@@ -23,11 +24,23 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({
+/*
+ * Async so notifications can be fetched for the single app-wide panel.
+ *
+ * Trade-off worth knowing: once Supabase is configured this read calls
+ * cookies(), which opts every route into dynamic rendering. With no
+ * credentials present getSupabaseServerClient() returns before touching
+ * cookies(), so the static pages stay static. Moving this fetch client-side
+ * would restore static rendering at the cost of a first-paint flash on the
+ * unread badge.
+ */
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const notifications = await getNotifications();
+
   return (
     <html
       lang="ckb"
@@ -38,7 +51,9 @@ export default function RootLayout({
       <body suppressHydrationWarning>
         <ThemeProvider>
           <LanguageProvider>
-            <NotificationProvider>
+            <NotificationProvider
+              notifications={notifications}
+            >
             {/* =============================================
                 DESKTOP BACKDROP
             ============================================== */}

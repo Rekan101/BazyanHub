@@ -12,6 +12,7 @@ import {
 import { usePathname } from "next/navigation";
 
 import NotificationPanel from "@/components/layout/NotificationPanel";
+import type { AppNotification } from "@/lib/data/notifications";
 
 /*
 |--------------------------------------------------------------------------
@@ -39,8 +40,16 @@ const NotificationContext =
 
 export function NotificationProvider({
   children,
+  notifications = [],
 }: {
   children: ReactNode;
+
+  /*
+   * Fetched on the server in app/layout.tsx and threaded through to the
+   * single panel instance. Defaults to empty so the provider still works in
+   * isolation — the panel then shows its built-in welcome item.
+   */
+  notifications?: AppNotification[];
 }) {
   const [isOpen, setIsOpen] =
     useState(false);
@@ -90,6 +99,7 @@ export function NotificationProvider({
       <NotificationPanel
         open={isOpen}
         onClose={close}
+        notifications={notifications}
       />
     </NotificationContext.Provider>
   );
