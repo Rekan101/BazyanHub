@@ -87,7 +87,8 @@ Established as a 5-color system, replacing an earlier emerald/green theme. **Eve
   - `useNotifications()` now also exposes `{ notifications, unreadCount, isLoading, refresh }` alongside the open/close API, so the header bell could consume the real count later.
 
 ### `components/layout/MenuSheet.tsx`
-- The hamburger-triggered slide-in sheet (page links, language switcher, theme toggle, footer info). Still uses the general slate treatment — **not** updated to navy chrome; if the navy header makes it feel visually disconnected, that is a known, un-actioned observation, not a bug.
+- The hamburger-triggered slide-in sheet (auth CTA, page links, language switcher, theme toggle, footer info). Still uses the general slate treatment — **not** updated to navy chrome; if the navy header makes it feel visually disconnected, that is a known, un-actioned observation, not a bug.
+- **First item in the scrollable content is the auth CTA banner** (`<AuthEntryLinks />` under a tinted gradient panel) — see §12. It sits above the page-links nav deliberately: signing in is the most useful action for a signed-out visitor.
 
 ## 5. Stories Carousel (`components/Stories.tsx`, used inside `components/Hero.tsx`)
 
@@ -163,7 +164,7 @@ the local `categories` array; it was not part of the Supabase rewiring.
 - `lib/supabase/types.ts` — hand-written `Database` types. **Keep in sync with the SQL by hand**, or regenerate with `npx supabase gen types typescript`.
 - `lib/supabase/client.ts` — `"use client"`. Browser client + all auth helpers (§8.1). Exports `isSupabaseConfigured()`.
 - **`lib/supabase/public.ts`** — `server-only`. **Cookie-free** client (plain `createClient`, anon key, `persistSession: false`). Used by every public read. **This is what keeps pages statically renderable**, because it never calls `cookies()`.
-- `lib/supabase/server.ts` — `server-only`. Cookie-**based** client via `@supabase/ssr`. Now used by **nothing except conceptually the OAuth callback** (which builds its own inline, because this helper deliberately swallows cookie writes). Reach for it only when a read must see the signed-in user; doing so makes the calling route dynamic.
+- `lib/supabase/server.ts` — `server-only`. Cookie-**based** client via `@supabase/ssr`. **Currently imported by nothing — this is intentional, KEEP IT.** It is the designated client for the next phase's authenticated server work (admin news moderation, a user reading their own `pending` posts), where seeing `auth.uid()` is the whole point. The OAuth callback builds its own inline instead, because this helper deliberately swallows cookie writes. Reach for it only when a read must see the signed-in user — doing so makes the calling route dynamic (see the `cookies()` rule below).
 - `lib/supabase/mappers.ts` — DB row → app model. Pure functions and type-only imports, so it is **client-safe**. This is what makes the golden-rule card work (§8.3).
 - `lib/supabase/queries.ts` — `server-only`. Public read queries, via the **public** client. Never add a user-specific read here.
 - **`lib/supabase/queries.client.ts`** — `"use client"`. Browser-side reads. Currently just notifications.
@@ -334,7 +335,8 @@ and will need:
 - Settings rows (Language, Notifications, Legal) use plain glyphs — no tinted icon tile behind them, per an explicit design correction away from the original tile treatment.
 - **Notifications row** is a real `<button onClick={openNotifications}>` wired to the shared `useNotifications()` context (§4.3) — opens the **same** panel as the header bell. Carries a `bg-rose-500` unread dot matching the header's.
 - **Contact social icons — strictly 3, not 5**: Instagram and TikTok were removed. Remaining order in source (`facebook`, `whatsapp`, `viber`) renders under RTL as **Viber (left) / WhatsApp (center) / Facebook (right)** — no manual reordering needed, RTL does it. WhatsApp is sized `h-[4.5rem] w-[4.5rem]` (72px) — exactly 1.5× the `h-12 w-12` (48px) Facebook/Viber buttons. All three use real brand hex colors with a glossy top-highlight overlay and brand-tinted glow shadows, no borders.
-- Also present, unchanged from earlier work: phone/email contact rows, Working Hours card, Address card, FAQ accordion (reusing `components/ui/accordion.tsx`), and a "coming soon" note for account features.
+- **Auth entry card** (last section on the page) — replaced the old dashed "coming soon" note once `/login` and `/signup` shipped. Reuses `cardClass` with `text-center`: a blue-tinted `LogIn` tile, `authEntryTitle`, `authEntrySubtitle`, then `<AuthEntryLinks />`. See §12.
+- Also present, unchanged from earlier work: phone/email contact rows, Working Hours card, Address card, and the FAQ accordion (reusing `components/ui/accordion.tsx`).
 
 ## 11. Coding & Maintenance Rules
 
@@ -393,8 +395,22 @@ inside the existing `pt-[73px] pb-24` gutters rather than fight them.
   inline instead of using `getSupabaseServerClient()`, because that helper swallows cookie writes —
   correct in a server component, fatal here where persisting the session is the entire job.
 
-### Known gap
+### Entry points
 
-**Nothing navigates to `/login` or `/signup`.** They are reachable only by direct URL, because
-`app/profile/page.tsx` and `components/layout/MenuSheet.tsx` were both out of scope. Adding an entry
-point is a one-line change to whichever of those two is preferred.
+Both are wired, via one shared component — `components/auth/AuthEntryLinks.tsx`:
+
+- **`app/profile/page.tsx`** — the dashed "coming soon" note is **gone**, replaced by a centered
+  `cardClass` card (blue-tinted `LogIn` tile, title, subtitle, button pair).
+- **`components/layout/MenuSheet.tsx`** — a tinted CTA banner at the **top** of the scrollable
+  content, above the page links. Uses the same `from-sky-50 to-blue-50/60` gradient family as the
+  NotificationPanel header so it reads as a call-to-action, not another nav row. Passes `onClose`
+  as `onNavigate`, matching how the sheet's other links already dismiss it.
+
+`AuthEntryLinks` is deliberately **one** component used in both places — two hand-tuned copies would
+drift. Primary `/login` is solid `blue-600`; secondary `/signup` is a `border-2 border-blue-600`
+outline. Both `h-12 rounded-2xl`, with the same lift-on-hover as the auth form's submit button.
+
+> Its strings (`authLoginButton`, `authSignupButton`, `authEntryTitle`, `authEntrySubtitle`) live in
+> **`lib/i18n.tsx`**, not `authText.ts` — these buttons appear on Profile and MenuSheet, which are
+> ordinary app surfaces, so they follow the normal §7 rule. `authText.ts` stays scoped to the two
+> auth pages themselves. The now-unused `profileComingSoon` key was removed from all three blocks.

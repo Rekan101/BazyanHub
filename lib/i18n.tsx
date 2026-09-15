@@ -69,8 +69,12 @@ export const TRANSLATIONS = {
     profileTitle: "هەژمارەکەم",
     profileSubtitle:
       "ڕێکخستنەکان و زانیاری هەژمارەکەت لێرە پیشان دەدرێن.",
-    profileComingSoon:
-      "بەم زووانە: تۆمارکردن و چوونەژوورەوە بۆ هەژماری بەکارهێنەر.",
+
+    authEntryTitle: "بچۆ ژوورەوە بۆ هەژمارەکەت",
+    authEntrySubtitle:
+      "بچۆ ژوورەوە یان هەژمارێکی نوێ دروست بکە بۆ بەکارهێنانی هەموو تایبەتمەندییەکان.",
+    authLoginButton: "چوونەژوورەوە",
+    authSignupButton: "خۆتۆمارکردن",
 
     heroTitle: "ژیانی ڕۆژانەت ئاسانتر بکە",
     heroDescription:
@@ -190,8 +194,12 @@ export const TRANSLATIONS = {
     profileTitle: "حسابي",
     profileSubtitle:
       "ستظهر هنا إعدادات ومعلومات حسابك.",
-    profileComingSoon:
-      "قريبًا: التسجيل وتسجيل الدخول إلى حساب المستخدم.",
+
+    authEntryTitle: "سجّل الدخول إلى حسابك",
+    authEntrySubtitle:
+      "سجّل الدخول أو أنشئ حسابًا جديدًا للاستفادة من جميع الميزات.",
+    authLoginButton: "تسجيل الدخول",
+    authSignupButton: "إنشاء حساب",
 
     heroTitle: "اجعل حياتك اليومية أسهل",
     heroDescription:
@@ -311,8 +319,12 @@ export const TRANSLATIONS = {
     profileTitle: "My Profile",
     profileSubtitle:
       "Your account settings and information will appear here.",
-    profileComingSoon:
-      "Coming soon: sign up and log in to a user account.",
+
+    authEntryTitle: "Sign in to your account",
+    authEntrySubtitle:
+      "Sign in or create a new account to unlock all features.",
+    authLoginButton: "Sign in",
+    authSignupButton: "Sign up",
 
     heroTitle: "Make Your Everyday Life Easier",
     heroDescription:

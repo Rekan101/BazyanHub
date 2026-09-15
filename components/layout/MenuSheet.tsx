@@ -30,6 +30,7 @@ import {
 } from "@/lib/i18n";
 
 import { useTheme } from "@/components/ThemeProvider";
+import AuthEntryLinks from "@/components/auth/AuthEntryLinks";
 
 /* ---------------------------------------------------------
    Sheet navigation links
@@ -322,6 +323,59 @@ export default function MenuSheet({
             =============================================== */}
 
             <div className="flex-1 overflow-y-auto px-4 pb-6 pt-5">
+              {/* ===============================================
+                  AUTH ENTRY — sign in / create account
+
+                  Tinted banner, same gradient family as the
+                  NotificationPanel header, so it reads as a
+                  highlighted call-to-action rather than another
+                  plain nav row. Placed first: it is the most
+                  useful action for a signed-out visitor.
+              =============================================== */}
+
+              <div
+                className="
+                  mb-5
+                  overflow-hidden
+                  rounded-2xl
+                  border border-blue-600/15
+                  bg-gradient-to-br
+                  from-sky-50
+                  to-blue-50/60
+                  p-4
+
+                  dark:border-blue-500/20
+                  dark:from-blue-500/[0.12]
+                  dark:to-sky-500/[0.06]
+                "
+              >
+                <p
+                  className="
+                    text-[13.5px] font-bold
+                    text-slate-900
+                    dark:text-white
+                  "
+                >
+                  {t("authEntryTitle")}
+                </p>
+
+                <p
+                  className="
+                    mt-1
+                    text-[12px] leading-relaxed
+                    text-slate-600
+                    dark:text-slate-400
+                  "
+                >
+                  {t("authEntrySubtitle")}
+                </p>
+
+                <AuthEntryLinks
+                  className="mt-3"
+                  onNavigate={onClose}
+                />
+              </div>
+
               {/* PAGE LINKS */}
 
               <nav

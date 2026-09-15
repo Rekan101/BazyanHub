@@ -8,6 +8,7 @@ import {
   Clock3,
   FileText,
   Globe,
+  LogIn,
   Mail,
   MapPin,
   Phone,
@@ -31,6 +32,7 @@ import {
 } from "@/components/icons/SocialIcons";
 
 import { useNotifications } from "@/components/layout/NotificationProvider";
+import AuthEntryLinks from "@/components/auth/AuthEntryLinks";
 
 /*
  * Premium social buttons — true brand colors, white glyphs, soft
@@ -511,27 +513,56 @@ export default function ProfilePage() {
       </div>
 
       {/* =====================================================
-          COMING SOON
+          AUTH ENTRY — sign in / create account
+
+          Replaces the earlier "coming soon" placeholder now that
+          /login and /signup exist. Centered iOS-style card, same
+          cardClass as Working Hours/Address above.
       ====================================================== */}
 
-      <p
-        className="
-          mt-8
-          rounded-3xl
-          border border-dashed border-slate-300
-          bg-white/70
-          px-4 py-5
-          text-center
-          text-[13px] leading-relaxed
-          text-slate-600
-
-          dark:border-slate-700
-          dark:bg-white/[0.02]
-          dark:text-slate-400
-        "
+      <div
+        className={`${cardClass} mt-8 text-center`}
       >
-        {t("profileComingSoon")}
-      </p>
+        <span
+          aria-hidden="true"
+          className="
+            mx-auto flex h-12 w-12
+            items-center justify-center
+            rounded-2xl
+            bg-blue-600/10
+            text-blue-600
+
+            dark:bg-blue-500/10
+            dark:text-blue-500
+          "
+        >
+          <LogIn className="h-6 w-6" />
+        </span>
+
+        <h3
+          className="
+            mt-3
+            text-[15px] font-bold
+            text-slate-900
+            dark:text-white
+          "
+        >
+          {t("authEntryTitle")}
+        </h3>
+
+        <p
+          className="
+            mt-1
+            text-[13px] leading-relaxed
+            text-slate-600
+            dark:text-slate-400
+          "
+        >
+          {t("authEntrySubtitle")}
+        </p>
+
+        <AuthEntryLinks className="mt-4" />
+      </div>
     </div>
   );
 }
