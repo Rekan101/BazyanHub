@@ -640,9 +640,13 @@ create policy "notifications: admin write"
 -- 9. News feed
 -- ===========================================================================
 --
--- Backs app/news/page.tsx. That page currently renders two hardcoded posts
--- and keeps likes/comments in local React state that resets on reload; these
--- tables are what it will read from once it is wired up.
+-- Backs app/news/page.tsx.
+--
+-- *** PIVOT, 2026: comments removed, likes replaced by multi-reactions. ***
+-- There is deliberately NO news_comments table. Commenting was dropped from
+-- the product entirely — do not reintroduce it here without the same being
+-- agreed on the UI side. A single-like `news_likes` table was likewise
+-- replaced by `news_reactions` below.
 --
 -- The moderation guarantee lives in the RLS policy, not in application code:
 -- the INSERT policy's WITH CHECK pins status to 'pending', so a user
@@ -654,14 +658,30 @@ create policy "notifications: admin write"
 do $$
 begin
   if not exists (select 1 from pg_type where typname = 'news_post_status') then
-    -- 'rejected' is an addition beyond the two states originally specified.
-    -- Without it a moderator's only options are "approve" or "delete", and
-    -- deleting destroys the record of what was submitted. Drop it from this
-    -- enum if you genuinely only want a two-state workflow.
+    -- 'rejected' is an addition beyond a plain approve/deny pair. Without it
+    -- a moderator's only options are "approve" or "delete", and deleting
+    -- destroys the record of what was submitted.
     create type public.news_post_status as enum ('pending', 'approved', 'rejected');
   end if;
 end
 $$;
+
+-- Strictly these five. Adding a sixth means a matching entry in REACTIONS
+-- (lib/data/news.ts) or the UI will render a post it cannot label.
+do $$
+begin
+  if not exists (select 1 from pg_type where typname = 'news_reaction_type') then
+    create type public.news_reaction_type as enum
+      ('like', 'love', 'haha', 'sad', 'angry');
+  end if;
+end
+$$;
+
+-- Clean up the pre-pivot tables if an older version of this schema was run.
+-- Order matters: news_comments/news_likes both reference news_posts.
+drop view if exists public.news_feed;
+drop table if exists public.news_comments;
+drop table if exists public.news_likes;
 
 create table if not exists public.news_posts (
   id            uuid primary key default gen_random_uuid(),
@@ -704,50 +724,60 @@ create trigger news_posts_touch
   for each row execute function public.touch_updated_at();
 
 
-create table if not exists public.news_comments (
-  id           uuid primary key default gen_random_uuid(),
+-- ---------------------------------------------------------------------------
+-- news_reactions
+--
+-- One row per (post, user). The composite primary key is what enforces
+-- "one reaction per person" — reacting again is an UPSERT that overwrites
+-- reaction_type rather than adding a second row:
+--
+--   insert into public.news_reactions (post_id, user_id, reaction_type)
+--   values (...)
+--   on conflict (post_id, user_id)
+--   do update set reaction_type = excluded.reaction_type, updated_at = now();
+--
+-- Removing a reaction is a plain delete on the key.
+-- ---------------------------------------------------------------------------
 
-  -- CASCADE here is correct: a comment has no meaning without its post.
-  post_id      uuid not null references public.news_posts (id) on delete cascade,
+create table if not exists public.news_reactions (
+  post_id        uuid not null references public.news_posts (id) on delete cascade,
+  user_id        uuid not null references public.profiles (id) on delete cascade,
 
-  user_id      uuid references public.profiles (id) on delete set null,
-  author_name  text,
+  reaction_type  public.news_reaction_type not null default 'like',
 
-  -- Column is named `text` per spec, which collides with the type name.
-  -- btrim() is used rather than trim() because trim() has special grammar
-  -- (trim(BOTH FROM x)) and a bare type-named identifier inside it is
-  -- needlessly ambiguous to read, even though it parses.
-  text         text not null check (btrim(text) <> ''),
-
-  created_at   timestamptz not null default now()
-);
-
-create index if not exists news_comments_post_idx
-  on public.news_comments (post_id, created_at asc);
-
-
--- One like per user per post, enforced by the composite primary key rather
--- than a surrogate id + unique index. A duplicate like is then a no-op via
--- `on conflict do nothing`, and unliking is a plain delete on the key.
-create table if not exists public.news_likes (
-  post_id     uuid not null references public.news_posts (id) on delete cascade,
-  user_id     uuid not null references public.profiles (id) on delete cascade,
-  created_at  timestamptz not null default now(),
+  created_at     timestamptz not null default now(),
+  updated_at     timestamptz not null default now(),
 
   primary key (post_id, user_id)
 );
 
-create index if not exists news_likes_user_idx
-  on public.news_likes (user_id);
+create index if not exists news_reactions_user_idx
+  on public.news_reactions (user_id);
+
+-- Serves the per-type grouping in the news_feed view below.
+create index if not exists news_reactions_post_type_idx
+  on public.news_reactions (post_id, reaction_type);
+
+drop trigger if exists news_reactions_touch on public.news_reactions;
+create trigger news_reactions_touch
+  before update on public.news_reactions
+  for each row execute function public.touch_updated_at();
 
 
 -- ---------------------------------------------------------------------------
--- Feed view with counts.
+-- Feed view.
 --
--- The UI needs likes and comments totals per post. security_invoker makes the
--- view respect the querying user's RLS rather than the view owner's, so it
--- cannot be used to read unapproved posts. Requires Postgres 15+, which
--- Supabase provides.
+-- Exposes exactly what a feed card needs:
+--   * total_reactions    — the number shown next to the icon cluster
+--   * top_reaction_types — the DISTINCT types this post received, ordered
+--                          most-used first, so the UI can render overlapping
+--                          icons Facebook-style. Capped at 5 by the enum.
+--
+-- There is no comment_count: comments no longer exist.
+--
+-- security_invoker makes the view respect the querying user's RLS rather than
+-- the view owner's, so it cannot be used to read unapproved posts. Requires
+-- Postgres 15+, which Supabase provides.
 -- ---------------------------------------------------------------------------
 
 create or replace view public.news_feed
@@ -755,26 +785,38 @@ with (security_invoker = true)
 as
 select
   p.*,
-  coalesce(l.like_count, 0)    as like_count,
-  coalesce(c.comment_count, 0) as comment_count
+  coalesce(totals.total_reactions, 0)            as total_reactions,
+  coalesce(ranked.top_reaction_types, '{}'::text[]) as top_reaction_types
 from public.news_posts p
+
 left join (
-  select post_id, count(*) as like_count
-  from public.news_likes
+  select
+    post_id,
+    count(*)::int as total_reactions
+  from public.news_reactions
   group by post_id
-) l on l.post_id = p.id
+) totals on totals.post_id = p.id
+
 left join (
-  select post_id, count(*) as comment_count
-  from public.news_comments
+  select
+    post_id,
+    array_agg(reaction_type order by cnt desc, reaction_type) as top_reaction_types
+  from (
+    select
+      post_id,
+      reaction_type::text as reaction_type,
+      count(*)            as cnt
+    from public.news_reactions
+    group by post_id, reaction_type
+  ) per_type
   group by post_id
-) c on c.post_id = p.id;
+) ranked on ranked.post_id = p.id;
 
 
 -- --- news RLS --------------------------------------------------------------
 
-alter table public.news_posts    enable row level security;
-alter table public.news_comments enable row level security;
-alter table public.news_likes    enable row level security;
+alter table public.news_posts     enable row level security;
+alter table public.news_reactions enable row level security;
 
 -- Approved posts are public. Authors additionally see their own pending and
 -- rejected submissions, so the composer can show "awaiting approval".
@@ -815,69 +857,40 @@ create policy "news_posts: admin moderate"
   with check (public.is_admin());
 
 
--- Comments are visible only on posts the reader can already see.
-drop policy if exists "news_comments: read visible" on public.news_comments;
-create policy "news_comments: read visible"
-  on public.news_comments for select
-  to anon, authenticated
-  using (
-    exists (
-      select 1
-      from public.news_posts p
-      where p.id = news_comments.post_id
-        and (
-          p.status = 'approved'
-          or p.user_id = auth.uid()
-          or public.is_admin()
-        )
-    )
-  );
-
--- Commenting is allowed only on approved posts.
-drop policy if exists "news_comments: write own" on public.news_comments;
-create policy "news_comments: write own"
-  on public.news_comments for insert
-  to authenticated
-  with check (
-    user_id = auth.uid()
-    and exists (
-      select 1
-      from public.news_posts p
-      where p.id = news_comments.post_id
-        and p.status = 'approved'
-    )
-  );
-
-drop policy if exists "news_comments: delete own" on public.news_comments;
-create policy "news_comments: delete own"
-  on public.news_comments for delete
-  to authenticated
-  using (user_id = auth.uid() or public.is_admin());
-
-
--- Likes are world-readable so the counts render for signed-out visitors.
-drop policy if exists "news_likes: read all" on public.news_likes;
-create policy "news_likes: read all"
-  on public.news_likes for select
+-- Reactions are world-readable so the counts render for signed-out visitors.
+drop policy if exists "news_reactions: read all" on public.news_reactions;
+create policy "news_reactions: read all"
+  on public.news_reactions for select
   to anon, authenticated
   using (true);
 
-drop policy if exists "news_likes: like own" on public.news_likes;
-create policy "news_likes: like own"
-  on public.news_likes for insert
+-- Reacting is allowed only on approved posts, and only as yourself.
+drop policy if exists "news_reactions: react own" on public.news_reactions;
+create policy "news_reactions: react own"
+  on public.news_reactions for insert
   to authenticated
   with check (
     user_id = auth.uid()
     and exists (
       select 1
       from public.news_posts p
-      where p.id = news_likes.post_id
+      where p.id = news_reactions.post_id
         and p.status = 'approved'
     )
   );
 
-drop policy if exists "news_likes: unlike own" on public.news_likes;
-create policy "news_likes: unlike own"
-  on public.news_likes for delete
+-- Required for the UPSERT above: ON CONFLICT DO UPDATE is checked against
+-- the UPDATE policy, not the INSERT one. Without this, changing an existing
+-- reaction fails even though creating one succeeds.
+drop policy if exists "news_reactions: change own" on public.news_reactions;
+create policy "news_reactions: change own"
+  on public.news_reactions for update
+  to authenticated
+  using (user_id = auth.uid())
+  with check (user_id = auth.uid());
+
+drop policy if exists "news_reactions: remove own" on public.news_reactions;
+create policy "news_reactions: remove own"
+  on public.news_reactions for delete
   to authenticated
   using (user_id = auth.uid());

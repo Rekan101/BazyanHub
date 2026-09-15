@@ -11,9 +11,14 @@ import type {
 } from "@/lib/data/categories";
 import type { Slide } from "@/lib/data/stories";
 import type { AppNotification } from "@/lib/data/notifications";
+import {
+  getAuthorInitials,
+  type FeedPost,
+} from "@/lib/data/news";
 import type {
   CategoryRow,
   FilterRow,
+  NewsFeedRow,
   NotificationRow,
   ProviderHoursRow,
   ProviderRowWithRelations,
@@ -323,6 +328,110 @@ export function mapStorySlideRow(
     id: row.id,
     title: row.title_ckb,
     stories,
+  };
+}
+
+/*
+|--------------------------------------------------------------------------
+| News feed
+|--------------------------------------------------------------------------
+*/
+
+/*
+ * Relative time, formatted in the reader's language. The mock posts carry a
+ * pre-written Kurdish string instead; real rows get this.
+ */
+function formatRelativeTime(
+  iso: string,
+  language: "ckb" | "ar" | "en"
+): string {
+  const then = new Date(iso).getTime();
+
+  if (Number.isNaN(then)) {
+    return "";
+  }
+
+  const diffSeconds = Math.round(
+    (then - Date.now()) / 1000
+  );
+
+  const units: Array<
+    [Intl.RelativeTimeFormatUnit, number]
+  > = [
+    ["year", 60 * 60 * 24 * 365],
+    ["month", 60 * 60 * 24 * 30],
+    ["day", 60 * 60 * 24],
+    ["hour", 60 * 60],
+    ["minute", 60],
+  ];
+
+  /*
+   * Intl has no "ckb" relative-time data in most runtimes; "ar" is the
+   * closest script/plural match and degrades gracefully.
+   */
+  const locale =
+    language === "en"
+      ? "en"
+      : language === "ar"
+        ? "ar"
+        : "ckb";
+
+  const formatter =
+    new Intl.RelativeTimeFormat(
+      [locale, "ar", "en"],
+      { numeric: "auto" }
+    );
+
+  for (const [unit, seconds] of units) {
+    if (Math.abs(diffSeconds) >= seconds) {
+      return formatter.format(
+        Math.round(diffSeconds / seconds),
+        unit
+      );
+    }
+  }
+
+  return formatter.format(
+    diffSeconds,
+    "second"
+  );
+}
+
+export function mapNewsFeedRow(
+  row: NewsFeedRow,
+  language: "ckb" | "ar" | "en" = "ckb"
+): FeedPost {
+  const author =
+    row.author_name?.trim() || "—";
+
+  return {
+    id: row.id,
+    author,
+    authorInitials: getAuthorInitials(author),
+
+    /*
+     * No verified flag on news_posts. Admin-authored posts are the only
+     * thing that would earn the badge, and that is not modelled yet, so it
+     * is deliberately always false rather than faked.
+     */
+    verified: false,
+
+    time: formatRelativeTime(
+      row.created_at,
+      language
+    ),
+    createdAt: row.created_at,
+
+    body: row.text_content ?? "",
+    image: row.media_url,
+    mediaType: row.media_type,
+
+    totalReactions: Number(
+      row.total_reactions ?? 0
+    ),
+
+    topReactionTypes:
+      row.top_reaction_types ?? [],
   };
 }
 

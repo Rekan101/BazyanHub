@@ -167,6 +167,12 @@ the local `categories` array; it was not part of the Supabase rewiring.
 - `supabase-schema.sql` — full DDL: `profiles`, `categories`, `filters`, `providers`, `provider_hours`, `story_slides`, `stories`, `notifications`, plus RLS policies, an `is_admin()` `SECURITY DEFINER` helper, and a `handle_new_user()` trigger on `auth.users`.
 - `supabase-seed.sql` — optional. Inserts the 10 categories, the 12 filter chips, Bazyan Cafe + its 7 hours rows, and the 6 story slide headlines. Run **after** the schema.
 - `lib/supabase/types.ts` — hand-written `Database` types. **Keep in sync with the SQL by hand**, or regenerate with `npx supabase gen types typescript`.
+  > ⚠️ **Every table AND view needs a `Relationships` key**, and tables that are embedded via
+  > `select("*, other(...)")` need the real foreign keys declared in it. postgrest-js's
+  > `GenericSchema` constraint requires it; omit it and the *entire* `public` schema silently fails
+  > the constraint, at which point every table resolves to `never` — reads appear to work only
+  > because of `as` casts, and inserts stop type-checking. This was hit for real: the view entry was
+  > missing `Relationships`, which had quietly disabled type checking across the whole data layer.
 - `lib/supabase/client.ts` — `"use client"`. Browser client + all auth helpers (§8.1). Exports `isSupabaseConfigured()`.
 - **`lib/supabase/public.ts`** — `server-only`. **Cookie-free** client (plain `createClient`, anon key, `persistSession: false`). Used by every public read. **This is what keeps pages statically renderable**, because it never calls `cookies()`.
 - `lib/supabase/server.ts` — `server-only`. Cookie-**based** client via `@supabase/ssr`. **Currently imported by nothing — this is intentional, KEEP IT.** It is the designated client for the next phase's authenticated server work (admin news moderation, a user reading their own `pending` posts), where seeing `auth.uid()` is the whole point. The OAuth callback builds its own inline instead, because this helper deliberately swallows cookie writes. Reach for it only when a read must see the signed-in user — doing so makes the calling route dynamic (see the `cookies()` rule below).
@@ -234,9 +240,10 @@ data as a prop. Do not collapse the pair back into one file — see the boundary
 
 Notifications deliberately break that pattern because they are user-specific; see §4.3.
 
+| **News feed** | `lib/data/news.server.ts` | `app/news/page.tsx` → `NewsPageClient` (+ own reaction via `queries.client.ts`) |
+
 ### Still mock-backed
 
-- **News feed** (`app/news/page.tsx`) — **the schema now exists** (`news_posts`, `news_comments`, `news_likes`, plus the `news_feed` view; see §9), but the page is **not wired to it**. It still renders two hardcoded `MOCK_POSTS` with likes/comments in local React state.
 - Favorites — still `localStorage` (`bazianhub-favorites`, `Record<string, boolean>` keyed by category id). Needs auth UI first.
 - `lib/data/services/*.ts` — **only `restaurants.ts` has real data** (`restaurant-bazian-cafe`); the other nine are empty and serve as the fallback for their categories.
 - `places.ts`, `faqs.ts` — static mock content, untouched.
@@ -283,18 +290,22 @@ route and no `AuthProvider` yet** — this is the data surface a future auth-UI 
   directly with a crafted payload. There is deliberately **no owner UPDATE policy**: an UPDATE policy
   cannot restrict *which columns* change, so granting one would let an author flip their own post to
   `'approved'`. Authors may DELETE (withdraw) but not edit; only an admin may UPDATE.
-- **`news_post_status` includes `'rejected'`**, one state beyond what was specified. Without it a
-  moderator's only options are approve or delete, and deleting destroys the record of what was
-  submitted. Drop it from the enum if a strict two-state workflow is wanted.
-- **`news_likes` uses a composite primary key `(post_id, user_id)`**, not a surrogate id — that is
-  what enforces one like per user. Liking becomes `on conflict do nothing`; unliking is a plain
-  delete on the key.
-- **`public.news_feed`** is a view over `news_posts` carrying `like_count` / `comment_count`. It is
-  declared `security_invoker = true` so it respects the *querying* user's RLS rather than the view
-  owner's — without that it would leak unapproved posts. Requires Postgres 15+ (Supabase provides it).
-- **`news_comments.text`** is named per spec, which collides with the type name `text`. The CHECK uses
-  `btrim(text)` rather than `trim(text)` — both parse, but `trim` has special grammar
-  (`trim(BOTH FROM x)`) that makes a type-named identifier inside it needlessly ambiguous to read.
+- **`news_post_status` includes `'rejected'`**, one state beyond a plain approve/deny pair. Without it
+  a moderator's only options are approve or delete, and deleting destroys the record of what was
+  submitted.
+- **`news_reactions` uses a composite primary key `(post_id, user_id)`** — that is what enforces one
+  reaction per person. Reacting again is an **UPSERT** that overwrites `reaction_type`; removing is a
+  plain delete on the key. `ON CONFLICT DO UPDATE` is checked against the **UPDATE** policy, not the
+  INSERT one, which is why both `news_reactions: react own` and `news_reactions: change own` exist.
+  Dropping the UPDATE policy would let users create a reaction but never change it.
+- **`public.news_feed`** is a view over `news_posts` carrying `total_reactions` and
+  `top_reaction_types` (distinct types, most-used first). No `comment_count` — comments are gone.
+  `security_invoker = true` so it respects the *querying* user's RLS rather than the view owner's;
+  without that it would leak unapproved posts. Requires Postgres 15+ (Supabase provides it).
+- **Reactions cannot be seeded on an empty project.** `news_reactions.user_id` is NOT NULL (half the
+  PK) and references `profiles` → `auth.users`, so there is nobody to attribute one to. The seed's
+  reaction block is driven by whatever profiles exist and is a **no-op** until you have signed some
+  accounts up. Posts *can* be seeded anonymously — `news_posts.user_id` is nullable for exactly that.
 - **`notifications.is_read` is per-row**, so a broadcast (`user_id IS NULL`) cannot track per-user
   read state. A `notification_reads(user_id, notification_id)` join table is the documented fix.
 - `filters` uses two **partial** unique indexes, not a plain `UNIQUE (category_id, slug)` — Postgres
@@ -308,36 +319,60 @@ Supabase work. Standardization happens at the data layer: `mapProviderRow()` emi
 defaulted, hours normalized), so a database-backed provider and a mock provider render through
 identical markup. **Map to `Provider`; never fork the card.**
 
-## 9. News Feed (`app/news/page.tsx`)
+## 9. News Feed (`app/news/page.tsx` + `NewsPageClient.tsx`)
 
-- **Composer**: real controlled `<textarea>` (not a fake button), an `ImagePlus` attach button, and a `بڵاوکردنەوە` publish button (`disabled` while the draft is empty).
-- **Media attachment** (local preview only — nothing is uploaded anywhere): the `ImagePlus` button calls `fileInputRef.current?.click()` on a hidden `<input type="file" accept="image/*,video/*" className="hidden">`; `accept` is what makes mobile offer the gallery/camera. `onChange` stores `{ url: URL.createObjectURL(file), type, name }` and renders a 64px preview in the composer (`<video muted playsInline>` for video, a plain `<img>` for images — blob URLs cannot go through `next/image`).
-  - Two non-obvious requirements, do not remove: blob URLs are revoked in a `useEffect` keyed on `media` (the cleanup closes over the *previous* value, freeing each URL exactly once), and `clearMedia` resets `fileInputRef.current.value = ""` — without that, re-picking the *same* file never fires `onChange`.
-- **Moderation flow**: clicking publish **never appends to the feed array**. It clears the draft and shows a toast: *"پۆستەکەت نێردرا و دوای پەسەندکردنی لەلایەن ئادمینەوە بڵاودەکرێتەوە."* (auto-dismisses after 3.2s). This is the entire "moderation" behavior — there is no admin queue, review UI, or persistence anywhere.
-- **Feed**: exactly 2 hardcoded `MOCK_POSTS`, representing already-approved content. Cards: `bg-slate-50 dark:bg-slate-900` with a `border-slate-200/800` + shadow (needed because the page background is the same `slate-50`).
-- **Engagement**:
-  - **Like (ڕیاکت)** — real per-post local toggle (`Record<string, boolean>` keyed by post id). Fills the heart, turns `text-blue-600 dark:text-blue-500`, count is `post.likes + (liked ? 1 : 0)`. No backend — resets on reload.
-  - **Comment (کۆمێنت)** — toggles an inline thread per post. Three `Record<string, …>` maps keyed by post id: `openComments` (open/closed), `commentDrafts` (controlled input value), `comments` (submitted strings). Submit via the send button or the **Enter** key (`onKeyDown` + `preventDefault`); empty/whitespace is rejected and the button is `disabled`. The displayed count is `post.comments + postComments.length`, so it updates live. Local only — resets on reload.
-  - The comment input reuses the `newsComposerPlaceholder` key rather than introducing a dedicated one; add a proper key to all three `TRANSLATIONS` blocks if a distinct placeholder is wanted.
-- There is **no** admin-approval info banner on the page — it was deliberately removed once the toast started carrying that message.
+> **PIVOT (2026-09): comments removed, likes replaced by multi-reactions.**
+> There is no comment feature anywhere — no `news_comments` table, no comment
+> count, no thread UI. Do not reintroduce one on either side without the other.
 
-### 9.1 Database schema — exists, but the page does not use it yet
+### Structure — Supabase-backed, static
 
-`supabase-schema.sql` §9 defines `news_posts`, `news_comments`, `news_likes` and the `news_feed`
-view, and `supabase-seed.sql` inserts two posts (one `approved`, one `pending`) plus two comments.
-**`app/news/page.tsx` is still entirely mock-backed** — every behaviour described above (2 hardcoded
-posts, local like/comment state, publish-shows-a-toast) is unchanged. Wiring it is a separate pass
-and will need:
+- **`app/news/page.tsx`** — async server component, `export const revalidate = 300`.
+  Calls `getNewsFeed()` (`lib/data/news.server.ts`), which reads the `news_feed`
+  **view** through the cookie-free public client. That is what keeps `/news` `○` static.
+- **`app/news/NewsPageClient.tsx`** — all interactivity. Receives approved posts as a prop.
+- **`lib/data/news.ts`** — client-safe: `FeedPost`, the `REACTIONS` config, `MOCK_POSTS`.
+- **`components/news/ReactionBar.tsx`** — the reaction control.
 
-- a `lib/data/news.ts` / `lib/data/news.server.ts` pair, following the same split as stories;
-- the composer's publish handler to INSERT (the RLS policy forces `status = 'pending'`, so the
-  existing toast copy stays accurate);
-- media upload to Supabase Storage — right now `URL.createObjectURL` previews are **local only** and
-  nothing is uploaded anywhere;
-- auth, since `news_posts`/`news_comments`/`news_likes` all require `auth.uid()` to write. Until
-  login exists the page cannot do more than read.
-- the seeded rows have `user_id IS NULL` (a fresh project has no `auth.users`), which is why that
-  column is nullable — keep it that way so imported/seeded content stays possible.
+Same fallback contract as everywhere else: `null` (no answer) or `[]` (empty DB) → `MOCK_POSTS`.
+
+### Reactions
+
+Five, strictly: 👍 like · ❤️ love · 😂 haha · 😢 sad · 😡 angry. `REACTIONS` in
+`lib/data/news.ts` **must** stay in sync with the `news_reaction_type` enum — a sixth on
+either side alone means a rejected write or an unrenderable reaction.
+
+- **Opening the picker**: hover on pointer devices (with a 220ms close delay so the cursor
+  can travel from button to popover); **450ms long-press** on touch. `pressedRef` swallows
+  the click the browser synthesises after a long-press — without it, long-pressing would
+  open the picker *and* immediately apply the default reaction.
+- **A plain tap** applies `DEFAULT_REACTION` (`like`); tapping again removes it.
+- **Summary**: overlapping 22px bubbles for the distinct types (capped at 3), plus the total.
+  `baseCount`/`baseTypes` come from the server and **exclude the viewer's own** reaction, which
+  is resolved client-side — `ReactionBar` adds it back so counts stay correct optimistically.
+- **Writes** are optimistic with rollback on error. Three cases, deliberately distinct:
+  Supabase unconfigured → pure local state (the demo path); configured but signed out →
+  revert is skipped, a toast with a `/login` link appears; signed in → upsert.
+
+### Split of concerns — why reactions are half server, half client
+
+Aggregates (`total_reactions`, `top_reaction_types`) are public and come from the view on the
+server, so they prerender. "Which reaction did *I* pick" needs a session, and reading a session
+server-side means `cookies()`, which would make `/news` dynamic. So `fetchMyReactions()` runs in
+the browser (`lib/supabase/queries.client.ts`), exactly like notifications.
+
+### Composer
+
+- Real `<textarea>`; `ImagePlus` opens a hidden `<input type="file" accept="image/*,video/*">`.
+- **Media is preview-only.** `URL.createObjectURL` blobs are revoked in a `useEffect` keyed on
+  `media`, and `clearMedia` resets `fileInputRef.current.value` (without it, re-picking the same
+  file never fires `onChange`). **Nothing is uploaded** — `submitNewsPost()` deliberately does not
+  send `media_url`. Supabase Storage is a follow-up.
+- **Publishing never appends to the feed.** `submitNewsPost()` omits `status` entirely: the RLS
+  INSERT policy pins it to `'pending'`, so the column default does the work and the moderation
+  guarantee cannot be bypassed from the client. The toast says exactly that.
+- Signed out with Supabase configured → `newsAuthRequired` toast instead of a write.
+
 
 ## 10. Profile Page (`app/profile/page.tsx`)
 

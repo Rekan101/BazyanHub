@@ -275,20 +275,45 @@ where not exists (
 );
 
 
--- Comments, attached to the approved post only — the RLS insert policy
--- refuses comments on a post that is not approved, and the seed should not
--- create rows the app itself could not.
-insert into public.news_comments (post_id, author_name, text)
-select p.id, v.author_name, v.body
+-- ---------------------------------------------------------------------------
+-- Reactions.
+--
+-- IMPORTANT — this block usually inserts NOTHING, by design.
+--
+-- news_reactions.user_id is NOT NULL (it is half of the composite primary key
+-- that enforces one reaction per person), and it references profiles, which
+-- references auth.users. A freshly created project has no users, so there is
+-- no one to attribute a reaction to. Unlike posts, reactions genuinely cannot
+-- be seeded anonymously.
+--
+-- Rather than fail, the insert is driven by whatever profiles happen to exist:
+-- on an empty project the driving select returns no rows and this is a no-op;
+-- once you have signed a few accounts up, re-running the seed gives the
+-- approved post some demo reactions.
+--
+-- Until then the feed's reaction counts come from the mock fallback in
+-- lib/data/news.ts, which is what the UI renders while the database is empty.
+-- ---------------------------------------------------------------------------
+
+insert into public.news_reactions (post_id, user_id, reaction_type)
+select
+  p.id,
+  u.id,
+  -- Spread the first few accounts across different reactions so the
+  -- overlapping-icon cluster in the UI has something to show.
+  (array['like', 'love', 'haha', 'sad', 'angry'])[
+    ((u.row_number - 1) % 5) + 1
+  ]::public.news_reaction_type
 from public.news_posts p
-join (values
-  ('ئاکۆ م.',   'زۆر سوپاس بۆ ئەم زانیارییە، بەسوود بوو. 🙏'),
-  ('شیلان ح.',  'باشە، ئێستا ڕێگاکە چۆنە لە کاتی بەیانیان؟')
-) as v (author_name, body) on true
+cross join (
+  select
+    id,
+    row_number() over (order by created_at) as row_number
+  from public.profiles
+  limit 5
+) u
 where p.status = 'approved'
   and p.author_name = 'ئیدارەی بازیان هەب'
-  and not exists (
-    select 1 from public.news_comments existing
-    where existing.post_id = p.id
-      and existing.text = v.body
-  );
+on conflict (post_id, user_id) do update set
+  reaction_type = excluded.reaction_type,
+  updated_at    = now();

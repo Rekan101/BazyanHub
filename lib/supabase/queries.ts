@@ -12,13 +12,16 @@ import { getSupabasePublicClient } from "@/lib/supabase/public";
 import {
   mapCategoryRow,
   mapFilterRow,
+  mapNewsFeedRow,
   mapProviderRow,
   mapStorySlideRow,
   type CategoryRowWithFilters,
 } from "@/lib/supabase/mappers";
 import type { Slide } from "@/lib/data/stories";
+import type { FeedPost } from "@/lib/data/news";
 import type {
   FilterRow,
+  NewsFeedRow,
   ProviderRowWithRelations,
   StorySlideRowWithStories,
 } from "@/lib/supabase/types";
@@ -229,6 +232,45 @@ export async function fetchFiltersByCategory(
 
   return (data as unknown as FilterRow[]).map(
     mapFilterRow
+  );
+}
+
+/*
+ * Approved news posts with their reaction aggregates, newest first.
+ *
+ * Reads the news_feed VIEW, not the table, so total_reactions and
+ * top_reaction_types come back already computed.
+ *
+ * Only `approved` rows: this runs through the cookie-free public client, so
+ * the caller is `anon` and RLS would hide pending posts anyway — the explicit
+ * filter documents the intent and keeps the query honest if that ever changes.
+ *
+ * Consumed by lib/data/news.server.ts, which applies the mock fallback.
+ */
+export async function fetchNewsFeed(
+  language: "ckb" | "ar" | "en" = "ckb"
+): Promise<FeedPost[] | null> {
+  const supabase = getSupabasePublicClient();
+
+  if (!supabase) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from("news_feed")
+    .select("*")
+    .eq("status", "approved")
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  if (error) {
+    logQueryError("fetchNewsFeed", error);
+
+    return null;
+  }
+
+  return (data as NewsFeedRow[]).map((row) =>
+    mapNewsFeedRow(row, language)
   );
 }
 

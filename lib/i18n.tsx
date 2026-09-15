@@ -55,8 +55,16 @@ export const TRANSLATIONS = {
     newsPublish: "بڵاوکردنەوە",
     newsPostSubmitted:
       "پۆستەکەت نێردرا و دوای پەسەندکردنی لەلایەن ئادمینەوە بڵاودەکرێتەوە.",
-    newsLike: "ڕیاکت",
-    newsComment: "کۆمێنت",
+    newsReact: "ڕیاکت",
+    newsReactionsLabel: "ڕیاکتەکان",
+    newsSignInToReact:
+      "بۆ تۆمارکردنی ڕیاکتەکەت بچۆ ژوورەوە.",
+
+    reactionLike: "بەدڵمە",
+    reactionLove: "خۆشمدەوێت",
+    reactionHaha: "پێکەنیناوی",
+    reactionSad: "خەمگینم",
+    reactionAngry: "توڕەم",
 
     notificationsEmpty:
       "هیچ ئاگادارکردنەوەیەکی نوێت نییە.",
@@ -183,8 +191,16 @@ export const TRANSLATIONS = {
     newsPublish: "نشر",
     newsPostSubmitted:
       "تم إرسال منشورك وسيتم نشره بعد موافقة الإدارة.",
-    newsLike: "إعجاب",
-    newsComment: "تعليق",
+    newsReact: "تفاعل",
+    newsReactionsLabel: "التفاعلات",
+    newsSignInToReact:
+      "سجّل الدخول لحفظ تفاعلك.",
+
+    reactionLike: "أعجبني",
+    reactionLove: "أحببته",
+    reactionHaha: "أضحكني",
+    reactionSad: "أحزنني",
+    reactionAngry: "أغضبني",
 
     notificationsEmpty:
       "لا توجد إشعارات جديدة.",
@@ -311,8 +327,16 @@ export const TRANSLATIONS = {
     newsPublish: "Publish",
     newsPostSubmitted:
       "Your post was submitted and will be published once an admin approves it.",
-    newsLike: "Like",
-    newsComment: "Comment",
+    newsReact: "React",
+    newsReactionsLabel: "Reactions",
+    newsSignInToReact:
+      "Sign in to save your reaction.",
+
+    reactionLike: "Like",
+    reactionLove: "Love",
+    reactionHaha: "Haha",
+    reactionSad: "Sad",
+    reactionAngry: "Angry",
 
     notificationsEmpty:
       "You have no new notifications.",

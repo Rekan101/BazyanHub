@@ -184,25 +184,36 @@ export type NewsPostRow = {
   updated_at: string;
 };
 
-/* The public.news_feed view: news_posts plus aggregate counts. */
+/*
+ * Strictly these five — mirrors the news_reaction_type enum. Adding a sixth
+ * means updating REACTIONS in lib/data/news.ts too, or the UI renders a
+ * reaction it has no emoji or label for.
+ */
+export type NewsReactionType =
+  | "like"
+  | "love"
+  | "haha"
+  | "sad"
+  | "angry";
+
+/*
+ * The public.news_feed view: news_posts plus reaction aggregates.
+ *
+ * There is no comment_count — comments were removed from the product.
+ * `top_reaction_types` is the DISTINCT set of reactions the post received,
+ * ordered most-used first, for the overlapping icon cluster.
+ */
 export type NewsFeedRow = NewsPostRow & {
-  like_count: number;
-  comment_count: number;
+  total_reactions: number;
+  top_reaction_types: NewsReactionType[] | null;
 };
 
-export type NewsCommentRow = {
-  id: string;
-  post_id: string;
-  user_id: string | null;
-  author_name: string | null;
-  text: string;
-  created_at: string;
-};
-
-export type NewsLikeRow = {
+export type NewsReactionRow = {
   post_id: string;
   user_id: string;
+  reaction_type: NewsReactionType;
   created_at: string;
+  updated_at: string;
 };
 
 /*
@@ -216,21 +227,51 @@ export type Database = {
         Row: ProfileRow;
         Insert: Partial<ProfileRow> & { id: string };
         Update: Partial<ProfileRow>;
+        Relationships: [];
       };
       categories: {
         Row: CategoryRow;
         Insert: Partial<CategoryRow> & { slug: string; name_ckb: string };
         Update: Partial<CategoryRow>;
+        Relationships: [];
       };
       filters: {
         Row: FilterRow;
         Insert: Partial<FilterRow> & { slug: string; label_ckb: string };
         Update: Partial<FilterRow>;
+        Relationships: [
+          {
+            foreignKeyName: "filters_category_id_fkey";
+            columns: ["category_id"];
+            referencedRelation: "categories";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       providers: {
         Row: ProviderRow;
         Insert: Partial<ProviderRow> & { category_id: string; name: string };
         Update: Partial<ProviderRow>;
+        Relationships: [
+          {
+            foreignKeyName: "providers_category_id_fkey";
+            columns: ["category_id"];
+            referencedRelation: "categories";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "providers_filter_id_fkey";
+            columns: ["filter_id"];
+            referencedRelation: "filters";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "providers_owner_id_fkey";
+            columns: ["owner_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       provider_hours: {
         Row: ProviderHoursRow;
@@ -239,44 +280,100 @@ export type Database = {
           day_of_week: number;
         };
         Update: Partial<ProviderHoursRow>;
+        Relationships: [
+          {
+            foreignKeyName: "provider_hours_provider_id_fkey";
+            columns: ["provider_id"];
+            referencedRelation: "providers";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       story_slides: {
         Row: StorySlideRow;
         Insert: Partial<StorySlideRow> & { title_ckb: string };
         Update: Partial<StorySlideRow>;
+        Relationships: [];
       };
       stories: {
         Row: StoryRow;
         Insert: Partial<StoryRow> & { slide_id: string; image_url: string };
         Update: Partial<StoryRow>;
+        Relationships: [
+          {
+            foreignKeyName: "stories_slide_id_fkey";
+            columns: ["slide_id"];
+            referencedRelation: "story_slides";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "stories_provider_id_fkey";
+            columns: ["provider_id"];
+            referencedRelation: "providers";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       notifications: {
         Row: NotificationRow;
         Insert: Partial<NotificationRow> & { title_ckb: string };
         Update: Partial<NotificationRow>;
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       news_posts: {
         Row: NewsPostRow;
         Insert: Partial<NewsPostRow>;
         Update: Partial<NewsPostRow>;
+        Relationships: [
+          {
+            foreignKeyName: "news_posts_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
       };
-      news_comments: {
-        Row: NewsCommentRow;
-        Insert: Partial<NewsCommentRow> & {
+      news_reactions: {
+        Row: NewsReactionRow;
+        Insert: {
           post_id: string;
-          text: string;
+          user_id: string;
+          reaction_type: NewsReactionType;
         };
-        Update: Partial<NewsCommentRow>;
-      };
-      news_likes: {
-        Row: NewsLikeRow;
-        Insert: { post_id: string; user_id: string };
-        Update: Partial<NewsLikeRow>;
+        Update: Partial<NewsReactionRow>;
+        Relationships: [
+          {
+            foreignKeyName: "news_reactions_post_id_fkey";
+            columns: ["post_id"];
+            referencedRelation: "news_posts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "news_reactions_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
       };
     };
+    /*
+     * Views need a Relationships key just like tables do — postgrest-js's
+     * GenericView requires it. Omitting it makes the whole `public` schema
+     * fail the GenericSchema constraint, at which point every table and
+     * column silently resolves to `never` and inserts stop type-checking.
+     */
     Views: {
       news_feed: {
         Row: NewsFeedRow;
+        Relationships: [];
       };
     };
     Functions: {
@@ -289,6 +386,7 @@ export type Database = {
       story_duration: StoryDuration;
       auth_method: AuthMethod;
       news_post_status: NewsPostStatus;
+      news_reaction_type: NewsReactionType;
     };
     CompositeTypes: Record<string, never>;
   };
