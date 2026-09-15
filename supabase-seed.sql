@@ -301,14 +301,19 @@ select
   u.id,
   -- Spread the first few accounts across different reactions so the
   -- overlapping-icon cluster in the UI has something to show.
+  --
+  -- The ::int on the subscript is deliberate: row_number() returns bigint,
+  -- and Postgres array subscripts require integer — bigint is only an
+  -- assignment cast, so without this it errors with
+  -- "array subscript must have type integer".
   (array['like', 'love', 'haha', 'sad', 'angry'])[
-    ((u.row_number - 1) % 5) + 1
+    (((u.rn - 1) % 5) + 1)::int
   ]::public.news_reaction_type
 from public.news_posts p
 cross join (
   select
     id,
-    row_number() over (order by created_at) as row_number
+    row_number() over (order by created_at) as rn
   from public.profiles
   limit 5
 ) u
