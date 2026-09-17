@@ -247,23 +247,40 @@ Notifications deliberately break that pattern because they are user-specific; se
 > structurally only (balanced parens, quotes and `$$` bodies). **Expect to fix something the first
 > time you run them**, and re-run the schema before the seed.
 
-### 8.1 Auth — four methods, helpers only
+### 8.1 Auth — username + password ONLY
 
-`lib/supabase/client.ts` exposes typed helpers for all four. **There is no `/login` or `/signup`
-route and no `AuthProvider` yet** — this is the data surface a future auth-UI pass consumes.
+**The UI offers exactly one method.** Email, phone and Facebook were removed from the form
+deliberately: every email Supabase sends counts against a rate limit that becomes the first
+bottleneck at scale, so the product avoids sending any.
 
-1. **Email + password** — `signUpWithEmail` / `signInWithEmail`.
-2. **Username + password** — Supabase Auth has no native username login. A username maps
-   deterministically to a **synthetic address**, `<username>@users.bazyanhub.app`, at both signup
-   and signin. No lookup happens, so there is no username→email enumeration endpoint.
-   **Trade-off:** those addresses cannot receive mail, so email password reset does not work until
-   the user attaches a real address via `linkEmailToAccount()`. `sendPasswordReset()` detects a
-   synthetic address and returns a clear error rather than silently doing nothing.
-   Requires **"Confirm email" turned OFF** in the dashboard.
-3. **Facebook OAuth** — `signInWithFacebook()`. Needs a Facebook App ID/Secret in the dashboard.
-4. **Phone + password** — `signUpWithPhone` / `signInWithPhone` / `verifyPhoneOtp`. **Inert until an
-   SMS provider (Twilio et al.) is configured in the dashboard.** The code is complete; the
-   credentials are not.
+**Username + password** — Supabase Auth has no native username login, so a username maps
+deterministically to a **synthetic address**, `<username>@users.bazyanhub.app`, at both signup and
+signin. No lookup happens, so there is no username→email enumeration endpoint. `isSyntheticEmail()`
+keeps that address off screen (§12).
+
+- **"Confirm email" MUST be OFF** in the dashboard. A synthetic address can never be confirmed, so
+  with it on every signup returns a session-less user and nobody can sign in — ever.
+- **There is no password reset, by design.** No real address exists to send one to. A forgotten
+  password means a lost account, or a manual reset in the dashboard. `linkEmailToAccount()` still
+  exists if a recovery-email feature is ever wanted.
+- **Usernames are Latin-only** (`^[a-z0-9_]{3,30}$`, matching the `profiles_username_format` CHECK).
+  This is not an oversight in a Kurdish-first app: an email local-part must be ASCII, so Kurdish
+  letters cannot go into the synthetic address without an encoding layer. `isValidUsername()` runs
+  **before** the network call so the constraint is never reached.
+
+**Duplicate usernames have three failure shapes**, all normalised to `code: "username_taken"` by
+`signUpWithUsername`. Two are non-obvious:
+- With "Confirm email" ON, GoTrue returns **no error** for an existing account — it fabricates a user
+  with `identities: []` to prevent enumeration. Checking only `error` would report success.
+- `profiles.username` is UNIQUE and `handle_new_user()`'s `on conflict (id) do nothing` guards the
+  *id*, not the username, so a collision raises inside the trigger, rolls the `auth.users` insert
+  back, and surfaces as the generic `"Database error saving new user"`.
+
+`signUpWithEmail` / `signInWithEmail` / `signInWithFacebook` / `signUpWithPhone` /
+`signInWithPhone` / `verifyPhoneOtp` **remain exported but are detached from the UI** — nothing
+imports them. Kept on the same reasoning as `lib/supabase/server.ts`: a typed, working surface for a
+future pass. `app/auth/callback/route.ts` is likewise now unreferenced (Facebook was its only
+caller) and is kept inert.
 
 ### 8.2 Schema notes worth knowing
 
@@ -332,9 +349,14 @@ Same fallback contract as everywhere else: `null` (no answer) or `[]` (empty DB)
 
 ### Reactions
 
-Five, strictly: 👍 like · ❤️ love · 😂 haha · 😢 sad · 😡 angry. `REACTIONS` in
-`lib/data/news.ts` **must** stay in sync with the `news_reaction_type` enum — a sixth on
+Six, strictly: 👍 like · ❤️ love · 😂 haha · 😮 wow · 😢 sad · 😡 angry. `REACTIONS` in
+`lib/data/news.ts` **must** stay in sync with the `news_reaction_type` enum — a seventh on
 either side alone means a rejected write or an unrenderable reaction.
+
+> `wow` is **not** in `supabase-schema.sql`'s enum. It is added by
+> **`supabase-migration-02-news.sql`**, which must be run against any database created from the
+> base schema, or every `wow` write is rejected. `alter type … add value` cannot be used in the
+> same transaction that adds it, which is why that file is split into two parts to run separately.
 
 - **Opening the picker**: hover on pointer devices (with a 220ms close delay so the cursor
   can travel from button to popover); **450ms long-press** on touch. `pressedRef` swallows
@@ -358,14 +380,48 @@ the browser (`lib/supabase/queries.client.ts`), exactly like notifications.
 ### Composer
 
 - Real `<textarea>`; `ImagePlus` opens a hidden `<input type="file" accept="image/*,video/*">`.
-- **Media is preview-only.** `URL.createObjectURL` blobs are revoked in a `useEffect` keyed on
-  `media`, and `clearMedia` resets `fileInputRef.current.value` (without it, re-picking the same
-  file never fires `onChange`). **Nothing is uploaded** — `submitNewsPost()` deliberately does not
-  send `media_url`. Supabase Storage is a follow-up.
+- **Media uploads for real**, to the public `news-media` bucket created by
+  `supabase-migration-02-news.sql`. The preview is still a local blob (instant), revoked in a
+  `useEffect` keyed on `media`; `clearMedia` resets `fileInputRef.current.value` (without it,
+  re-picking the same file never fires `onChange`).
+  - **The upload happens on publish, not on pick.** Attaching something and then changing your mind
+    costs no storage.
+  - **Upload failure aborts the whole submit.** Publishing a caption whose image silently vanished
+    is worse than failing loudly.
+  - Storage path is `<user-id>/<uuid>.<ext>`, because the bucket's INSERT policy pins the first path
+    segment to `auth.uid()`. The extension comes from the **MIME type, not the filename** — a
+    Kurdish or Arabic filename would produce a non-ASCII path, which Storage rejects.
+  - 10 MB cap, enforced in both the bucket (`file_size_limit`) and the client, so an oversized file
+    fails instantly instead of after a long upload.
+- **A post needs text OR media**, matching the `news_posts_not_empty` CHECK — the publish button
+  cannot submit something the database would refuse.
 - **Publishing never appends to the feed.** `submitNewsPost()` omits `status` entirely: the RLS
   INSERT policy pins it to `'pending'`, so the column default does the work and the moderation
   guarantee cannot be bypassed from the client. The toast says exactly that.
 - Signed out with Supabase configured → `newsAuthRequired` toast instead of a write.
+
+### Admin moderation queue — `components/news/AdminQueue.tsx`
+
+A second tab on `/news`, rendered only when `profile.is_admin === true` (`useAuth()`), listing
+`status = 'pending'` posts with Approve / Reject.
+
+- **The tab is presentation, not security.** The real gate is RLS, which was already in place:
+  `news_posts: read approved` returns pending rows only to their author or an admin, and
+  `news_posts: admin moderate` restricts UPDATE to `is_admin()`. A non-admin who forced the
+  component to render would see an empty list and could not write. **No schema change was needed
+  for this feature.**
+- Fetches in the **browser** (`fetchPendingPosts`), like notifications and own-reactions, so `/news`
+  keeps its `○` prerender. Reading pending posts on the server would mean `cookies()`.
+- `profile` is null while the session resolves, so the tabs are absent during that window rather
+  than flashing in. Signing out mid-session forces the tab back to `feed`.
+- Approve/reject **removes the row locally** instead of refetching — a refetch makes the card
+  flicker back in before disappearing.
+- `approved_by` is stamped on **both** outcomes (knowing who rejected something matters too);
+  `approved_at` only on approval, so it stays readable as "when this went live".
+- Reject is an **outline** button, not filled red: the row keeps its content and can still be
+  approved later, so it should not carry a delete's visual weight — same rule as sign-out.
+- An approved post appears on `/news` within the **5-minute ISR window**, not instantly. That is the
+  documented trade-off of keeping the route static.
 
 
 ## 10. Profile Page (`app/profile/page.tsx`)
@@ -401,7 +457,7 @@ still stands, and nothing links to these routes yet (see the gap noted below).
 | `app/login/page.tsx`, `app/signup/page.tsx` | Static server shells. Metadata only; they render `AuthPage` and nothing else, which is what keeps both routes `○`. |
 | `components/auth/AuthPage.tsx` | `"use client"` boundary. Picks the copy for the mode and composes shell + form. |
 | `components/auth/AuthShell.tsx` | Navy brand panel + the floating card that overlaps it + the login⇄signup footer link. |
-| `components/auth/AuthForm.tsx` | All four methods, validation, OTP step, Facebook button. |
+| `components/auth/AuthForm.tsx` | Username + password only. Validation, error-code mapping. No email/phone/OTP/Facebook UI. |
 | `components/auth/authText.ts` | Feature-scoped `ckb`/`ar`/`en` copy. |
 | `app/auth/callback/route.ts` | PKCE code → session exchange. |
 
@@ -411,7 +467,6 @@ Deliberately reuses the Profile page's vocabulary so the two read as one app: `r
 `border-slate-200` / `dark:border-slate-800`, `bg-white` / `dark:bg-slate-900`, soft shadow.
 The brand panel is the same navy as the chrome — `#003B6D` light, `#002240` dark (§3) — and the card
 is pulled up over it with `-mt-10`, matching the provider detail page's identity-card overlap.
-Facebook's button uses its real brand blue `#1877F2`, per the same rule as the profile socials.
 
 These pages render **inside** the root layout, so `AppHeader` and `BottomNav` are present. That is
 intentional (it stays a PWA shell); the shell is sized to `min-h-[calc(100vh-73px-6rem)]` to sit
@@ -425,9 +480,15 @@ inside the existing `pt-[73px] pb-24` gutters rather than fight them.
   `ar`/`en` key a compile error.
 - **Password length and confirmation are validated on signup only.** Enforcing them at login would
   leak the policy and could reject a legitimate older password.
-- **Phone signup can return no session**, meaning Supabase wants SMS confirmation — the card then
-  switches to an OTP step wired to `verifyPhoneOtp()`. Inert until an SMS provider is configured; the
-  form shows a standing note saying exactly that.
+- **Errors are mapped from `result.code`, never from Supabase's message text.** `AuthErrorCode`
+  (`lib/supabase/client.ts`) is the contract; the form picks localised copy from `authText.ts`. Do
+  not regex English error strings in a component.
+- **A signup that returns no session means "Confirm email" is still ON** — the only way that can
+  happen now that phone/OTP are gone. The form says the account exists rather than pretending the
+  user is signed in.
+- **Errors render in the inline `ErrorBanner`, not `window.alert()`.** It carries `role="alert"`,
+  inherits RTL and dark mode, and cannot be suppressed by the browser's "prevent additional dialogs"
+  checkbox the way a native dialog can after repeated failures.
 - **`isSupabaseConfigured()` is surfaced, not swallowed.** With no credentials the form shows an
   amber notice rather than failing silently — which is the repo's current state.
 - **The callback sanitises `next`**: only paths starting with a single `/` are honoured, so

@@ -222,6 +222,112 @@ export async function clearMyReaction(
 
 /*
 |--------------------------------------------------------------------------
+| Media upload
+|--------------------------------------------------------------------------
+|
+| Uploads to the public `news-media` bucket created by
+| supabase-migration-02-news.sql.
+|
+| The path is `<user-id>/<random>.<ext>` because the storage INSERT policy
+| pins the first segment to auth.uid() — that is what stops one user writing
+| into another's folder or overwriting their file by guessing its name.
+|
+*/
+
+/* Mirrors the bucket's file_size_limit. Checked here too so an oversized
+ * file fails instantly instead of after a long upload. */
+export const MAX_MEDIA_BYTES = 10 * 1024 * 1024;
+
+export type UploadedMedia = {
+  url: string;
+  type: "image" | "video";
+};
+
+export async function uploadNewsMedia(
+  file: File
+): Promise<{
+  media: UploadedMedia | null;
+  error: Error | null;
+}> {
+  const supabase = getSupabaseClient();
+
+  if (!supabase) {
+    return {
+      media: null,
+      error: new Error(
+        "Supabase is not configured."
+      ),
+    };
+  }
+
+  if (file.size > MAX_MEDIA_BYTES) {
+    return {
+      media: null,
+      error: new Error("FILE_TOO_LARGE"),
+    };
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return {
+      media: null,
+      error: new Error("Not signed in."),
+    };
+  }
+
+  const isVideo =
+    file.type.startsWith("video");
+
+  /*
+   * Derived from the MIME type, not from the original filename: a Kurdish or
+   * Arabic filename would produce a path with non-ASCII characters, which
+   * Supabase Storage rejects.
+   */
+  const extension =
+    file.type.split("/")[1]?.split("+")[0] ??
+    (isVideo ? "mp4" : "jpg");
+
+  const path = `${user.id}/${crypto.randomUUID()}.${extension}`;
+
+  const { error: uploadError } =
+    await supabase.storage
+      .from("news-media")
+      .upload(path, file, {
+        contentType: file.type,
+        upsert: false,
+      });
+
+  if (uploadError) {
+    if (process.env.NODE_ENV === "development") {
+      console.warn(
+        "[supabase] uploadNewsMedia failed:",
+        uploadError
+      );
+    }
+
+    return { media: null, error: uploadError };
+  }
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage
+    .from("news-media")
+    .getPublicUrl(path);
+
+  return {
+    media: {
+      url: publicUrl,
+      type: isVideo ? "video" : "image",
+    },
+    error: null,
+  };
+}
+
+/*
+|--------------------------------------------------------------------------
 | Post submission
 |--------------------------------------------------------------------------
 |
@@ -230,13 +336,11 @@ export async function clearMyReaction(
 | letting the column default do the work keeps the client honest and makes
 | the moderation guarantee impossible to bypass from here.
 |
-| media_url is likewise not sent: the composer's preview is a local blob URL
-| and nothing is uploaded yet. Supabase Storage is a follow-up.
-|
 */
 
 export async function submitNewsPost(
-  textContent: string
+  textContent: string,
+  media?: UploadedMedia | null
 ): Promise<{ error: Error | null }> {
   const supabase = getSupabaseClient();
 
@@ -273,7 +377,209 @@ export async function submitNewsPost(
         profile?.username ??
         null,
       text_content: textContent.trim(),
+      media_url: media?.url ?? null,
+      media_type: media?.type ?? null,
     });
+
+  return { error };
+}
+
+/*
+|--------------------------------------------------------------------------
+| Admin moderation
+|--------------------------------------------------------------------------
+|
+| Browser-side for the same reason as everything else user-specific: reading
+| the session on the server would make /news dynamic (CLAUDE.md §8).
+|
+| THE GATE IS RLS, NOT THIS CODE. `news_posts: read approved` already permits
+| a select of pending rows only for their author or an admin, and
+| `news_posts: admin moderate` restricts UPDATE to is_admin(). Hiding the tab
+| from non-admins is presentation; a non-admin calling these directly still
+| gets nothing back and cannot write.
+|
+*/
+
+export type PendingPost = {
+  id: string;
+  authorName: string | null;
+  textContent: string | null;
+  mediaUrl: string | null;
+  mediaType: "image" | "video" | null;
+  createdAt: string;
+};
+
+export async function fetchPendingPosts(): Promise<
+  PendingPost[] | null
+> {
+  const supabase = getSupabaseClient();
+
+  if (!supabase) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from("news_posts")
+    .select(
+      "id, author_name, text_content, media_url, media_type, created_at"
+    )
+    .eq("status", "pending")
+    .order("created_at", { ascending: false })
+    .limit(100);
+
+  if (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.warn(
+        "[supabase] fetchPendingPosts failed:",
+        error
+      );
+    }
+
+    return null;
+  }
+
+  return data.map((row) => ({
+    id: row.id,
+    authorName: row.author_name,
+    textContent: row.text_content,
+    mediaUrl: row.media_url,
+    mediaType: row.media_type,
+    createdAt: row.created_at,
+  }));
+}
+
+const NEWS_MEDIA_BUCKET = "news-media";
+
+/*
+ * Recovers the storage path from a public URL, so a deleted post can take its
+ * uploaded file with it instead of orphaning bytes in the bucket forever.
+ *
+ * Returns null for anything that is not one of our uploads — seeded posts
+ * point at /images/... in the Next.js public folder, and deleting those is
+ * neither possible nor desirable.
+ */
+function storagePathFromPublicUrl(
+  url: string | null
+): string | null {
+  if (!url) {
+    return null;
+  }
+
+  const marker = `/storage/v1/object/public/${NEWS_MEDIA_BUCKET}/`;
+  const index = url.indexOf(marker);
+
+  if (index === -1) {
+    return null;
+  }
+
+  const path = url.slice(
+    index + marker.length
+  );
+
+  return path
+    ? decodeURIComponent(path)
+    : null;
+}
+
+/*
+ * Deletes a post outright.
+ *
+ * Permitted by the `news_posts: delete own` policy for the author OR an
+ * admin — so this same call serves a user withdrawing their own submission
+ * and an admin removing something from the live feed.
+ *
+ * The row goes first. If the row delete fails there is nothing to clean up,
+ * and if the file delete fails afterwards the post is still gone — an
+ * orphaned file is a storage-cost problem, not a correctness one, so it must
+ * never block or fail the delete the user actually asked for.
+ */
+export async function deleteNewsPost(
+  postId: string,
+  mediaUrl?: string | null
+): Promise<{ error: Error | null }> {
+  const supabase = getSupabaseClient();
+
+  if (!supabase) {
+    return {
+      error: new Error(
+        "Supabase is not configured."
+      ),
+    };
+  }
+
+  const { error } = await supabase
+    .from("news_posts")
+    .delete()
+    .eq("id", postId);
+
+  if (error) {
+    return { error };
+  }
+
+  const path =
+    storagePathFromPublicUrl(mediaUrl ?? null);
+
+  if (path) {
+    const { error: storageError } =
+      await supabase.storage
+        .from(NEWS_MEDIA_BUCKET)
+        .remove([path]);
+
+    if (
+      storageError &&
+      process.env.NODE_ENV === "development"
+    ) {
+      console.warn(
+        "[supabase] post deleted but its media file was not:",
+        storageError
+      );
+    }
+  }
+
+  return { error: null };
+}
+
+/*
+ * Approve or reject. `approved_by` is stamped for both outcomes — knowing who
+ * rejected something is as useful as knowing who approved it — while
+ * `approved_at` is only set on an actual approval, so it stays meaningful as
+ * "when this went live".
+ */
+export async function moderateNewsPost(
+  postId: string,
+  status: "approved" | "rejected"
+): Promise<{ error: Error | null }> {
+  const supabase = getSupabaseClient();
+
+  if (!supabase) {
+    return {
+      error: new Error(
+        "Supabase is not configured."
+      ),
+    };
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return {
+      error: new Error("Not signed in."),
+    };
+  }
+
+  const { error } = await supabase
+    .from("news_posts")
+    .update({
+      status,
+      approved_by: user.id,
+      approved_at:
+        status === "approved"
+          ? new Date().toISOString()
+          : null,
+    })
+    .eq("id", postId);
 
   return { error };
 }

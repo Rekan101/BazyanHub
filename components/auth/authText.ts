@@ -26,30 +26,15 @@ const AUTH_TEXT = {
   ckb: {
     loginTitle: "بەخێربێیتەوە",
     loginSubtitle:
-      "بچۆ ژوورەوە بۆ گەیشتن بە هەژمارەکەت",
+      "بە ناوی بەکارهێنەر و وشەی نهێنی بچۆ ژوورەوە",
     signupTitle: "خۆتۆمارکردن",
     signupSubtitle:
-      "خۆت تۆمار بکە و دەست بکە بە بەکارهێنانی بازیان هەب",
-
-    methodEmail: "ئیمەیل",
-    methodUsername: "ناوی بەکارهێنەر",
-    methodPhone: "مۆبایل",
-
-    emailLabel: "ئیمەیل",
-    emailPlaceholder: "you@example.com",
+      "تەنها ناوێکی بەکارهێنەر و وشەیەکی نهێنی هەڵبژێرە",
 
     usernameLabel: "ناوی بەکارهێنەر",
     usernamePlaceholder: "bazyan_user",
     usernameHint:
       "٣ تا ٣٠ پیت، تەنها پیتی بچووکی ئینگلیزی، ژمارە و _",
-
-    phoneLabel: "ژمارەی مۆبایل",
-    phonePlaceholder: "+9647500000000",
-    phoneHint:
-      "بە شێوازی نێودەوڵەتی بنووسە، بۆ نموونە ‎+964750…",
-
-    fullNameLabel: "ناوی تەواو",
-    fullNamePlaceholder: "ناوەکەت بنووسە",
 
     passwordLabel: "وشەی نهێنی",
     passwordPlaceholder: "••••••••",
@@ -62,23 +47,10 @@ const AUTH_TEXT = {
     signupButton: "خۆتۆمارکردن",
     loadingButton: "چاوەڕێ بکە…",
 
-    orDivider: "یان",
-    facebookButton: "بەردەوامبوون بە فەیسبووک",
-
     noAccount: "هەژمارت نییە؟",
     goSignup: "خۆتۆمارکردن",
     hasAccount: "پێشتر هەژمارت هەیە؟",
     goLogin: "چوونەژوورەوە",
-
-    forgotPassword: "وشەی نهێنیت لەبیرچووە؟",
-
-    otpTitle: "پشتڕاستکردنەوەی ژمارە",
-    otpSubtitle:
-      "کۆدێکی ٦ ژمارەیی بۆ مۆبایلەکەت نێردرا",
-    otpLabel: "کۆدی پشتڕاستکردنەوە",
-    otpPlaceholder: "١٢٣٤٥٦",
-    otpButton: "پشتڕاستکردنەوە",
-    otpBack: "گەڕانەوە",
 
     errorRequired:
       "تکایە هەموو خانەکان پڕ بکەرەوە.",
@@ -88,16 +60,18 @@ const AUTH_TEXT = {
       "وشە نهێنییەکان وەک یەک نین.",
     errorUsernameFormat:
       "ناوی بەکارهێنەر دروست نییە. ٣ تا ٣٠ پیتی بچووک، ژمارە و _ بەکاربهێنە.",
-    errorPhoneFormat:
-      "ژمارەی مۆبایل دروست نییە. بە شێوازی ‎+964… بنووسە.",
+
+    /* Wording supplied verbatim by the product owner — do not reword. */
+    errorUsernameTaken:
+      "ئەم یوزەرنەیمە پێشتر بەکارهاتووە، تکایە یوزەرنەیمێکی تر بەکاربهێنە.",
+
+    errorInvalidCredentials:
+      "ناوی بەکارهێنەر یان وشەی نهێنی هەڵەیە.",
 
     notConfiguredTitle:
       "هێشتا پەیوەندی بە داتابەیسەوە نەکراوە",
     notConfiguredBody:
       "بۆ کارکردنی چوونەژوورەوە، پێویستە زانیاری Supabase لە ‎.env.local دابنرێت.",
-
-    phoneNotReadyNote:
-      "چوونەژوورەوە بە مۆبایل پێویستی بە ڕێکخستنی خزمەتگوزاری SMS هەیە لە Supabase. ڕووکارەکە ئامادەیە.",
 
     signupSuccessTitle: "هەژمارەکەت دروستکرا",
     signupSuccessBody:
@@ -109,30 +83,15 @@ const AUTH_TEXT = {
   ar: {
     loginTitle: "مرحبًا بعودتك",
     loginSubtitle:
-      "سجّل الدخول للوصول إلى حسابك",
+      "سجّل الدخول باسم المستخدم وكلمة المرور",
     signupTitle: "إنشاء حساب",
     signupSubtitle:
-      "سجّل وابدأ باستخدام بازيان هَب",
-
-    methodEmail: "البريد",
-    methodUsername: "اسم المستخدم",
-    methodPhone: "الهاتف",
-
-    emailLabel: "البريد الإلكتروني",
-    emailPlaceholder: "you@example.com",
+      "اختر اسم مستخدم وكلمة مرور فقط",
 
     usernameLabel: "اسم المستخدم",
     usernamePlaceholder: "bazyan_user",
     usernameHint:
       "٣ إلى ٣٠ حرفًا، أحرف إنجليزية صغيرة وأرقام و _ فقط",
-
-    phoneLabel: "رقم الهاتف",
-    phonePlaceholder: "+9647500000000",
-    phoneHint:
-      "اكتبه بالصيغة الدولية، مثال ‎+964750…",
-
-    fullNameLabel: "الاسم الكامل",
-    fullNamePlaceholder: "اكتب اسمك",
 
     passwordLabel: "كلمة المرور",
     passwordPlaceholder: "••••••••",
@@ -145,23 +104,10 @@ const AUTH_TEXT = {
     signupButton: "إنشاء حساب",
     loadingButton: "يرجى الانتظار…",
 
-    orDivider: "أو",
-    facebookButton: "المتابعة عبر فيسبوك",
-
     noAccount: "ليس لديك حساب؟",
     goSignup: "إنشاء حساب",
     hasAccount: "لديك حساب بالفعل؟",
     goLogin: "تسجيل الدخول",
-
-    forgotPassword: "نسيت كلمة المرور؟",
-
-    otpTitle: "تأكيد الرقم",
-    otpSubtitle:
-      "أُرسل رمز من ٦ أرقام إلى هاتفك",
-    otpLabel: "رمز التأكيد",
-    otpPlaceholder: "١٢٣٤٥٦",
-    otpButton: "تأكيد",
-    otpBack: "رجوع",
 
     errorRequired:
       "يرجى تعبئة جميع الحقول.",
@@ -171,16 +117,17 @@ const AUTH_TEXT = {
       "كلمتا المرور غير متطابقتين.",
     errorUsernameFormat:
       "اسم المستخدم غير صالح. استخدم ٣ إلى ٣٠ حرفًا صغيرًا وأرقامًا و _.",
-    errorPhoneFormat:
-      "رقم الهاتف غير صالح. اكتبه بصيغة ‎+964…",
+
+    errorUsernameTaken:
+      "اسم المستخدم هذا مستخدم بالفعل، يرجى اختيار اسم آخر.",
+
+    errorInvalidCredentials:
+      "اسم المستخدم أو كلمة المرور غير صحيحة.",
 
     notConfiguredTitle:
       "لم يتم ربط قاعدة البيانات بعد",
     notConfiguredBody:
       "لتفعيل تسجيل الدخول، يجب إضافة بيانات Supabase في ‎.env.local.",
-
-    phoneNotReadyNote:
-      "تسجيل الدخول بالهاتف يتطلب إعداد خدمة SMS في Supabase. الواجهة جاهزة.",
 
     signupSuccessTitle: "تم إنشاء حسابك",
     signupSuccessBody:
@@ -192,30 +139,15 @@ const AUTH_TEXT = {
   en: {
     loginTitle: "Welcome back",
     loginSubtitle:
-      "Sign in to access your account",
+      "Sign in with your username and password",
     signupTitle: "Sign up",
     signupSubtitle:
-      "Sign up and start using BazyanHub",
-
-    methodEmail: "Email",
-    methodUsername: "Username",
-    methodPhone: "Phone",
-
-    emailLabel: "Email address",
-    emailPlaceholder: "you@example.com",
+      "Just pick a username and a password",
 
     usernameLabel: "Username",
     usernamePlaceholder: "bazyan_user",
     usernameHint:
       "3–30 characters: lowercase letters, numbers and _ only",
-
-    phoneLabel: "Phone number",
-    phonePlaceholder: "+9647500000000",
-    phoneHint:
-      "Use international format, e.g. +964750…",
-
-    fullNameLabel: "Full name",
-    fullNamePlaceholder: "Your name",
 
     passwordLabel: "Password",
     passwordPlaceholder: "••••••••",
@@ -228,23 +160,10 @@ const AUTH_TEXT = {
     signupButton: "Sign up",
     loadingButton: "Please wait…",
 
-    orDivider: "or",
-    facebookButton: "Continue with Facebook",
-
     noAccount: "Don't have an account?",
     goSignup: "Sign up",
     hasAccount: "Already have an account?",
     goLogin: "Sign in",
-
-    forgotPassword: "Forgot your password?",
-
-    otpTitle: "Verify your number",
-    otpSubtitle:
-      "We sent a 6-digit code to your phone",
-    otpLabel: "Verification code",
-    otpPlaceholder: "123456",
-    otpButton: "Verify",
-    otpBack: "Back",
 
     errorRequired:
       "Please fill in all fields.",
@@ -254,16 +173,17 @@ const AUTH_TEXT = {
       "Passwords do not match.",
     errorUsernameFormat:
       "Invalid username. Use 3–30 lowercase letters, numbers or _.",
-    errorPhoneFormat:
-      "Invalid phone number. Use the +964… format.",
+
+    errorUsernameTaken:
+      "That username is already taken, please choose another one.",
+
+    errorInvalidCredentials:
+      "Incorrect username or password.",
 
     notConfiguredTitle:
       "Database not connected yet",
     notConfiguredBody:
       "Sign-in needs Supabase credentials in .env.local.",
-
-    phoneNotReadyNote:
-      "Phone sign-in needs an SMS provider configured in Supabase. The UI is ready.",
 
     signupSuccessTitle: "Account created",
     signupSuccessBody:

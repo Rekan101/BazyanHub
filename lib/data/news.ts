@@ -51,7 +51,10 @@ export type FeedPost = {
 | Reactions
 |--------------------------------------------------------------------------
 |
-| Strictly five, matching the news_reaction_type enum in supabase-schema.sql.
+| Strictly six, matching the news_reaction_type enum — five from
+| supabase-schema.sql plus 'wow' from supabase-migration-02-news.sql, in the
+| same order the picker renders them.
+|
 | Adding one here without adding it there (or vice versa) breaks the round
 | trip — the DB would reject the write, or the UI would receive a type it
 | cannot render.
@@ -86,6 +89,13 @@ export const REACTIONS: ReactionConfig[] = [
     type: "haha",
     emoji: "😂",
     labelKey: "reactionHaha",
+    activeClass:
+      "text-amber-600 dark:text-amber-400",
+  },
+  {
+    type: "wow",
+    emoji: "😮",
+    labelKey: "reactionWow",
     activeClass:
       "text-amber-600 dark:text-amber-400",
   },

@@ -6,3 +6,5 @@ out/
 # (.env, .env.local, .env*.local) did NOT cover .env.production.
 .env*
 !.env.example
+
+.vercel

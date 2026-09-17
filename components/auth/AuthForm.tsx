@@ -7,89 +7,52 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import {
-  AtSign,
   Eye,
   EyeOff,
-  Info,
   Loader2,
   Lock,
-  Phone,
   ShieldCheck,
   TriangleAlert,
-  User,
   UserRound,
 } from "lucide-react";
 
 import { useLanguage } from "@/lib/i18n";
-import { FacebookIcon } from "@/components/icons/SocialIcons";
-import {
-  getAuthText,
-  type AuthTextBlock,
-} from "@/components/auth/authText";
+import { getAuthText } from "@/components/auth/authText";
 import {
   isSupabaseConfigured,
-  isValidPhone,
   isValidUsername,
-  signInWithEmail,
-  signInWithFacebook,
-  signInWithPhone,
   signInWithUsername,
-  signUpWithEmail,
-  signUpWithPhone,
   signUpWithUsername,
-  verifyPhoneOtp,
 } from "@/lib/supabase/client";
 
 /*
 |--------------------------------------------------------------------------
-| Auth form
+| Auth form — username + password only
 |--------------------------------------------------------------------------
 |
-| One component serving both /login and /signup, switched by `mode`. The
-| three password-based methods share almost all of their markup and
-| validation, so splitting them into separate components would mean three
-| copies of the same submit handler.
+| One component serving both /login and /signup, switched by `mode`.
 |
-| All four agreed methods are here:
-|   1. Email    + password
-|   2. Username + password  (synthetic-email mapping, handled in lib/supabase/client.ts)
-|   3. Phone    + password  (UI complete; inert until SMS is configured)
-|   4. Facebook OAuth
+| THERE IS NO EMAIL FIELD, BY DESIGN. Supabase Auth requires an email, so
+| lib/supabase/client.ts maps the username to a synthetic address
+| (<username>@users.bazyanhub.app) that is never shown to the user and never
+| receives mail. That is what keeps signups off Supabase's email pipeline and
+| clear of its rate limits.
+|
+| Consequences, accepted deliberately:
+|   * "Confirm email" MUST be OFF in the Supabase dashboard, or every signup
+|     returns a session-less user and nobody can ever sign in.
+|   * There is no password reset. No real address exists to send one to.
 |
 | Every call goes through lib/supabase/client.ts, which resolves rather than
-| throws — so there is no try/catch here, just an `error` field to read.
+| throws — so there is no try/catch here, just `error` and `code` to read.
 |
 */
 
 type AuthMode = "login" | "signup";
 
-type Method = "email" | "username" | "phone";
-
 type AuthFormProps = {
   mode: AuthMode;
 };
-
-const METHODS: Array<{
-  id: Method;
-  labelKey: keyof AuthTextBlock;
-  icon: typeof AtSign;
-}> = [
-  {
-    id: "email",
-    labelKey: "methodEmail",
-    icon: AtSign,
-  },
-  {
-    id: "username",
-    labelKey: "methodUsername",
-    icon: UserRound,
-  },
-  {
-    id: "phone",
-    labelKey: "methodPhone",
-    icon: Phone,
-  },
-];
 
 const MIN_PASSWORD_LENGTH = 6;
 
@@ -110,13 +73,7 @@ export default function AuthForm({
     []
   );
 
-  const [method, setMethod] =
-    useState<Method>("email");
-
-  const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
-  const [phone, setPhone] = useState("");
-  const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] =
     useState("");
@@ -133,50 +90,21 @@ export default function AuthForm({
   const [successMessage, setSuccessMessage] =
     useState<string | null>(null);
 
-  /*
-   * Phone signup can return without a session when Supabase is configured
-   * to confirm the number by SMS. That switches the card into OTP mode
-   * rather than navigating away.
-   */
-  const [awaitingOtp, setAwaitingOtp] =
-    useState(false);
-
-  const [otp, setOtp] = useState("");
-
   /* ------------------------------------------------------------------
      VALIDATION
+
+     Runs BEFORE any network call, so a malformed username never reaches
+     Supabase — and never reaches the profiles_username_format CHECK
+     constraint, which would come back as a raw Postgres error.
   ------------------------------------------------------------------ */
 
   function validate(): string | null {
-    if (!password.trim()) {
+    if (!username.trim() || !password.trim()) {
       return text.errorRequired;
     }
 
-    if (
-      method === "email" &&
-      !email.trim()
-    ) {
-      return text.errorRequired;
-    }
-
-    if (method === "username") {
-      if (!username.trim()) {
-        return text.errorRequired;
-      }
-
-      if (!isValidUsername(username)) {
-        return text.errorUsernameFormat;
-      }
-    }
-
-    if (method === "phone") {
-      if (!phone.trim()) {
-        return text.errorRequired;
-      }
-
-      if (!isValidPhone(phone)) {
-        return text.errorPhoneFormat;
-      }
+    if (!isValidUsername(username)) {
+      return text.errorUsernameFormat;
     }
 
     /*
@@ -220,9 +148,35 @@ export default function AuthForm({
 
     setIsSubmitting(true);
 
-    const result = await runAuthCall();
+    const result = isSignup
+      ? await signUpWithUsername(
+          username,
+          password
+        )
+      : await signInWithUsername(
+          username,
+          password
+        );
 
     setIsSubmitting(false);
+
+    /*
+     * `code` is set by the client helpers so the message shown here is
+     * localised copy, not Supabase's English error text.
+     */
+    if (result.code === "username_taken") {
+      setErrorMessage(text.errorUsernameTaken);
+      return;
+    }
+
+    if (
+      result.code === "invalid_credentials"
+    ) {
+      setErrorMessage(
+        text.errorInvalidCredentials
+      );
+      return;
+    }
 
     if (result.error) {
       setErrorMessage(result.error.message);
@@ -230,15 +184,11 @@ export default function AuthForm({
     }
 
     /*
-     * A signup that returns no session means Supabase wants a confirmation
-     * step — an SMS code for phone, or an email link otherwise.
+     * A signup with no session means "Confirm email" is still ON in the
+     * dashboard — the synthetic address can never be confirmed, so say the
+     * account exists rather than pretending the user is signed in.
      */
     if (isSignup && !result.session) {
-      if (method === "phone") {
-        setAwaitingOtp(true);
-        return;
-      }
-
       setSuccessMessage(
         text.signupSuccessBody
       );
@@ -248,89 +198,6 @@ export default function AuthForm({
 
     router.push("/profile");
     router.refresh();
-  }
-
-  async function runAuthCall() {
-    if (method === "email") {
-      return isSignup
-        ? signUpWithEmail(email, password, {
-            fullName: fullName || undefined,
-          })
-        : signInWithEmail(email, password);
-    }
-
-    if (method === "username") {
-      return isSignup
-        ? signUpWithUsername(
-            username,
-            password,
-            {
-              fullName: fullName || undefined,
-            }
-          )
-        : signInWithUsername(
-            username,
-            password
-          );
-    }
-
-    return isSignup
-      ? signUpWithPhone(phone, password, {
-          fullName: fullName || undefined,
-        })
-      : signInWithPhone(phone, password);
-  }
-
-  async function handleVerifyOtp(
-    event: FormEvent
-  ) {
-    event.preventDefault();
-
-    setErrorMessage(null);
-
-    if (otp.trim().length < 4) {
-      setErrorMessage(text.errorRequired);
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    const result = await verifyPhoneOtp(
-      phone,
-      otp
-    );
-
-    setIsSubmitting(false);
-
-    if (result.error) {
-      setErrorMessage(result.error.message);
-      return;
-    }
-
-    router.push("/profile");
-    router.refresh();
-  }
-
-  async function handleFacebook() {
-    setErrorMessage(null);
-    setIsSubmitting(true);
-
-    const { error } =
-      await signInWithFacebook(
-        typeof window !== "undefined"
-          ? `${window.location.origin}/auth/callback`
-          : undefined
-      );
-
-    /*
-     * On success the browser is redirected away, so reaching this line at
-     * all effectively means it failed.
-     */
-    setIsSubmitting(false);
-
-    if (error) {
-      setErrorMessage(error.message);
-    }
   }
 
   /* ------------------------------------------------------------------
@@ -397,128 +264,7 @@ export default function AuthForm({
   `;
 
   /* ------------------------------------------------------------------
-     OTP STEP
-  ------------------------------------------------------------------ */
-
-  if (awaitingOtp) {
-    return (
-      <form
-        onSubmit={handleVerifyOtp}
-        dir={direction}
-        className="flex flex-col gap-4"
-      >
-        <div className="text-center">
-          <span
-            className="
-              mx-auto mb-3 flex
-              h-12 w-12
-              items-center justify-center
-              rounded-2xl
-              bg-blue-600/10
-              text-blue-600
-
-              dark:bg-blue-500/10
-              dark:text-blue-500
-            "
-          >
-            <ShieldCheck className="h-6 w-6" />
-          </span>
-
-          <p
-            className="
-              text-[15px] font-extrabold
-              text-slate-900
-              dark:text-white
-            "
-          >
-            {text.otpTitle}
-          </p>
-
-          <p
-            className="
-              mt-1
-              text-[12.5px]
-              text-slate-600
-              dark:text-slate-400
-            "
-          >
-            {text.otpSubtitle}
-          </p>
-        </div>
-
-        <div>
-          <label
-            htmlFor="auth-otp"
-            className={labelClass}
-          >
-            {text.otpLabel}
-          </label>
-
-          <div className={fieldWrapClass}>
-            <ShieldCheck
-              className={fieldIconClass}
-              aria-hidden="true"
-            />
-
-            <input
-              id="auth-otp"
-              name="otp"
-              type="text"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              dir="ltr"
-              maxLength={8}
-              value={otp}
-              onChange={(e) =>
-                setOtp(e.target.value)
-              }
-              placeholder={text.otpPlaceholder}
-              className={`${inputClass} tracking-[0.4em]`}
-            />
-          </div>
-        </div>
-
-        {errorMessage ? (
-          <ErrorBanner
-            message={errorMessage}
-          />
-        ) : null}
-
-        <SubmitButton
-          isSubmitting={isSubmitting}
-          label={text.otpButton}
-          loadingLabel={text.loadingButton}
-        />
-
-        <button
-          type="button"
-          onClick={() => {
-            setAwaitingOtp(false);
-            setOtp("");
-            setErrorMessage(null);
-          }}
-          className="
-            mx-auto
-            text-[12.5px] font-semibold
-            text-slate-500
-            outline-none
-            transition-colors
-
-            hover:text-blue-600
-            focus-visible:underline
-
-            dark:text-slate-400
-            dark:hover:text-blue-500
-          "
-        >
-          {text.otpBack}
-        </button>
-      </form>
-    );
-  }
-
-  /* ------------------------------------------------------------------
-     MAIN FORM
+     FORM
   ------------------------------------------------------------------ */
 
   return (
@@ -528,89 +274,10 @@ export default function AuthForm({
       className="flex flex-col gap-4"
     >
       {/* ===================================================
-          METHOD SWITCHER — segmented control
-      =================================================== */}
-
-      <div
-        role="tablist"
-        aria-label={text.methodEmail}
-        className="
-          grid grid-cols-3 gap-1
-          rounded-2xl
-          bg-slate-100
-          p-1
-
-          dark:bg-slate-950/60
-        "
-      >
-        {METHODS.map((item) => {
-          const isActive =
-            method === item.id;
-
-          const Icon = item.icon;
-
-          return (
-            <button
-              key={item.id}
-              type="button"
-              role="tab"
-              aria-selected={isActive}
-              onClick={() => {
-                setMethod(item.id);
-                setErrorMessage(null);
-                setSuccessMessage(null);
-              }}
-              className={`
-                flex items-center justify-center gap-1.5
-                rounded-xl
-                px-2 py-2.5
-                text-[12.5px] font-bold
-                outline-none
-                transition-all duration-200
-
-                focus-visible:ring-2
-                focus-visible:ring-blue-600
-                dark:focus-visible:ring-blue-500
-
-                ${
-                  isActive
-                    ? `
-                        bg-white
-                        text-blue-600
-                        shadow-sm
-
-                        dark:bg-slate-800
-                        dark:text-blue-500
-                      `
-                    : `
-                        text-slate-500
-                        hover:text-slate-800
-
-                        dark:text-slate-400
-                        dark:hover:text-slate-200
-                      `
-                }
-              `}
-            >
-              <Icon
-                className="h-4 w-4 shrink-0"
-                aria-hidden="true"
-              />
-
-              <span className="truncate">
-                {text[item.labelKey]}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* ===================================================
           NOT-CONFIGURED NOTICE
 
           Shown instead of failing silently when there are no
-          Supabase credentials — which is the current state of
-          this repo.
+          Supabase credentials.
       =================================================== */}
 
       {!configured ? (
@@ -661,199 +328,51 @@ export default function AuthForm({
       ) : null}
 
       {/* ===================================================
-          PHONE NOTE — SMS provider not wired yet
+          USERNAME
       =================================================== */}
 
-      {method === "phone" ? (
-        <div
-          className="
-            flex gap-2.5
-            rounded-2xl
-            border border-sky-200
-            bg-sky-50
-            p-3
-
-            dark:border-sky-500/25
-            dark:bg-sky-500/10
-          "
+      <div>
+        <label
+          htmlFor="auth-username"
+          className={labelClass}
         >
-          <Info
-            className="
-              mt-0.5 h-4 w-4 shrink-0
-              text-blue-600
-              dark:text-blue-500
-            "
+          {text.usernameLabel}
+        </label>
+
+        <div className={fieldWrapClass}>
+          <UserRound
+            className={fieldIconClass}
             aria-hidden="true"
           />
 
-          <p
-            className="
-              min-w-0
-              text-[11.5px] leading-relaxed
-              text-slate-700
-
-              dark:text-slate-300
-            "
-          >
-            {text.phoneNotReadyNote}
-          </p>
+          <input
+            id="auth-username"
+            name="username"
+            type="text"
+            autoComplete="username"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            dir="ltr"
+            value={username}
+            onChange={(e) =>
+              setUsername(
+                e.target.value.toLowerCase()
+              )
+            }
+            placeholder={
+              text.usernamePlaceholder
+            }
+            className={inputClass}
+          />
         </div>
-      ) : null}
 
-      {/* ===================================================
-          IDENTIFIER FIELD
-      =================================================== */}
-
-      {method === "email" ? (
-        <div>
-          <label
-            htmlFor="auth-email"
-            className={labelClass}
-          >
-            {text.emailLabel}
-          </label>
-
-          <div className={fieldWrapClass}>
-            <AtSign
-              className={fieldIconClass}
-              aria-hidden="true"
-            />
-
-            <input
-              id="auth-email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              dir="ltr"
-              value={email}
-              onChange={(e) =>
-                setEmail(e.target.value)
-              }
-              placeholder={
-                text.emailPlaceholder
-              }
-              className={inputClass}
-            />
-          </div>
-        </div>
-      ) : null}
-
-      {method === "username" ? (
-        <div>
-          <label
-            htmlFor="auth-username"
-            className={labelClass}
-          >
-            {text.usernameLabel}
-          </label>
-
-          <div className={fieldWrapClass}>
-            <UserRound
-              className={fieldIconClass}
-              aria-hidden="true"
-            />
-
-            <input
-              id="auth-username"
-              name="username"
-              type="text"
-              autoComplete="username"
-              dir="ltr"
-              value={username}
-              onChange={(e) =>
-                setUsername(
-                  e.target.value.toLowerCase()
-                )
-              }
-              placeholder={
-                text.usernamePlaceholder
-              }
-              className={inputClass}
-            />
-          </div>
-
-          {isSignup ? (
-            <p className={hintClass}>
-              {text.usernameHint}
-            </p>
-          ) : null}
-        </div>
-      ) : null}
-
-      {method === "phone" ? (
-        <div>
-          <label
-            htmlFor="auth-phone"
-            className={labelClass}
-          >
-            {text.phoneLabel}
-          </label>
-
-          <div className={fieldWrapClass}>
-            <Phone
-              className={fieldIconClass}
-              aria-hidden="true"
-            />
-
-            <input
-              id="auth-phone"
-              name="phone"
-              type="tel"
-              autoComplete="tel"
-              dir="ltr"
-              value={phone}
-              onChange={(e) =>
-                setPhone(e.target.value)
-              }
-              placeholder={
-                text.phonePlaceholder
-              }
-              className={inputClass}
-            />
-          </div>
-
+        {isSignup ? (
           <p className={hintClass}>
-            {text.phoneHint}
+            {text.usernameHint}
           </p>
-        </div>
-      ) : null}
-
-      {/* ===================================================
-          FULL NAME — signup only, optional
-      =================================================== */}
-
-      {isSignup ? (
-        <div>
-          <label
-            htmlFor="auth-fullname"
-            className={labelClass}
-          >
-            {text.fullNameLabel}
-          </label>
-
-          <div className={fieldWrapClass}>
-            <User
-              className={fieldIconClass}
-              aria-hidden="true"
-            />
-
-            <input
-              id="auth-fullname"
-              name="fullName"
-              type="text"
-              autoComplete="name"
-              value={fullName}
-              onChange={(e) =>
-                setFullName(e.target.value)
-              }
-              placeholder={
-                text.fullNamePlaceholder
-              }
-              className={inputClass}
-            />
-          </div>
-        </div>
-      ) : null}
+        ) : null}
+      </div>
 
       {/* ===================================================
           PASSWORD
@@ -1036,74 +555,6 @@ export default function AuthForm({
         }
         loadingLabel={text.loadingButton}
       />
-
-      {/* ===================================================
-          DIVIDER
-      =================================================== */}
-
-      <div
-        className="flex items-center gap-3 py-0.5"
-        aria-hidden="true"
-      >
-        <span className="h-px flex-1 bg-slate-200 dark:bg-slate-800" />
-
-        <span
-          className="
-            text-[11.5px] font-bold uppercase
-            tracking-wider
-            text-slate-400
-
-            dark:text-slate-600
-          "
-        >
-          {text.orDivider}
-        </span>
-
-        <span className="h-px flex-1 bg-slate-200 dark:bg-slate-800" />
-      </div>
-
-      {/* ===================================================
-          FACEBOOK OAUTH
-
-          #1877F2 is Facebook's own brand blue, used verbatim
-          rather than mapped to the palette — the same rule the
-          profile page's social buttons follow.
-      =================================================== */}
-
-      <button
-        type="button"
-        onClick={handleFacebook}
-        disabled={isSubmitting}
-        className="
-          flex h-12 w-full
-          items-center justify-center gap-2.5
-          rounded-2xl
-          bg-[#1877F2]
-          px-4
-          text-[14px] font-bold
-          text-white
-          shadow-[0_10px_24px_-12px_rgba(24,119,242,0.9)]
-          outline-none
-          transition-all duration-200
-
-          hover:-translate-y-0.5
-          hover:bg-[#1568DB]
-
-          focus-visible:ring-2
-          focus-visible:ring-[#1877F2]
-          focus-visible:ring-offset-2
-          dark:focus-visible:ring-offset-slate-900
-
-          active:translate-y-0
-
-          disabled:cursor-not-allowed
-          disabled:opacity-60
-          disabled:hover:translate-y-0
-        "
-      >
-        <FacebookIcon className="h-5 w-5" />
-        {text.facebookButton}
-      </button>
     </form>
   );
 }
@@ -1171,6 +622,12 @@ function SubmitButton({
   );
 }
 
+/*
+ * Inline, in-page error — deliberately not window.alert(). role="alert" makes
+ * a screen reader announce it, it inherits RTL and dark mode from the page,
+ * and unlike a native dialog the browser cannot suppress it after repeated
+ * failures ("prevent this page from creating additional dialogs").
+ */
 function ErrorBanner({
   message,
 }: {

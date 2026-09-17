@@ -15,8 +15,11 @@ import {
   BadgeCheck,
   CheckCircle2,
   ImagePlus,
+  Loader2,
   Newspaper,
   SendHorizontal,
+  ShieldCheck,
+  Trash2,
   User,
   X,
 } from "lucide-react";
@@ -24,6 +27,7 @@ import {
 import { useLanguage } from "@/lib/i18n";
 import { useAuth } from "@/components/auth/AuthProvider";
 import ReactionBar from "@/components/news/ReactionBar";
+import AdminQueue from "@/components/news/AdminQueue";
 import {
   type FeedPost,
   type NewsReactionType,
@@ -31,9 +35,12 @@ import {
 import { isSupabaseConfigured } from "@/lib/supabase/client";
 import {
   clearMyReaction,
+  deleteNewsPost,
   fetchMyReactions,
   setMyReaction,
   submitNewsPost,
+  uploadNewsMedia,
+  MAX_MEDIA_BYTES,
 } from "@/lib/supabase/queries.client";
 
 /*
@@ -58,11 +65,50 @@ type NewsPageClientProps = {
 };
 
 export default function NewsPageClient({
-  posts,
+  posts: serverPosts,
 }: NewsPageClientProps) {
   const { t, direction } = useLanguage();
 
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, profile } = useAuth();
+
+  /*
+   * Presentation gate only. RLS is the real boundary — see AdminQueue's
+   * header comment. `profile` is null until the browser resolves the session,
+   * so the tabs simply are not rendered during that window rather than
+   * flashing in.
+   */
+  const isAdmin = profile?.is_admin === true;
+
+  const [tab, setTab] = useState<
+    "feed" | "pending"
+  >("feed");
+
+  /*
+   * An admin who signs out mid-session must not be left looking at a
+   * moderation tab that can no longer load anything.
+   */
+  useEffect(() => {
+    if (!isAdmin) {
+      setTab("feed");
+    }
+  }, [isAdmin]);
+
+  /*
+   * A local copy of the server's posts, so an admin delete can remove a card
+   * immediately. The feed itself is still server-rendered and ISR-cached —
+   * this only ever *removes* from what the server sent.
+   */
+  const [posts, setPosts] =
+    useState<FeedPost[]>(serverPosts);
+
+  /*
+   * Re-seed when the server sends a new list (ISR revalidation, or navigating
+   * back to /news). Without this, a deleted-then-revalidated feed would keep
+   * showing the stale local copy for the rest of the session.
+   */
+  useEffect(() => {
+    setPosts(serverPosts);
+  }, [serverPosts]);
 
   const [draft, setDraft] = useState("");
 
@@ -192,7 +238,54 @@ export default function NewsPageClient({
   };
 
   /* ------------------------------------------------------------------
-     MEDIA ATTACHMENT — local preview only, nothing is uploaded
+     ADMIN DELETE
+
+     Two-step on purpose. A single tap on a trash icon is far too easy to hit
+     by accident on a phone, and this is irreversible — the row is gone, not
+     flagged. The first tap arms the card; the second confirms.
+  ------------------------------------------------------------------ */
+
+  const [confirmingId, setConfirmingId] =
+    useState<string | null>(null);
+
+  const [deletingId, setDeletingId] = useState<
+    string | null
+  >(null);
+
+  const handleDelete = async (
+    post: FeedPost
+  ) => {
+    setDeletingId(post.id);
+
+    const { error } = await deleteNewsPost(
+      post.id,
+      post.image
+    );
+
+    setDeletingId(null);
+    setConfirmingId(null);
+
+    if (error) {
+      showToast(t("newsDeleteFailed"));
+      return;
+    }
+
+    setPosts((current) =>
+      current.filter(
+        (item) => item.id !== post.id
+      )
+    );
+
+    showToast(t("newsDeletedToast"));
+  };
+
+  /* ------------------------------------------------------------------
+     MEDIA ATTACHMENT
+
+     The preview is a local blob (instant, no wait); the FILE itself is kept
+     aside and uploaded to Supabase Storage on publish. Uploading on publish
+     rather than on pick means a user who attaches something and then changes
+     their mind never costs a byte of storage.
   ------------------------------------------------------------------ */
 
   const fileInputRef =
@@ -202,7 +295,11 @@ export default function NewsPageClient({
     url: string;
     type: "image" | "video";
     name: string;
+    file: File;
   } | null>(null);
+
+  const [isUploading, setIsUploading] =
+    useState(false);
 
   const openFilePicker = () => {
     fileInputRef.current?.click();
@@ -217,12 +314,28 @@ export default function NewsPageClient({
       return;
     }
 
+    /*
+     * Checked here as well as in the bucket's file_size_limit, so an
+     * oversized file is refused instantly instead of after a long upload
+     * that the server then rejects.
+     */
+    if (file.size > MAX_MEDIA_BYTES) {
+      showToast(t("newsFileTooLarge"));
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      return;
+    }
+
     setMedia({
       url: URL.createObjectURL(file),
       type: file.type.startsWith("video")
         ? "video"
         : "image",
       name: file.name,
+      file,
     });
   };
 
@@ -265,7 +378,11 @@ export default function NewsPageClient({
   const handlePublish = async () => {
     const text = draft.trim();
 
-    if (!text) {
+    /*
+     * A post needs text OR media — matching the news_posts_not_empty CHECK
+     * constraint, so the button can never submit something the DB refuses.
+     */
+    if (!text && !media) {
       return;
     }
 
@@ -287,7 +404,41 @@ export default function NewsPageClient({
 
     setIsPublishing(true);
 
-    const { error } = await submitNewsPost(text);
+    /*
+     * Upload first. If it fails, the post is NOT submitted — publishing a
+     * caption whose image silently vanished would be worse than failing
+     * loudly and letting the user retry.
+     */
+    let uploaded = null;
+
+    if (media) {
+      setIsUploading(true);
+
+      const { media: result, error: uploadError } =
+        await uploadNewsMedia(media.file);
+
+      setIsUploading(false);
+
+      if (uploadError) {
+        setIsPublishing(false);
+
+        showToast(
+          uploadError.message ===
+            "FILE_TOO_LARGE"
+            ? t("newsFileTooLarge")
+            : t("newsUploadFailed")
+        );
+
+        return;
+      }
+
+      uploaded = result;
+    }
+
+    const { error } = await submitNewsPost(
+      text,
+      uploaded
+    );
 
     setIsPublishing(false);
 
@@ -306,7 +457,9 @@ export default function NewsPageClient({
   };
 
   const canPublish =
-    draft.trim().length > 0 && !isPublishing;
+    (draft.trim().length > 0 ||
+      media !== null) &&
+    !isPublishing;
 
   return (
     <div
@@ -363,9 +516,112 @@ export default function NewsPageClient({
       </div>
 
       {/* =====================================================
+          ADMIN TABS
+
+          Rendered only for an admin. Everyone else sees the feed
+          with no hint that a moderation view exists.
+      ====================================================== */}
+
+      {isAdmin ? (
+        <div
+          role="tablist"
+          aria-label={t("newsAdminOnly")}
+          className="
+            mt-5 grid grid-cols-2 gap-1
+            rounded-2xl
+            bg-slate-100
+            p-1
+
+            dark:bg-slate-900
+          "
+        >
+          {(
+            [
+              {
+                id: "feed" as const,
+                label: t("newsTabFeed"),
+                icon: Newspaper,
+              },
+              {
+                id: "pending" as const,
+                label: t("newsTabPending"),
+                icon: ShieldCheck,
+              },
+            ]
+          ).map((item) => {
+            const isActive = tab === item.id;
+            const Icon = item.icon;
+
+            return (
+              <button
+                key={item.id}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => setTab(item.id)}
+                className={`
+                  flex items-center justify-center gap-1.5
+                  rounded-xl
+                  px-2 py-2.5
+                  text-[12.5px] font-bold
+                  outline-none
+                  transition-all duration-200
+
+                  focus-visible:ring-2
+                  focus-visible:ring-blue-600
+                  dark:focus-visible:ring-blue-500
+
+                  ${
+                    isActive
+                      ? `
+                          bg-white
+                          text-blue-600
+                          shadow-sm
+
+                          dark:bg-slate-800
+                          dark:text-blue-500
+                        `
+                      : `
+                          text-slate-500
+                          hover:text-slate-800
+
+                          dark:text-slate-400
+                          dark:hover:text-slate-200
+                        `
+                  }
+                `}
+                style={{
+                  WebkitTapHighlightColor:
+                    "transparent",
+                }}
+              >
+                <Icon
+                  className="h-4 w-4 shrink-0"
+                  aria-hidden="true"
+                />
+
+                <span className="truncate">
+                  {item.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+
+      {/* =====================================================
+          MODERATION QUEUE — admin, pending tab only
+      ====================================================== */}
+
+      {isAdmin && tab === "pending" ? (
+        <AdminQueue onDone={showToast} />
+      ) : null}
+
+      {/* =====================================================
           COMPOSER
       ====================================================== */}
 
+      {tab === "feed" ? (
       <div
         className="
           mt-6
@@ -492,7 +748,7 @@ export default function NewsPageClient({
             <button
               type="button"
               onClick={clearMedia}
-              aria-label="داخستن"
+              aria-label={t("newsRemoveMedia")}
               className="
                 flex h-8 w-8 shrink-0
                 items-center justify-center
@@ -609,22 +865,33 @@ export default function NewsPageClient({
               disabled:hover:translate-y-0
             "
           >
-            <SendHorizontal
-              className="h-4 w-4 shrink-0"
-              aria-hidden="true"
-            />
+            {isPublishing ? (
+              <Loader2
+                className="h-4 w-4 shrink-0 animate-spin"
+                aria-hidden="true"
+              />
+            ) : (
+              <SendHorizontal
+                className="h-4 w-4 shrink-0"
+                aria-hidden="true"
+              />
+            )}
 
             <span className="truncate">
-              {t("newsPublish")}
+              {isUploading
+                ? t("newsUploading")
+                : t("newsPublish")}
             </span>
           </button>
         </div>
       </div>
+      ) : null}
 
       {/* =====================================================
           FEED
       ====================================================== */}
 
+      {tab === "feed" ? (
       <div className="mt-5 space-y-4">
         {posts.map((post) => (
           <article
@@ -692,7 +959,203 @@ export default function NewsPageClient({
                   {post.time}
                 </p>
               </div>
+
+              {/*
+                ADMIN DELETE — hidden entirely from everyone else. The
+                real boundary is the `news_posts: delete own` policy,
+                which allows the author or an admin and nobody else.
+              */}
+              {isAdmin ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setConfirmingId(
+                      confirmingId === post.id
+                        ? null
+                        : post.id
+                    )
+                  }
+                  aria-label={t("newsDelete")}
+                  aria-expanded={
+                    confirmingId === post.id
+                  }
+                  className="
+                    flex h-9 w-9 shrink-0
+                    items-center justify-center
+                    rounded-xl
+                    text-slate-400
+                    outline-none
+                    transition-colors duration-200
+
+                    hover:bg-rose-50
+                    hover:text-rose-600
+
+                    focus-visible:ring-2
+                    focus-visible:ring-rose-500
+
+                    dark:hover:bg-rose-500/10
+                    dark:hover:text-rose-400
+                    dark:focus-visible:ring-rose-400
+                  "
+                  style={{
+                    WebkitTapHighlightColor:
+                      "transparent",
+                  }}
+                >
+                  <Trash2
+                    className="h-[18px] w-[18px]"
+                    aria-hidden="true"
+                  />
+                </button>
+              ) : null}
             </div>
+
+            {/* DELETE CONFIRMATION */}
+
+            <AnimatePresence initial={false}>
+              {isAdmin &&
+              confirmingId === post.id ? (
+                <motion.div
+                  initial={{
+                    opacity: 0,
+                    height: 0,
+                  }}
+                  animate={{
+                    opacity: 1,
+                    height: "auto",
+                  }}
+                  exit={{
+                    opacity: 0,
+                    height: 0,
+                  }}
+                  transition={{
+                    duration: 0.18,
+                  }}
+                  className="overflow-hidden"
+                >
+                  <div
+                    className="
+                      mx-3.5 mb-3
+                      rounded-xl
+                      border border-rose-300/70
+                      bg-rose-50
+                      p-3
+
+                      dark:border-rose-500/30
+                      dark:bg-rose-950/40
+                    "
+                  >
+                    <p
+                      className="
+                        text-[12px] font-semibold leading-relaxed
+                        text-rose-800
+
+                        dark:text-rose-300
+                      "
+                    >
+                      {t("newsDeleteConfirm")}
+                    </p>
+
+                    <div className="mt-2.5 flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleDelete(post)
+                        }
+                        disabled={
+                          deletingId === post.id
+                        }
+                        className="
+                          flex h-10 flex-1
+                          items-center justify-center gap-1.5
+                          rounded-lg
+                          bg-rose-600
+                          px-3
+                          text-[12.5px] font-bold
+                          text-white
+                          outline-none
+                          transition-colors duration-200
+
+                          hover:bg-rose-700
+
+                          focus-visible:ring-2
+                          focus-visible:ring-rose-600
+                          focus-visible:ring-offset-2
+                          dark:focus-visible:ring-offset-slate-900
+
+                          active:scale-[0.98]
+
+                          disabled:cursor-not-allowed
+                          disabled:opacity-60
+                        "
+                        style={{
+                          WebkitTapHighlightColor:
+                            "transparent",
+                        }}
+                      >
+                        {deletingId ===
+                        post.id ? (
+                          <Loader2
+                            className="h-3.5 w-3.5 animate-spin"
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <Trash2
+                            className="h-3.5 w-3.5"
+                            aria-hidden="true"
+                          />
+                        )}
+
+                        <span className="truncate">
+                          {t("newsDeleteYes")}
+                        </span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setConfirmingId(null)
+                        }
+                        disabled={
+                          deletingId === post.id
+                        }
+                        className="
+                          flex h-10 flex-1
+                          items-center justify-center
+                          rounded-lg
+                          border border-slate-300
+                          bg-white
+                          px-3
+                          text-[12.5px] font-bold
+                          text-slate-700
+                          outline-none
+                          transition-colors duration-200
+
+                          hover:bg-slate-50
+
+                          focus-visible:ring-2
+                          focus-visible:ring-slate-400
+
+                          disabled:cursor-not-allowed
+                          disabled:opacity-60
+
+                          dark:border-slate-700
+                          dark:bg-slate-900
+                          dark:text-slate-200
+                          dark:hover:bg-slate-800
+                        "
+                        style={{
+                          WebkitTapHighlightColor:
+                            "transparent",
+                        }}
+                      >
+                        {t("newsCancel")}
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
 
             {/* POST BODY */}
 
@@ -747,6 +1210,7 @@ export default function NewsPageClient({
           </article>
         ))}
       </div>
+      ) : null}
 
       {/* =====================================================
           TOAST

@@ -185,14 +185,18 @@ export type NewsPostRow = {
 };
 
 /*
- * Strictly these five — mirrors the news_reaction_type enum. Adding a sixth
- * means updating REACTIONS in lib/data/news.ts too, or the UI renders a
- * reaction it has no emoji or label for.
+ * Strictly these six — mirrors the news_reaction_type enum, in the same
+ * order. 'wow' was added by supabase-migration-02-news.sql; a database that
+ * has not run that migration will REJECT a 'wow' write.
+ *
+ * Adding a seventh means updating REACTIONS in lib/data/news.ts and the enum
+ * together, or the UI renders a reaction it has no emoji or label for.
  */
 export type NewsReactionType =
   | "like"
   | "love"
   | "haha"
+  | "wow"
   | "sad"
   | "angry";
 

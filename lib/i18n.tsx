@@ -63,8 +63,41 @@ export const TRANSLATIONS = {
     reactionLike: "بەدڵمە",
     reactionLove: "خۆشمدەوێت",
     reactionHaha: "پێکەنیناوی",
+    reactionWow: "سەرسامم",
     reactionSad: "خەمگینم",
     reactionAngry: "توڕەم",
+
+    /* Media attachment */
+    newsUploading: "بارکردن…",
+    newsUploadFailed:
+      "بارکردنی فایلەکە سەرکەوتوو نەبوو، دووبارە هەوڵ بدەرەوە.",
+    newsFileTooLarge:
+      "قەبارەی فایلەکە زۆر گەورەیە. زۆرترین قەبارە ١٠ مێگابایتە.",
+    newsRemoveMedia: "لابردنی فایل",
+
+    /* Admin moderation */
+    newsTabFeed: "هەواڵەکان",
+    newsTabPending: "چاوەڕوانی پەسەندکردن",
+    newsPendingEmpty:
+      "هیچ پۆستێکی چاوەڕوان نییە.",
+    newsPendingLoading: "بارکردنی پۆستەکان…",
+    newsApprove: "پەسەندکردن",
+    newsReject: "ڕەتکردنەوە",
+    newsApprovedToast: "پۆستەکە پەسەندکرا.",
+    newsRejectedToast: "پۆستەکە ڕەتکرایەوە.",
+    newsModerationFailed:
+      "گۆڕینی دۆخی پۆستەکە سەرکەوتوو نەبوو.",
+    newsPendingBadge: "چاوەڕوان",
+    newsAdminOnly: "تەنها بۆ ئادمین",
+    newsRefresh: "نوێکردنەوە",
+    newsDelete: "سڕینەوە",
+    newsDeleteConfirm:
+      "دڵنیایت لە سڕینەوەی ئەم پۆستە؟ ناگەڕێتەوە.",
+    newsDeleteYes: "بەڵێ، بیسڕەوە",
+    newsCancel: "پاشگەزبوونەوە",
+    newsDeletedToast: "پۆستەکە سڕایەوە.",
+    newsDeleteFailed:
+      "سڕینەوەی پۆستەکە سەرکەوتوو نەبوو.",
 
     notificationsEmpty:
       "هیچ ئاگادارکردنەوەیەکی نوێت نییە.",
@@ -195,6 +228,37 @@ export const TRANSLATIONS = {
     newsReactionsLabel: "التفاعلات",
     newsSignInToReact:
       "سجّل الدخول لحفظ تفاعلك.",
+
+    reactionWow: "أدهشني",
+
+    newsUploading: "جارٍ الرفع…",
+    newsUploadFailed:
+      "فشل رفع الملف، يرجى المحاولة مرة أخرى.",
+    newsFileTooLarge:
+      "حجم الملف كبير جدًا. الحد الأقصى ١٠ ميغابايت.",
+    newsRemoveMedia: "إزالة الملف",
+
+    newsTabFeed: "الأخبار",
+    newsTabPending: "بانتظار الموافقة",
+    newsPendingEmpty:
+      "لا توجد منشورات بانتظار المراجعة.",
+    newsPendingLoading: "جارٍ تحميل المنشورات…",
+    newsApprove: "موافقة",
+    newsReject: "رفض",
+    newsApprovedToast: "تمت الموافقة على المنشور.",
+    newsRejectedToast: "تم رفض المنشور.",
+    newsModerationFailed:
+      "تعذّر تغيير حالة المنشور.",
+    newsPendingBadge: "بالانتظار",
+    newsAdminOnly: "للمشرفين فقط",
+    newsRefresh: "تحديث",
+    newsDelete: "حذف",
+    newsDeleteConfirm:
+      "هل أنت متأكد من حذف هذا المنشور؟ لا يمكن التراجع.",
+    newsDeleteYes: "نعم، احذفه",
+    newsCancel: "إلغاء",
+    newsDeletedToast: "تم حذف المنشور.",
+    newsDeleteFailed: "تعذّر حذف المنشور.",
 
     reactionLike: "أعجبني",
     reactionLove: "أحببته",
@@ -331,6 +395,38 @@ export const TRANSLATIONS = {
     newsReactionsLabel: "Reactions",
     newsSignInToReact:
       "Sign in to save your reaction.",
+
+    reactionWow: "Wow",
+
+    newsUploading: "Uploading…",
+    newsUploadFailed:
+      "Upload failed, please try again.",
+    newsFileTooLarge:
+      "That file is too large. The limit is 10 MB.",
+    newsRemoveMedia: "Remove attachment",
+
+    newsTabFeed: "News",
+    newsTabPending: "Pending approval",
+    newsPendingEmpty:
+      "No posts are waiting for review.",
+    newsPendingLoading: "Loading posts…",
+    newsApprove: "Approve",
+    newsReject: "Reject",
+    newsApprovedToast: "Post approved.",
+    newsRejectedToast: "Post rejected.",
+    newsModerationFailed:
+      "Could not change the post status.",
+    newsPendingBadge: "Pending",
+    newsAdminOnly: "Admins only",
+    newsRefresh: "Refresh",
+    newsDelete: "Delete",
+    newsDeleteConfirm:
+      "Delete this post? This cannot be undone.",
+    newsDeleteYes: "Yes, delete",
+    newsCancel: "Cancel",
+    newsDeletedToast: "Post deleted.",
+    newsDeleteFailed:
+      "Could not delete the post.",
 
     reactionLike: "Like",
     reactionLove: "Love",

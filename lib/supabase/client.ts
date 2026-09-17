@@ -27,11 +27,16 @@ import type {
 | `next build` succeeds on a machine with no .env.local and the app quietly
 | falls back to the local mock data in lib/data/.
 |
-| Four sign-in methods are supported:
-|   1. Email    + password
-|   2. Username + password  (mapped to a synthetic email, see below)
-|   3. Facebook OAuth
-|   4. Phone    + password
+| THE UI USES EXACTLY ONE METHOD: username + password.
+|
+| Every signup would otherwise send mail through Supabase's email pipeline,
+| whose rate limits are the first thing to break at scale. Usernames map to a
+| synthetic address instead, so no mail is ever sent.
+|
+| The email, phone and Facebook helpers below are still exported but are
+| DETACHED FROM THE UI - nothing imports them today. They are kept the same
+| way lib/supabase/server.ts is kept: a working, typed surface for a future
+| pass, not dead weight to delete. Do not assume they are reachable.
 |
 */
 
@@ -102,10 +107,23 @@ export function getSupabaseClient():
 |
 */
 
+/*
+ * A machine-readable reason, so the UI can pick its own localised copy
+ * instead of pattern-matching Supabase's English error strings inside a
+ * React component. `error` still carries the original for logging.
+ */
+export type AuthErrorCode =
+  | "username_taken"
+  | "invalid_credentials"
+  | "username_format"
+  | "not_configured"
+  | "unknown";
+
 export type AuthResult = {
   user: User | null;
   session: Session | null;
   error: AuthError | Error | null;
+  code?: AuthErrorCode;
 };
 
 const NOT_CONFIGURED_ERROR = new Error(
@@ -118,6 +136,7 @@ function notConfigured(): AuthResult {
     user: null,
     session: null,
     error: NOT_CONFIGURED_ERROR,
+    code: "not_configured",
   };
 }
 
@@ -245,6 +264,41 @@ export async function signInWithEmail(
 |
 */
 
+/*
+ * True when a signUp error means "this username is already registered".
+ *
+ * Two distinct shapes land here:
+ *
+ *   1. GoTrue's own duplicate response — HTTP 422, "User already registered".
+ *   2. A unique violation raised INSIDE handle_new_user(). profiles.username
+ *      is UNIQUE, and that trigger's `on conflict (id) do nothing` guards the
+ *      id, not the username. The trigger runs in the same transaction as the
+ *      auth.users insert, so the whole signup rolls back and Supabase reports
+ *      the generic "Database error saving new user".
+ *
+ * Case 2 only occurs if a username was claimed through some path other than
+ * this one (an account created directly in the dashboard, say), since the
+ * username→email mapping is deterministic and would otherwise trip case 1
+ * first. It is handled anyway so the user never sees raw Postgres text.
+ */
+function isUsernameTakenError(
+  error: AuthError | null
+): boolean {
+  if (!error) {
+    return false;
+  }
+
+  const status = (error as AuthError).status;
+
+  if (status === 422) {
+    return true;
+  }
+
+  return /already registered|already exists|already been registered|duplicate key|unique constraint|database error saving new user/i.test(
+    error.message
+  );
+}
+
 export async function signUpWithUsername(
   username: string,
   password: string,
@@ -265,6 +319,7 @@ export async function signUpWithUsername(
       error: new Error(
         "Username must be 3-30 characters: lowercase letters, numbers and underscores only."
       ),
+      code: "username_format",
     };
   }
 
@@ -286,10 +341,47 @@ export async function signUpWithUsername(
       },
     });
 
+  if (isUsernameTakenError(error)) {
+    return {
+      user: null,
+      session: null,
+      error,
+      code: "username_taken",
+    };
+  }
+
+  /*
+   * The silent duplicate. With "Confirm email" ON, GoTrue does NOT return an
+   * error for an existing account — it fabricates a user object with an empty
+   * `identities` array, so that an attacker cannot use signup to discover
+   * which accounts exist. Without this check a taken username would look like
+   * a successful registration.
+   *
+   * "Confirm email" is supposed to be OFF for this app (synthetic addresses
+   * cannot receive mail), so this is the safety net for a dashboard that has
+   * drifted, not the normal path.
+   */
+  if (
+    !error &&
+    data.user &&
+    Array.isArray(data.user.identities) &&
+    data.user.identities.length === 0
+  ) {
+    return {
+      user: null,
+      session: null,
+      error: new Error(
+        "That username is already registered."
+      ),
+      code: "username_taken",
+    };
+  }
+
   return {
     user: data.user,
     session: data.session,
     error,
+    code: error ? "unknown" : undefined,
   };
 }
 
@@ -310,6 +402,7 @@ export async function signInWithUsername(
       user: null,
       session: null,
       error: new Error("Invalid username."),
+      code: "username_format",
     };
   }
 
@@ -319,10 +412,27 @@ export async function signInWithUsername(
       password,
     });
 
+  /*
+   * A wrong password and an unknown username are deliberately the same
+   * error here, exactly as Supabase reports them — telling them apart would
+   * let anyone probe which usernames exist.
+   */
+  const isBadCredentials =
+    error !== null &&
+    (error.status === 400 ||
+      /invalid login credentials/i.test(
+        error.message
+      ));
+
   return {
     user: data.user,
     session: data.session,
     error,
+    code: isBadCredentials
+      ? "invalid_credentials"
+      : error
+        ? "unknown"
+        : undefined,
   };
 }
 
